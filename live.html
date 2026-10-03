@@ -19,14 +19,53 @@
 .next{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:13px 16px;background:#fff;color:#172b45;border-radius:15px}.next small{color:#667085}.next strong{font-size:17px}.status{min-height:22px;text-align:center;color:#b8c8dc;font-size:13px}.standby{flex:1;display:grid;place-items:center;text-align:center;padding:24px}.standby h2{font-size:clamp(32px,6vw,72px);margin:0 0 8px}.standby p{color:#b8c8dc;font-size:18px;max-width:680px}.admin-badge{font-size:11px;border:1px solid #ffffff38;border-radius:999px;padding:6px 9px;background:#ffffff12}
 @media(max-width:850px){.top{padding:9px 10px}.logo{width:34px;height:34px;font-size:12px}.brand h1{font-size:14px}.brand small{display:none}.actions{gap:5px}.actions .btn{padding:8px 9px;font-size:11px}.stage{padding:10px;gap:10px}.board{min-height:430px;grid-template-columns:1fr 62px 1fr;gap:4px;padding:12px 6px;border-radius:18px}.names{font-size:18px;min-height:50px;display:grid;place-items:center}.score{font-size:clamp(76px,25vw,130px)}.games{font-size:12px}.center{min-width:0}.game-pill{font-size:10px;padding:6px 7px}.target{font-size:9px}.versus{font-size:16px;margin:14px 0}.controls{grid-template-columns:1fr 74px 1fr;gap:4px}.control-side{gap:5px}.control-side .btn{font-size:18px;min-width:56px;min-height:52px;padding:8px}.center-actions .btn{font-size:10px;padding:8px 5px}.next{flex-direction:column;align-items:flex-start;padding:11px 12px}.next .btn{width:100%}}
 @media(max-width:480px){.actions .back-label{display:none}.board{min-height:390px}.names{font-size:15px}.score{font-size:84px}.control-side .btn{min-width:50px}.stage{padding-bottom:max(10px,env(safe-area-inset-bottom))}}
+
+html,body{width:100%;max-width:100%;overflow-x:hidden}
+.screen{width:100%;max-width:100%;min-height:100dvh}
+.top,.stage,.board,.controls,.next{max-width:100%;min-width:0}
+.rotate-hint{display:none;align-items:center;justify-content:space-between;gap:10px;padding:8px 12px;background:#fff5cc;color:#5d4a00;font-size:12px}
+.rotate-hint .btn{padding:7px 9px;font-size:10px}
+@media(max-width:850px){
+  html,body{height:100%;overflow:hidden}
+  .screen{height:100dvh;min-height:0;overflow:hidden}
+  .top{flex:0 0 auto;padding:7px 8px;min-height:46px}
+  .brand{min-width:0;flex:1}.brand h1{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.logo{width:30px;height:30px;min-width:30px}
+  .actions{flex:0 0 auto;gap:4px}.actions .btn{padding:7px 8px;font-size:10px}.admin-badge{display:none!important}
+  .stage{flex:1;min-height:0;overflow:hidden;padding:7px;gap:6px}
+  .live-label{font-size:10px;flex:0 0 auto}
+  .board{flex:1;min-height:0;max-height:none;padding:8px 4px;gap:3px;border-radius:14px;grid-template-columns:minmax(0,1fr) 52px minmax(0,1fr)}
+  .names{font-size:15px;line-height:1.2;min-height:36px}.score{font-size:clamp(66px,22vw,100px);line-height:.88}.games{font-size:10px;margin-top:5px}
+  .game-pill{font-size:9px;padding:5px 6px}.target{font-size:8px;margin-top:5px}.versus{font-size:14px;margin:9px 0}
+  .controls{flex:0 0 auto;grid-template-columns:minmax(0,1fr) 86px minmax(0,1fr);gap:4px}
+  .control-side{gap:4px}.control-side .btn{font-size:17px;min-width:0;min-height:44px;padding:7px;flex:1}
+  .center-actions{gap:4px}.center-actions .btn{padding:6px 4px;font-size:9px;min-height:30px}
+  .status{font-size:9px;min-height:14px}
+  .next{flex:0 0 auto;padding:7px 9px;border-radius:10px;gap:5px}.next small{font-size:9px}.next strong{font-size:11px;line-height:1.2}
+  .standby{padding:12px}.standby h2{font-size:34px}.standby p{font-size:14px}
+}
+@media(max-width:850px) and (orientation:portrait){
+  .rotate-hint{display:flex}
+  .stage{padding-top:5px}
+}
+@media(max-width:900px) and (orientation:landscape) and (max-height:500px){
+  .screen{height:100dvh;overflow:hidden}
+  .top{min-height:38px;padding:4px 7px}.logo{width:27px;height:27px;min-width:27px;font-size:9px}.brand h1{font-size:12px}.actions .btn{padding:5px 7px;font-size:9px}
+  .rotate-hint{display:none!important}.stage{padding:4px 7px;gap:4px}
+  .live-label{font-size:9px}.dot{width:7px;height:7px}
+  .board{padding:4px 8px;border-radius:12px;grid-template-columns:minmax(0,1fr) 64px minmax(0,1fr)}
+  .names{font-size:13px;min-height:28px}.score{font-size:68px}.games{font-size:9px;margin-top:2px}.game-pill{font-size:8px;padding:4px 5px}.versus{font-size:12px;margin:5px 0}.target{font-size:7px;margin-top:3px}
+  .controls{grid-template-columns:minmax(0,1fr) 100px minmax(0,1fr)}.control-side .btn{min-height:38px;font-size:15px}.center-actions .btn{font-size:8px;padding:4px 3px;min-height:24px}
+  .status{display:none}.next{padding:5px 8px}.next small{font-size:8px}.next strong{font-size:10px}
+}
+
 </style>
 </head>
 <body>
 <div class="screen">
 <header class="top">
   <div class="brand"><div class="logo">TLP</div><div><h1>Teachers Pickleball — Live Score</h1><small>Live court scoreboard</small></div></div>
-  <div class="actions"><span id="adminBadge" class="admin-badge" style="display:none">ADMIN SCORING</span><button class="btn ghost" onclick="location.href='/'"><span class="back-label">Back to </span>Matches</button></div>
-</header>
+  <div class="actions"><span id="adminBadge" class="admin-badge" style="display:none">ADMIN SCORING</span><button id="landscapeBtn" class="btn yellow" onclick="enterLandscape()">Landscape</button><button class="btn ghost" onclick="location.href='/'"><span class="back-label">Back to </span>Matches</button></div>
+</header><div id="rotateHint" class="rotate-hint" style="display:none"><strong>For the best live scoring view, rotate your phone to landscape.</strong><button class="btn yellow" onclick="enterLandscape()">Open Landscape / Full Screen</button></div>
 <main id="stage" class="stage"><div class="standby"><div><h2>Loading…</h2></div></div></main>
 </div>
 <script>
@@ -40,6 +79,29 @@ function lineup(m){const ps=matchPlayers.filter(x=>x.match_id===m.id),n=(t,pos)=
 function dateFmt(s){return s?new Date(s+'T00:00:00').toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}):''}
 function target(){return Number(live?.live_game)===3?5:11}
 function findState(){live=matches.find(m=>m.status==='IN_PROGRESS')||null;const ready=matches.filter(m=>m.status==='READY_TO_PLAY').sort((a,b)=>a.scheduled_date.localeCompare(b.scheduled_date)||a.slot-b.slot);next=live?(ready.find(m=>m.scheduled_date>live.scheduled_date||(m.scheduled_date===live.scheduled_date&&m.slot>live.slot))||ready[0]||null):(ready[0]||null)}
+
+function updateOrientationUI(){
+  const portrait=window.matchMedia&&window.matchMedia('(orientation: portrait)').matches&&window.innerWidth<=850;
+  const hint=document.getElementById('rotateHint');
+  const btn=document.getElementById('landscapeBtn');
+  if(hint)hint.style.display=portrait?'flex':'none';
+  if(btn)btn.style.display=portrait?'inline-flex':'none';
+}
+async function tryOrientationLock(withFullscreen){
+  try{
+    if(withFullscreen&&document.documentElement.requestFullscreen&&!document.fullscreenElement){
+      try{await document.documentElement.requestFullscreen({navigationUI:'hide'})}catch(e){}
+    }
+    if(screen.orientation&&typeof screen.orientation.lock==='function'){
+      try{await screen.orientation.lock('landscape')}catch(e){}
+    }
+  }finally{
+    setTimeout(updateOrientationUI,150);
+  }
+}
+async function enterLandscape(){await tryOrientationLock(true)}
+window.addEventListener('resize',updateOrientationUI);
+window.addEventListener('orientationchange',()=>setTimeout(updateOrientationUI,150));
 async function load(){const c=await sb.from('competitions').select('*').eq('active',true).limit(1).maybeSingle();if(c.error)return showError(c.error.message);competition=c.data;if(!competition)return showError('No active competition.');const cid=competition.id;const [pa,ma,mp]=await Promise.all([sb.from('participants').select('id,display_name,active').eq('competition_id',cid),sb.from('matches').select('*').eq('competition_id',cid).order('scheduled_date').order('slot'),sb.from('match_players').select('*')]);if(pa.error||ma.error||mp.error)return showError(pa.error?.message||ma.error?.message||mp.error?.message);participants=pa.data||[];matches=ma.data||[];matchPlayers=(mp.data||[]).filter(x=>matches.some(m=>m.id===x.match_id));findState();render()}
 function render(){document.getElementById('adminBadge').style.display=isAdmin()?'inline-flex':'none';const root=document.getElementById('stage');if(!live){let html='<div class="standby"><div><div class="live-label"><span class="dot"></span>COURT STANDBY</div><h2>No Live Match</h2><p>When the next match starts, this screen will update automatically.</p>'+(next&&isAdmin()?'<button class="btn green" onclick="startNext()">Start Match '+next.match_number+'</button>':'')+'</div></div>';if(next){const l=lineup(next);html+='<div class="next"><div><small>UP NEXT • Match '+next.match_number+' • '+dateFmt(next.scheduled_date)+' • Slot '+next.slot+'</small><br><strong>'+esc(l.a1)+' / '+esc(l.a2)+' vs '+esc(l.b1)+' / '+esc(l.b2)+'</strong></div></div>'}root.innerHTML=html;return}
  const l=lineup(live),t=target();let html='<div class="live-label"><span class="dot"></span>LIVE NOW • MATCH '+live.match_number+'</div><section class="board"><div class="side"><div class="names">'+esc(l.a1)+'<br>'+esc(l.a2)+'</div><div class="score">'+Number(live.live_score_a||0)+'</div><div class="games">Games won '+Number(live.games_won_a||0)+'</div></div><div class="center"><div class="game-pill">GAME '+live.live_game+'</div><div class="versus">VS</div><div class="target">Race to '+t+'<br>No deuce</div></div><div class="side"><div class="names">'+esc(l.b1)+'<br>'+esc(l.b2)+'</div><div class="score">'+Number(live.live_score_b||0)+'</div><div class="games">Games won '+Number(live.games_won_b||0)+'</div></div></section>';
@@ -55,7 +117,7 @@ async function restartMatch(){if(!isAdmin()||!live||busy)return;const ok1=confir
 async function cancelLive(){if(!isAdmin()||!live||busy||!confirm('Cancel Live and return this match to Ready to Play? Only available before a game has been recorded.'))return;busy=true;const{error}=await sb.rpc('cancel_live_match',{p_match_id:live.id});busy=false;if(error)return setStatus(error.message==='CANNOT_CANCEL_AFTER_GAME_RECORDED'?'A completed game is already recorded. Live can no longer be cancelled.':error.message);await load()}
 async function startNext(){if(!isAdmin()||!next||busy)return;busy=true;const{error}=await sb.rpc('start_live_match',{p_match_id:next.id});busy=false;if(error)return showError(error.message);await load()}
 function realtime(){if(channel)try{sb.removeChannel(channel)}catch(e){}channel=sb.channel('tlp-full-live').on('postgres_changes',{event:'UPDATE',schema:'public',table:'matches'},async p=>{const x=p.new;if(!x?.id)return;const i=matches.findIndex(m=>m.id===x.id);if(i>=0)matches[i]={...matches[i],...x};else return load();findState();render()}).subscribe(s=>{if(s==='CHANNEL_ERROR'||s==='TIMED_OUT')setTimeout(realtime,1500)})}
-sb.auth.getSession().then(async({data})=>{session=data.session;await load();realtime()});
+sb.auth.getSession().then(async({data})=>{session=data.session;updateOrientationUI();tryOrientationLock(false);await load();realtime()});
 sb.auth.onAuthStateChange((_e,s)=>{session=s;render()});
 </script>
 </body>
