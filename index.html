@@ -1,6 +1,10 @@
 <!doctype html>
 <html lang="en">
 <head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="app-build" content="20261016-2027-completed-v2">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#0b2d5c" />
@@ -436,4 +440,26 @@ async function saveManualMatch(){if(!requireMatchesUnlocked())return;const{error
 async function resetAllScores(){if(!requireMatchesUnlocked())return;const first=confirm('RESET ALL TEST SCORES? This will clear every completed/live game score and return all non-cancelled matches to Ready to Play. Match dates, players, skill levels, and schedules will stay unchanged.');if(!first)return;const second=confirm('This affects ALL matches in this competition. Continue with Reset All Scores?');if(!second)return;const{data,error}=await sb.rpc('reset_all_match_scores',{p_competition_id:competition.id});if(error)return toast(error.message,true);closeModal('liveScoreModal');closeModal('scoreModal');activeLiveMatchId=null;activeScoreMatch=null;toast('All test scores reset: '+(data?.matches_reset||0)+' matches cleared.');await loadAll()}
 async function generateNext8(){if(!requireMatchesUnlocked())return;const{data,error}=await sb.rpc('reshuffle_upcoming_matches',{p_competition_id:competition.id});if(error)return toast('Generate / Refresh failed: '+error.message,true);toast('Next 8 refreshed: '+(data?.generated||0)+' match(es) created using availability, LOWEST-PLAYED priority, winner-vs-winner pairing, mirrored two-player skill profiles, and all existing fairness rules.');await loadAll()}
 sb.auth.getSession().then(({data})=>{session=data.session;applyAuth();loadAll().then(()=>{setTimeout(initStaticChoices,0);setupRealtime();if(isAdmin()&&location.hash&&document.getElementById(location.hash.slice(1)))go(location.hash.slice(1));else go('matches')})});sb.auth.onAuthStateChange((_e,s)=>{session=s;applyAuth();if(!isAdmin())go('matches')});
-</script></body></html>
+</script>
+<script>
+(function(){
+  const CURRENT_BUILD='20261016-2027-completed-v2';
+  async function checkForNewBuild(){
+    try{
+      const r=await fetch('/index.html?buildcheck='+Date.now(),{cache:'no-store'});
+      if(!r.ok)return;
+      const t=await r.text();
+      const m=t.match(/<meta name="app-build" content="([^"]+)"/i);
+      const latest=m&&m[1];
+      if(latest&&latest!==CURRENT_BUILD){
+        const h=location.hash||'#matches';
+        location.replace('/?v='+encodeURIComponent(latest)+h);
+      }
+    }catch(e){}
+  }
+  window.addEventListener('pageshow',()=>setTimeout(checkForNewBuild,400));
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkForNewBuild()});
+})();
+</script>
+
+</body></html>
