@@ -530,3 +530,6 @@
   .mcx-footer{flex-wrap:wrap;align-items:center}
   .mcx-controls{flex:1}
 }
+
+/* Keep transparent portrait edges clean; show silhouette only for missing/broken photos. */
+.mcx-portrait.mcx-has-photo .mcx-silhouette{opacity:0;visibility:hidden}
