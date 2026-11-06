@@ -95,7 +95,6 @@ function cinematicMatchCard(m) {
     +(done?' completed-match-card':'')+(live?' mcx-is-live':'')+'"'+attrs+'>'
     +'<div class="mcx-scene mcx-stadium-asset" aria-label="Pickleball stadium matchup">'
     +'<header class="mcx-header">'
-    +'<div class="mcx-brand"><span class="mcx-header-rule" aria-hidden="true"></span><span class="mcx-brand-logo">TLP</span><strong>Teachers Pickleball Competition</strong><span class="mcx-header-rule" aria-hidden="true"></span></div>'
     +'<div class="mcx-fixture-meta"><div class="mcx-match-title">MATCH '+mcxDailyMatchNumber(m)+'</div>'
     +'<div class="mcx-date"><span class="mcx-date-label">▣ '+esc(dateFmt(m.scheduled_date))+'</span></div></div>'
     +'<div class="mcx-reorder">'+reorderTools(m)+'</div>'
