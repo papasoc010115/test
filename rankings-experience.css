@@ -287,3 +287,12 @@
     animation:none!important;transform:none!important
   }
 }
+
+/* Dynamic leader names and compact search stay readable on narrow screens. */
+#rankings #rlLeaderName{font-size:clamp(12px,1.4vw,21px);overflow-wrap:anywhere}
+@media(max-width:620px){
+  #rankings .ranking-toolbar{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
+  #rankings .ranking-toolbar .input{width:100%;max-width:none;min-width:0}
+  #rankings .rl-mobile-list{display:grid;gap:8px}
+  #rankings .ranking-card{display:none}
+}
