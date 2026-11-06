@@ -318,3 +318,54 @@
   .mcx-card .mcx-controls>.match-manage-menu,
   .mcx-card .mcx-controls>.btn{grid-column:2;grid-row:1}
 }
+
+
+/* ===============================================================
+   DATE-GROUPED MATCHES / CLEAN PUBLIC SPECTATOR VIEW
+   Match IDs, slot order, scores and administration remain unchanged.
+   =============================================================== */
+#matchesList.match-date-groups{
+  display:flex;flex-direction:column;gap:24px;
+  width:100%;min-width:0;
+}
+.match-date-groups .match-day-group{
+  min-width:0;width:100%;
+}
+.match-date-groups .match-day-heading{
+  display:flex;align-items:center;gap:11px;
+  margin:0 0 12px;padding:11px 14px;
+  font-size:clamp(17px,1.45vw,22px);
+  font-weight:900;letter-spacing:-.025em;
+  line-height:1.25;color:#113b66;
+  background:linear-gradient(100deg,#e7f2ff 0%,#f1f6fd 80%,transparent 100%);
+  border-left:4px solid #f8c810;
+  border-radius:8px;
+}
+.match-date-groups .match-day-heading-icon{
+  display:grid;place-items:center;
+  width:29px;height:29px;flex:0 0 29px;
+  background:#ffffff;color:#1b5f9d;border:1px solid #d0e4f7;
+  border-radius:8px;font-size:18px;
+}
+.match-date-groups .matches-grid{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  align-items:stretch;gap:12px;
+}
+/* Public schedule is read-only and keeps only relevant live-match information.
+   Administrative notices and the up-next panel are for logged-in admins. */
+.public-mode #matches .match-page-help,
+.public-mode #matches #matchLockBanner{
+  display:none!important;
+}
+#matches #liveArena[hidden]{display:none!important}
+@media(max-width:920px){
+  .match-date-groups .matches-grid{grid-template-columns:1fr}
+  .match-date-groups .match-day-heading{padding:10px 12px}
+}
+@media(max-width:520px){
+  #matchesList.match-date-groups{gap:19px}
+  .match-date-groups .match-day-heading{font-size:17px;gap:8px}
+  .match-date-groups .match-day-heading-icon{
+    width:27px;height:27px;flex-basis:27px;font-size:16px;
+  }
+}
