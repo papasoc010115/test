@@ -1,535 +1,304 @@
-/* TLP MATCH BROADCAST V2 – fixed stadium scene with four free-standing player portraits.
-   Design system: yellow Team A, electric-blue Team B, illuminated court and centered VS.
-   All selectors are namespaced .mcx- to avoid legacy card CSS collisions. */
+/* TLP TEACHERS PICKLEBALL – STADIUM MATCH CARDS V4
+   Exact image-first composition: authentic generated background, four independent
+   portrait layers, fixed nameplates/ratings, and a separate functional toolbar.
+   Scoped under .mcx-card to preserve all other application pages.
+*/
 
-.matches-grid {align-items:stretch}
-.matchcard.mcx-card {
-  position:relative;isolation:isolate;
-  display:flex;flex-direction:column;
-  width:100%;min-width:0;
+.matches-grid{align-items:stretch}
+.matchcard.mcx-card{
+  position:relative;isolation:isolate;container-type:inline-size;
+  width:100%;min-width:0;display:flex;flex-direction:column;
   padding:0!important;margin:0;
-  border-radius:15px;border:1px solid #284f7c;
   overflow:visible;
-  background:#06182d;color:#f5faff;
-  box-shadow:0 8px 26px rgba(4,29,65,.17);
+  border:1px solid #274f7e;border-radius:14px;
+  background:#061b35;color:#f8fcff;
+  box-shadow:0 5px 16px rgba(0,26,58,.20);
 }
-.mcx-card .mcx-scene {
-  position:relative;isolation:isolate;
-  flex:0 0 auto;
-  height:clamp(182px,12vw,215px);
-  width:100%;min-width:0;overflow:hidden;
-  border-radius:14px 14px 0 0;
-  background:
-    radial-gradient(ellipse 38% 76% at 6% 42%,rgba(0,125,255,.23),transparent 85%),
-    radial-gradient(ellipse 38% 76% at 95% 43%,rgba(19,126,255,.19),transparent 85%),
-    radial-gradient(ellipse 28% 52% at 50% 72%,rgba(38,91,156,.24),transparent 82%),
-    linear-gradient(180deg,#03152b 0%,#07305a 65%,#052440 86%,#04172e 100%);
+.mcx-card .mcx-scene{
+  position:relative;flex:0 0 auto;overflow:hidden;
+  width:100%;height:auto;aspect-ratio:700/163;
+  border-radius:13px 13px 0 0;
+  background-color:#04132a;
+  background-image:url('/assets/match-stadium.webp');
+  background-repeat:no-repeat;
+  background-position:center center;
+  background-size:100% 100%;
 }
-/* Stadium light glow and floor reflections, behind portraits */
-.mcx-scene::before {
-  content:"";position:absolute;z-index:0;pointer-events:none;inset:0;
-  background:
-    radial-gradient(ellipse 17% 28% at 2% 2%,rgba(126,202,255,.46),transparent 75%),
-    radial-gradient(ellipse 17% 28% at 98% 2%,rgba(126,202,255,.46),transparent 75%),
-    linear-gradient(180deg,transparent 63%,rgba(19,107,185,.23) 80%,rgba(11,30,57,.65) 100%);
-}
-.mcx-scene::after {
-  content:"";position:absolute;z-index:0;pointer-events:none;
-  inset:auto -10% 0;height:35%;
-  background:
-    linear-gradient(180deg,transparent 0%,rgba(1,19,41,.22) 70%,rgba(2,13,29,.7) 100%),
-    repeating-linear-gradient(0deg,transparent 0 16px,rgba(90,163,228,.12) 16px 17px);
-  transform:perspective(330px) rotateX(62deg);transform-origin:bottom;
-  opacity:.9;
-}
-/* Decorative floodlight banks */
-.mcx-lights{position:absolute;top:3px;width:122px;height:33px;z-index:1;pointer-events:none;
-  background:
-    radial-gradient(circle at 9% 40%,#eef8ff 0 3px,#68caff 4px,transparent 8px),
-    radial-gradient(circle at 26% 28%,#f2fbff 0 3px,#68caff 4px,transparent 8px),
-    radial-gradient(circle at 43% 23%,#f2fbff 0 3px,#68caff 4px,transparent 8px),
-    radial-gradient(circle at 60% 22%,#f2fbff 0 3px,#68caff 4px,transparent 8px),
-    radial-gradient(circle at 77% 27%,#f2fbff 0 3px,#68caff 4px,transparent 8px),
-    radial-gradient(circle at 94% 38%,#eef8ff 0 3px,#68caff 4px,transparent 8px);
-  filter:drop-shadow(0 0 5px rgba(63,182,255,.95));
-}
-.mcx-lights-left{left:4px;transform:rotate(18deg)}
-.mcx-lights-right{right:4px;transform:rotate(-18deg)}
-/* Central court net remains one background layer across BOTH teams */
-.mcx-net{
-  position:absolute;z-index:0;pointer-events:none;
-  top:44%;bottom:15%;left:2%;right:2%;
-  border-top:2px solid rgba(190,229,255,.42);
-  background:
-    repeating-linear-gradient(90deg,transparent 0 18px,rgba(141,192,237,.17) 18px 19px),
-    repeating-linear-gradient(0deg,transparent 0 13px,rgba(141,192,237,.18) 13px 14px);
-  mask-image:linear-gradient(180deg,rgba(0,0,0,.15),#000 22%,transparent 100%);
-}
-/* Brush-like electric team accents; entirely behind unboxed player portraits */
-.mcx-blast{position:absolute;z-index:1;top:26%;height:61%;width:40%;pointer-events:none;opacity:.95}
-.mcx-blast-a{
-  left:1%;
-  background:
-    repeating-linear-gradient(163deg,transparent 0 8px,rgba(255,194,0,.45) 8px 11px,transparent 11px 17px),
-    linear-gradient(110deg,rgba(255,205,0,.94) 0%,rgba(255,177,0,.25) 45%,transparent 84%);
-  clip-path:polygon(2% 58%,30% 11%,42% 23%,76% 0,57% 40%,100% 22%,74% 65%,94% 83%,28% 73%,0 100%);
-  filter:drop-shadow(0 0 10px rgba(255,202,0,.25));
-}
-.mcx-blast-b{
-  right:1%;
-  background:
-    repeating-linear-gradient(17deg,transparent 0 9px,rgba(41,178,255,.45) 9px 12px,transparent 12px 19px),
-    linear-gradient(250deg,rgba(0,146,255,.96) 0%,rgba(0,103,245,.28) 48%,transparent 83%);
-  clip-path:polygon(100% 50%,67% 6%,56% 26%,22% 0,37% 44%,0 22%,30% 66%,9% 91%,76% 80%,100% 100%);
-  filter:drop-shadow(0 0 10px rgba(32,144,255,.27));
-}
+.mcx-card .mcx-scene::before,
+.mcx-card .mcx-scene::after{display:none!important;content:none!important}
+.mcx-card .mcx-lights,.mcx-card .mcx-net,.mcx-card .mcx-blast,
+.mcx-card .mcx-showdown{display:none!important}
 
-/* Top broadcast header. No layout shift from reorder controls. */
-.mcx-header{
-  position:absolute;inset:0 0 auto;z-index:6;min-height:40px;
-  display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
-  gap:6px;align-items:center;
-  padding:5px 12px 5px;
-  background:linear-gradient(180deg,rgba(0,9,27,.72),rgba(0,9,27,.15));
+/* The two-line centered event label, MATCH, date and slot. */
+.mcx-card .mcx-header{
+  position:absolute;z-index:10;top:0;left:0;right:0;
+  height:47px;min-height:0;padding:0;margin:0;
+  display:block;background:transparent;border:0;pointer-events:none;
 }
-.mcx-brand{display:flex;align-items:center;gap:6px;min-width:0;
-  font-size:clamp(8px,.7vw,11px);font-weight:950;color:#fff;white-space:nowrap;text-shadow:0 1px 3px #0008}
-.mcx-brand strong{overflow:hidden;text-overflow:ellipsis}
-.mcx-brand-logo{flex:0 0 23px;display:grid;place-items:center;width:23px;height:23px;
-  border-radius:50%;color:#082a51;background:#ffdc0c;
-  font-size:9px;font-weight:1000;box-shadow:0 0 10px #ffcf1633}
-.mcx-match-title{
-  justify-self:center;white-space:nowrap;
-  background:linear-gradient(125deg,#ffe03b,#f8b900);
-  color:#062855;font-size:clamp(12px,1.05vw,17px);
-  font-style:italic;font-weight:1000;line-height:1;
-  padding:7px 13px;border-radius:3px 10px 3px 10px;
-  transform:skew(-8deg);box-shadow:0 2px 0 rgba(137,79,0,.26);
-  text-shadow:0 1px 0 #fff8;
-}
-.mcx-date{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;column-gap:5px;row-gap:2px;
-  min-width:0;color:#f0f7ff;font-size:clamp(8px,.7vw,10px);font-weight:800;text-shadow:0 1px 2px #0008}
-.mcx-date-sep{opacity:.6}
-.mcx-date>strong{white-space:nowrap}
-.mcx-date .match-reorder-tools{display:flex;align-items:center;gap:2px;margin:0 0 0 3px}
-.mcx-date .slot-move-btn,.mcx-date .drag-handle{background:#16365bd9!important;color:#e5f4ff!important;
-  border:1px solid #6496c1!important;border-radius:5px!important;
-  font-size:9px!important;padding:3px 4px!important;min-height:19px}
-.mcx-date .drag-handle{cursor:grab}
-
-/* Players are anchored to opposing sides of the SINGLE stadium background.
-   width / left / right never change with actual image aspect ratio. */
-.mcx-team{
-  position:absolute;z-index:4;
-  top:37px;bottom:3px;width:37.8%;min-width:0;
-  display:flex;flex-direction:column;justify-content:flex-end;
-}
-.mcx-team-a{left:7.0%}
-.mcx-team-b{right:7.0%}
-.mcx-roster{
-  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
-  align-items:end;gap:clamp(3px,.55vw,9px);flex:1 1 auto;min-height:0;
-}
-.mcx-player{
-  position:relative;
-  min-width:0;height:100%;
-  display:flex;flex-direction:column;justify-content:flex-end;
-  text-align:center;color:#fff;
-}
-.mcx-portrait{
-  position:relative;flex:1 1 0;min-height:0;width:100%;
-  display:flex;align-items:flex-end;justify-content:center;
-  background:transparent!important;border:0!important;overflow:hidden;
-}
-.mcx-portrait>img{
-  display:block;position:absolute;inset:0;
-  width:100%;height:100%;max-width:100%;max-height:100%;
-  object-fit:contain;object-position:center bottom;
-  filter:drop-shadow(0 5px 8px rgba(0,0,0,.67));
-}
-.mcx-silhouette{
-  position:absolute;inset:0;display:flex;justify-content:center;align-items:flex-end;
-  color:#d8e6f6;opacity:.6;pointer-events:none;
-}
-.mcx-silhouette svg{display:block;width:85%;height:90%}
-.mcx-silhouette b{position:absolute;top:48%;left:50%;transform:translate(-50%,-50%);
-  text-shadow:0 2px 6px #051a39;color:#fff;font-size:clamp(11px,1.35vw,21px)}
-.mcx-nameplate{
-  position:relative;z-index:3;flex:0 0 auto;
-  width:100%;height:20px;line-height:20px;
-  padding:0 5px;border-radius:3px;
-  font-size:clamp(9px,.79vw,13px);font-style:italic;font-weight:1000;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  box-shadow:0 3px 8px #0008;
-  transform:skew(-6deg);
-  background:linear-gradient(95deg,#ffe93e,#fac400 72%,#da9500);
-  color:#09274c;text-shadow:0 1px 0 #fff5;
-}
-.mcx-team-b .mcx-nameplate{
-  transform:skew(6deg);
-  background:linear-gradient(95deg,#1884ff,#23afff 70%,#0063ce);
-  color:#fff;text-shadow:0 1px 3px #002f6c;
-}
-.mcx-team-winner .mcx-nameplate{box-shadow:0 0 0 1px #b8ffb7,0 0 12px #82ff8550}
-.mcx-player-rating{
-  flex:0 0 18px;display:flex;align-items:center;justify-content:center;gap:4px;
-  min-width:0;height:18px;white-space:nowrap;
-}
-.mcx-skill{
-  display:inline-grid;place-items:center;flex:0 0 auto;
-  min-width:29px;height:15px;padding:0 4px;
-  background:#fff1bd;color:#1d2b40;border-radius:9px;
-  font-size:10px;line-height:1;font-weight:950;
-}
-.mcx-stars{
-  display:inline-block;min-width:0;overflow:hidden;
-  font:900 clamp(10px,.85vw,13px)/1 Arial,sans-serif;
-  letter-spacing:-1px;white-space:nowrap;
-  background:linear-gradient(90deg,#ffd642 0 var(--mcx-fill),#8b9db2 var(--mcx-fill) 100%);
-  -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;
-}
-.mcx-player-games{
-  display:block;flex:0 0 10px;line-height:10px;
-  color:#e0eaf8;font-size:8px;font-weight:800;
-  text-shadow:0 1px 3px #001632;
-}
-.mcx-average{
-  position:relative;flex:0 0 auto;
+.mcx-card .mcx-brand{
+  position:absolute;top:2px;left:50%;transform:translateX(-50%);
   display:flex;justify-content:center;align-items:center;gap:5px;
-  align-self:center;min-width:90px;height:19px;
-  padding:0 10px;margin:1px auto 0;
-  background:rgba(8,39,71,.96);
-  border:1px solid #f6c92d;border-radius:4px;
-  color:#f4f8ff;box-shadow:0 2px 6px #0008;
+  max-width:78%;white-space:nowrap;
+  color:#fff;font-size:clamp(9px,1.12cqw,12px);font-weight:950;
+  text-shadow:0 1px 4px rgba(0,0,0,.85);
 }
-.mcx-average span{font-size:9px;font-style:italic;white-space:nowrap;font-weight:900}
-.mcx-average strong{font-size:12px;font-weight:1000;color:#ffda23}
-.mcx-team-b .mcx-average{border-color:#36baff}
-.mcx-team-b .mcx-average strong{color:#7ed8ff}
-
-/* VS and perforated yellow ball are centered overlays and never reflow teams. */
-.mcx-showdown{
-  position:absolute;z-index:5;left:50%;top:53%;
-  transform:translate(-50%,-50%);
-  display:flex;justify-content:center;align-items:center;
-  width:15%;height:60%;pointer-events:none;
+.mcx-card .mcx-brand strong{
+  display:block!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font-size:inherit!important;font-weight:950;min-width:0;
 }
-.mcx-ball{
-  position:absolute;top:7%;
-  width:clamp(45px,6.1vw,76px);height:clamp(45px,6.1vw,76px);border-radius:50%;
-  background:
-    radial-gradient(circle at 24% 28%,#415568 0 4px,transparent 4.5px),
-    radial-gradient(circle at 68% 26%,#415568 0 4px,transparent 4.5px),
-    radial-gradient(circle at 47% 53%,#415568 0 4px,transparent 4.5px),
-    radial-gradient(circle at 26% 73%,#415568 0 4px,transparent 4.5px),
-    radial-gradient(circle at 72% 77%,#415568 0 4px,transparent 4.5px),
-    radial-gradient(circle at 34% 30%,#fffba9,#fada11 58%,#b77b00 100%);
-  opacity:.92;filter:drop-shadow(0 0 12px #ffd635a6);
+.mcx-card .mcx-brand-logo{
+  display:grid;place-items:center;flex:0 0 18px;
+  width:18px;height:18px;border-radius:50%;
+  color:#092953;background:#ffdf19;font-size:8px;font-weight:1000;
+  text-shadow:none;box-shadow:0 1px 5px #0008;
 }
-.mcx-showdown>strong{
-  position:relative;z-index:2;font-size:clamp(38px,4.2vw,76px);
-  line-height:1;letter-spacing:-.095em;font-style:italic;font-weight:1000;color:#fff;
-  transform:skew(-7deg);
-  -webkit-text-stroke:1px #dbefff;
-  text-shadow:0 2px 0 #0a51bc,2px 4px 0 #1779db,0 0 13px #69c8ff,0 0 20px #3caaff;
+.mcx-card .mcx-header-rule{
+  display:block;width:clamp(13px,4cqw,55px);height:1px;flex:0 0 auto;
+  background:linear-gradient(90deg,transparent,#ffc800);
 }
-
-/* Footer actions remain outside the scene: compact and readable. */
-.mcx-footer{
-  position:relative;z-index:10;
-  display:flex;align-items:center;justify-content:space-between;gap:9px;
-  min-height:43px;padding:7px 10px;
-  background:linear-gradient(180deg,#0a335a,#071f3e);
-  border-top:1px solid rgba(131,192,243,.26);
-  border-radius:0 0 14px 14px;
+.mcx-card .mcx-header-rule:last-child{background:linear-gradient(90deg,#ffc800,transparent)}
+.mcx-card .mcx-fixture-meta{
+  position:absolute;top:24px;left:50%;transform:translateX(-50%);
+  height:22px;padding:0 4px;max-width:78%;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  white-space:nowrap;background:rgba(0,13,34,.68);
+  border:1px solid #6385a448;border-radius:5px;
+  box-shadow:0 2px 9px #00122360;
 }
-.mcx-status{
-  display:inline-flex;align-items:center;justify-content:center;gap:6px;
-  padding:6px 9px;border-radius:999px;flex:0 0 auto;
-  background:#d8ffdf;color:#006b3f;font-size:9px;line-height:1;font-weight:950;white-space:nowrap;
-}
-.mcx-status.completed{background:#d9f0ff;color:#115480}
-.mcx-status.cancelled{background:#e5e8ee;color:#576273}
-.mcx-status.warn{background:#ffe9ae;color:#885000}
-.mcx-live-dot{width:7px;height:7px;border-radius:50%;background:#ed524e;box-shadow:0 0 0 3px #ed524e38}
-.mcx-controls,.mcx-action-group{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:5px;min-width:0}
-.mcx-card .mcx-footer .btn,
-.mcx-card .match-manage-menu summary{
+.mcx-card .mcx-match-title{
   display:inline-flex;align-items:center;justify-content:center;
-  min-height:27px;padding:6px 8px;
-  font-size:10px;line-height:1.05;font-weight:900;white-space:nowrap;
-  border-radius:10px;border:1px solid #b6d7f2;
-  background:#f2f7fc;color:#083866;box-shadow:0 1px 3px #0002;
+  flex:0 0 auto;height:22px;margin:0;padding:0 10px;
+  background:linear-gradient(135deg,#ffe346,#ffbc03);
+  border-radius:3px 9px 3px 9px;
+  color:#09294e;font-size:clamp(11px,1.5cqw,15px);font-weight:1000;
+  font-style:italic;line-height:1;white-space:nowrap;
+  transform:skew(-8deg);text-shadow:0 1px #fff5;
+}
+.mcx-card .mcx-date{
+  display:flex;align-items:center;justify-content:center;
+  gap:6px;white-space:nowrap;
+  color:#fff;font-size:clamp(8px,1cqw,10px);
+  font-weight:850;text-shadow:0 1px 4px #0009;
+}
+.mcx-card .mcx-date>span,.mcx-card .mcx-date>strong{white-space:nowrap}
+.mcx-card .mcx-date-sep{opacity:.7}
+.mcx-card .mcx-reorder{
+  position:absolute;z-index:15;top:3px;right:5px;pointer-events:auto;
+}
+.mcx-card .mcx-reorder .match-reorder-tools{
+  display:flex;align-items:center;gap:2px;margin:0;
+}
+.mcx-card .mcx-reorder .slot-move-btn,
+.mcx-card .mcx-reorder .drag-handle{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:19px;padding:2px 4px;border-radius:5px;
+  color:#eef8ff!important;background:rgba(7,31,62,.78)!important;
+  border:1px solid rgba(130,182,222,.55)!important;
+  font-size:9px!important;line-height:1;
+}
+.mcx-card .mcx-reorder .drag-handle{cursor:grab}
+.mcx-card .mcx-reorder .slot-move-btn:hover,
+.mcx-card .mcx-reorder .drag-handle:hover{background:#125887!important}
+
+/* Players match the reference: A at 17% / 30%, B at 72% / 85%.
+   All positions are proportional to the full scene, never image size. */
+.mcx-card .mcx-team{
+  position:absolute;z-index:5;
+  top:23px;bottom:4px;width:27%;
+  min-width:0;display:flex;flex-direction:column;
+  justify-content:flex-end;
+}
+.mcx-card .mcx-team-a{left:10%}
+.mcx-card .mcx-team-b{right:9%;width:26%}
+.mcx-card .mcx-roster{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:clamp(3px,.8cqw,8px);align-items:stretch;
+  flex:1 1 auto;min-height:0;
+}
+.mcx-card .mcx-player{
+  display:flex;flex-direction:column;justify-content:flex-end;
+  position:relative;height:100%;min-width:0;min-height:0;text-align:center;
+}
+.mcx-card .mcx-portrait{
+  position:relative;flex:1 1 0;min-height:0;width:100%;
+  overflow:hidden;background:transparent!important;border:0!important;
+}
+.mcx-card .mcx-portrait>img{
+  position:absolute;z-index:2;display:block;
+  inset:0;width:100%;height:100%;
+  object-fit:cover;object-position:center 7%;
+  filter:drop-shadow(0 4px 5px rgba(0,9,29,.72));
+}
+/* Missing pictures get a silhouette, but real photo PNGs never ghost. */
+.mcx-card .mcx-silhouette{
+  position:absolute;inset:0;display:flex;justify-content:center;
+  align-items:flex-end;color:#aed0e8;opacity:.65;
+}
+.mcx-card .mcx-silhouette svg{display:block;width:85%;height:88%}
+.mcx-card .mcx-silhouette b{
+  position:absolute;top:46%;left:50%;transform:translate(-50%,-50%);
+  font-weight:950;font-size:clamp(10px,2cqw,18px);color:#fff;
+  text-shadow:0 2px 6px #001c3c;
+}
+.mcx-card .mcx-portrait.mcx-has-photo .mcx-silhouette{
+  visibility:hidden;opacity:0;
+}
+.mcx-card .mcx-nameplate{
+  display:block;flex:0 0 19px;position:relative;z-index:4;
+  width:100%;height:19px;line-height:19px;padding:0 3px;margin:0;
+  text-align:center;font-size:clamp(9px,1.6cqw,13px);
+  font-weight:1000;font-style:italic;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;
+  color:#06294a;background:linear-gradient(95deg,#ffe833,#ffb900);
+  border:1px solid #f9db71aa;border-radius:3px 8px 3px 8px;
+  box-shadow:0 2px 7px #0213299e;
+  transform:skew(-6deg);
+}
+.mcx-card .mcx-team-b .mcx-nameplate{
+  color:#fff;background:linear-gradient(95deg,#189bff,#0064c8);
+  border-color:#87d6ff79;transform:skew(6deg);
+}
+.mcx-card .mcx-team-winner .mcx-nameplate{
+  box-shadow:0 0 0 1px #b8ff9e,0 1px 10px #b8ff9e77;
+}
+.mcx-card .mcx-player-rating{
+  flex:0 0 17px;height:17px;min-width:0;
+  display:flex;align-items:center;justify-content:center;
+  gap:3px;white-space:nowrap;
+}
+.mcx-card .mcx-skill{
+  flex:0 0 auto;display:inline-grid;place-items:center;
+  height:14px;min-width:26px;padding:0 3px;
+  background:#fff3ba;color:#203249;border-radius:9px;
+  font-size:9px;font-weight:1000;line-height:1;
+}
+.mcx-card .mcx-stars{
+  display:inline-block;min-width:0;overflow:hidden;
+  font:900 clamp(9px,1.45cqw,14px)/1 Arial,sans-serif;
+  letter-spacing:-1px;white-space:nowrap;
+  background:linear-gradient(90deg,#ffd336 0 var(--mcx-fill),#97aecb var(--mcx-fill) 100%);
+  -webkit-background-clip:text;background-clip:text;
+  color:transparent;-webkit-text-fill-color:transparent;
+}
+.mcx-card .mcx-player-games{display:none}
+.mcx-card .mcx-average{
+  position:relative;z-index:5;
+  align-self:center;display:flex;align-items:center;justify-content:center;
+  gap:5px;height:16px;flex:0 0 16px;min-width:0;
+  padding:0 9px;margin:0 auto;
+  color:#f6fbff;background:rgba(0,15,33,.92);
+  border:1px solid #f0c31a;border-radius:3px 7px 3px 7px;
+  box-shadow:0 2px 5px #0009;
+}
+.mcx-card .mcx-average span{
+  font-size:8px;font-weight:950;font-style:italic;white-space:nowrap;
+}
+.mcx-card .mcx-average strong{
+  font-size:11px;color:#ffe135;font-weight:1000;line-height:1;
+}
+.mcx-card .mcx-team-b .mcx-average{border-color:#2aa9fb}
+.mcx-card .mcx-team-b .mcx-average strong{color:#74ceff}
+
+/* Bottom toolbar: one centered control group, separate status and Manage. */
+.mcx-card .mcx-footer{
+  display:grid;grid-template-columns:minmax(110px,1fr) auto minmax(70px,1fr);
+  align-items:center;gap:5px;position:relative;z-index:12;
+  padding:5px 9px;min-height:33px;margin:0;
+  border-top:1px solid #194a78;
+  border-radius:0 0 13px 13px;
+  background:linear-gradient(180deg,#092a50,#061a33);
+}
+.mcx-card .mcx-status{
+  grid-column:1;justify-self:start;display:inline-flex;align-items:center;
+  padding:5px 8px;border-radius:999px;
+  font-size:9px;font-weight:950;white-space:nowrap;line-height:1;
+  color:#007043;background:#d8ffdf;
+}
+.mcx-card .mcx-status.completed{color:#115481;background:#d9f0ff}
+.mcx-card .mcx-status.warn{color:#86520c;background:#ffedb8}
+.mcx-card .mcx-status.cancelled{color:#565f70;background:#e6eaf0}
+.mcx-card .mcx-live-dot{width:7px;height:7px;border-radius:50%;background:#ef4e45}
+.mcx-card .mcx-controls{display:contents}
+.mcx-card .mcx-action-group{
+  grid-column:2;justify-self:center;
+  display:flex;align-items:center;justify-content:center;gap:5px;
+  flex-wrap:nowrap;min-width:0;
+}
+.mcx-card .mcx-controls>.match-manage-menu,
+.mcx-card .mcx-controls>.btn{
+  grid-column:3;justify-self:end;position:relative;z-index:15;
+}
+.mcx-card .mcx-footer .btn,
+.mcx-card .mcx-footer .match-manage-menu summary{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:25px;padding:5px 8px;line-height:1.1;
+  color:#0c335e;background:#f6faff;border:1px solid #b6cde2;
+  border-radius:10px;font-size:9px;font-weight:900;
+  white-space:nowrap;box-shadow:0 1px 3px #00162a42;
 }
 .mcx-card .mcx-footer .btn.green{
-  background:linear-gradient(#16b973,#09834e)!important;color:white!important;
-  border:1px solid #9cecbf!important;box-shadow:0 0 0 2px #16a65c33;
+  color:white!important;border-color:#91e3ad!important;
+  background:linear-gradient(135deg,#11ae67,#048249)!important;
+  box-shadow:0 0 0 2px #25bb4d40;
 }
-.mcx-card .mcx-footer .btn.live-admin-btn{background:#c53d31!important;color:white!important}
+.mcx-card .mcx-footer .btn.live-admin-btn{background:#b73530;color:white}
 .mcx-card .mcx-footer .btn:disabled{
-  background:#d7dde5!important;color:#7b8799!important;
-  border-color:#b8c4d2!important;cursor:not-allowed;opacity:.75;box-shadow:none;
+  opacity:.78;cursor:not-allowed;color:#7b8999!important;
+  background:#d7dfe7!important;border-color:#aebdce!important;
+  box-shadow:none;
 }
-.mcx-card .match-manage-menu{position:relative;z-index:15}
-.mcx-card .match-manage-popover{z-index:99}
-.mcx-card .cancelled-caption{font-size:10px;color:#e6f0ff}
+.mcx-card .match-manage-menu{position:relative;z-index:18}
+.mcx-card .match-manage-popover{z-index:100}
+.mcx-card .cancelled-caption{color:#dceefa;font-size:10px}
 .mcx-card .mcx-extra{
-  background:#0a3159;color:#fff;text-align:center;
-  border-top:1px solid #3a668e;
-  padding:8px;font-size:11px;font-weight:750;
+  position:relative;z-index:11;padding:7px 10px;text-align:center;
+  color:#eaf8ff;background:#07345e;border-top:1px solid #3a7398;
+  font-size:11px;font-weight:800;
 }
-.mcx-extra.mcx-live{display:flex;justify-content:center;align-items:center;gap:8px}
-.mcx-extra.mcx-live strong{font-size:15px}
-.mcx-extra.mcx-final>div:first-child{display:flex;justify-content:center;gap:9px;align-items:center;flex-wrap:wrap}
-.mcx-extra.mcx-final>div:first-child>span{color:#ffe16a;font-weight:950}
-.mcx-extra.mcx-final>div:first-child strong{font-size:12px}
-.mcx-extra.mcx-final>small{display:block;margin-top:7px;color:#cde1ef}
-.mcx-extra.mcx-final .completed-games{margin-top:7px}
-.mcx-card.mcx-is-live{border-color:#ffce70;box-shadow:0 0 0 1px #ffc6595c,0 10px 26px #0004}
-.mcx-card.match-drop-target{outline:2px solid #ffdc25}
-.mcx-card.dragging-match{opacity:.55}
+.mcx-card .mcx-extra.mcx-live{display:flex;gap:8px;align-items:center;justify-content:center}
+.mcx-card .mcx-extra.mcx-final>div:first-child{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
+.mcx-card .mcx-extra.mcx-final strong{color:#fff}
+.mcx-card .mcx-extra.mcx-final>small{display:block;margin-top:5px;color:#cfe1f2}
+.mcx-card .mcx-extra .completed-games{margin:5px 0}
+.mcx-card.mcx-is-live{border-color:#ffd66d;box-shadow:0 0 0 1px #ffdc7a77,0 10px 26px #001b36aa}
+.mcx-card.match-drop-target{outline:2px solid #ffe540}
+.mcx-card.dragging-match{opacity:.6}
 
-/* Tight two-column viewport: portraits stay symmetrical and never stretch cards. */
-@media(max-width:1490px){
-  .mcx-scene{height:197px}
-  .mcx-brand strong{font-size:9px}
-  .mcx-team-a{left:5.6%}
-  .mcx-team-b{right:5.6%}
-  .mcx-team{width:39%}
-  .mcx-match-title{padding:6px 9px}
+/* Reduced width: keep all four portraits in one horizontal scene. */
+@container (max-width:680px){
+  .mcx-card .mcx-header{height:40px}
+  .mcx-card .mcx-brand{font-size:9px;max-width:81%}
+  .mcx-card .mcx-fixture-meta{top:21px;height:21px;gap:4px}
+  .mcx-card .mcx-match-title{height:21px;font-size:11px;padding:0 6px}
+  .mcx-card .mcx-date{font-size:8px;gap:4px}
+  .mcx-card .mcx-team{top:22px}
+  .mcx-card .mcx-nameplate{font-size:clamp(8px,1.5cqw,11px)}
+  .mcx-card .mcx-average span{font-size:7px}
+  .mcx-card .mcx-footer .btn,.mcx-card .mcx-footer .match-manage-menu summary{font-size:9px;padding:5px 6px}
 }
-@media(max-width:1100px){
-  .mcx-card .mcx-scene{height:clamp(202px,24vw,253px)}
-  .mcx-team{top:41px}
-  .mcx-team{width:37.8%}
-  .mcx-team-a{left:7%}.mcx-team-b{right:7%}
-  .mcx-header{padding:6px 14px}
-  .mcx-brand strong{font-size:11px}
-  .mcx-skill{height:18px}
-  .mcx-player-rating{height:21px;flex-basis:21px}
+@container (max-width:530px){
+  .mcx-card .mcx-scene{aspect-ratio:auto;height:173px;background-size:cover;background-position:center}
+  .mcx-card .mcx-brand{max-width:75%;font-size:8px}
+  .mcx-card .mcx-header-rule{width:12px}
+  .mcx-card .mcx-team{top:26px;bottom:4px;width:40%}
+  .mcx-card .mcx-team-a{left:1%}
+  .mcx-card .mcx-team-b{right:1%;width:40%}
+  .mcx-card .mcx-roster{gap:2px}
+  .mcx-card .mcx-nameplate{height:18px;line-height:18px;font-size:9px}
+  .mcx-card .mcx-player-rating{height:16px;flex-basis:16px;gap:1px}
+  .mcx-card .mcx-stars{font-size:9px;letter-spacing:-1.5px}
+  .mcx-card .mcx-skill{height:13px;min-width:23px;font-size:8px}
+  .mcx-card .mcx-average{height:15px;flex-basis:15px;padding:0 5px;gap:3px}
+  .mcx-card .mcx-average span{font-size:7px}
+  .mcx-card .mcx-average strong{font-size:10px}
+  .mcx-card .mcx-fixture-meta{top:22px}
+  .mcx-card .mcx-date{font-size:7px;gap:2px}
+  .mcx-card .mcx-match-title{font-size:11px}
+  .mcx-card .mcx-footer{
+    grid-template-columns:1fr auto;row-gap:6px;padding:7px 8px;
+  }
+  .mcx-card .mcx-status{grid-column:1;grid-row:1}
+  .mcx-card .mcx-action-group{grid-column:1/-1;grid-row:2;justify-self:start;flex-wrap:wrap}
+  .mcx-card .mcx-controls>.match-manage-menu,
+  .mcx-card .mcx-controls>.btn{grid-column:2;grid-row:1}
 }
-@media(max-width:760px){
-  .mcx-card .mcx-scene{height:clamp(177px,48vw,237px)}
-  .mcx-header{padding:5px 7px;gap:4px;min-height:34px}
-  .mcx-brand strong{display:none}
-  .mcx-brand-logo{width:23px;height:23px}
-  .mcx-match-title{font-size:13px;padding:6px 10px}
-  .mcx-date{font-size:9px;gap:3px}
-  .mcx-date .match-reorder-tools{gap:1px}
-  .mcx-date .slot-move-btn,.mcx-date .drag-handle{font-size:8px!important;padding:3px!important}
-  .mcx-team{top:35px;bottom:3px;width:40%}
-  .mcx-team-a{left:3.6%}.mcx-team-b{right:3.6%}
-  .mcx-roster{gap:3px}
-  .mcx-nameplate{font-size:clamp(10px,2.6vw,13px);height:19px;line-height:19px;padding:0 2px}
-  .mcx-average{height:18px;min-width:80px;padding:0 6px}
-  .mcx-average span{font-size:8px}.mcx-average strong{font-size:11px}
-  .mcx-showdown{width:16%}.mcx-showdown>strong{font-size:clamp(35px,9vw,56px)}
-  .mcx-ball{width:clamp(42px,12vw,65px);height:clamp(42px,12vw,65px)}
-  .mcx-player-rating{gap:2px}
-  .mcx-stars{font-size:clamp(9px,2.4vw,13px);letter-spacing:-1px}
-  .mcx-skill{font-size:9px;min-width:26px;height:14px}
-  .mcx-footer{padding:7px;align-items:flex-start;gap:7px;flex-wrap:wrap}
-  .mcx-controls{flex:1;justify-content:flex-end}
-  .mcx-card .mcx-footer .btn,.mcx-card .match-manage-menu summary{min-height:26px;font-size:10px;padding:6px 7px}
-}
-@media(max-width:440px){
-  .mcx-card .mcx-scene{height:182px}
-  .mcx-team{top:34px;width:42%;bottom:3px}
-  .mcx-team-a{left:1%}.mcx-team-b{right:1%}
-  .mcx-showdown{top:49%;width:12%}
-  .mcx-showdown>strong{font-size:34px}
-  .mcx-ball{width:44px;height:44px}
-  .mcx-nameplate{height:18px;line-height:18px;font-size:9px}
-  .mcx-player-rating{height:16px;flex-basis:16px;gap:1px}
-  .mcx-stars{font-size:9px;letter-spacing:-1.5px}
-  .mcx-skill{font-size:8px;min-width:24px;height:13px;padding:0 2px}
-  .mcx-player-games{font-size:8px}
-  .mcx-average{height:17px;padding:0 5px;gap:3px}
-  .mcx-average span{font-size:7px}.mcx-average strong{font-size:10px}
-  .mcx-date>span:first-child{font-size:8px}
-  .mcx-date-sep{display:none}
-  .mcx-match-title{font-size:12px;padding:5px 7px}
-  .mcx-footer{gap:6px}
-  .mcx-status{font-size:8px;padding:5px 7px}
-  .mcx-controls,.mcx-action-group{gap:4px}
-  .mcx-card .mcx-footer .btn,.mcx-card .match-manage-menu summary{font-size:9px;padding:6px 6px}
-}
-
-/* ===============================================================
-   V3 REFERENCE COMPOSITION  ·  MATCH 45 BROADCAST PROPORTIONS
-   Stadium background first; fixed portrait anchors above the court.
-   Photo boxes are intentionally absent.
-   =============================================================== */
-.matchcard.mcx-card{container-type:inline-size;border-color:#224975}
-.mcx-card .mcx-scene{
-  height:clamp(150px,23cqw,190px);
-  background:
-    radial-gradient(ellipse 27% 60% at 6% 18%,rgba(1,96,175,.38),transparent 86%),
-    radial-gradient(ellipse 28% 64% at 94% 19%,rgba(5,114,217,.37),transparent 88%),
-    linear-gradient(180deg,#020d20 0%,#051c3a 38%,#063366 75%,#042244 100%);
-}
-.mcx-card .mcx-scene::before{
-  background:
-    radial-gradient(ellipse 28% 48% at 1% 0%,rgba(143,226,255,.36),transparent 73%),
-    radial-gradient(ellipse 29% 49% at 99% 0%,rgba(143,226,255,.36),transparent 72%),
-    radial-gradient(ellipse 60% 14% at 50% 100%,rgba(22,162,233,.24),transparent 100%);
-}
-.mcx-card .mcx-scene::after{
-  inset:auto -8% -5px;height:36%;opacity:.65;
-  transform:perspective(340px) rotateX(64deg);
-  background:
-    repeating-linear-gradient(90deg,transparent 0 28px,rgba(95,183,255,.17) 28px 29px),
-    repeating-linear-gradient(0deg,transparent 0 20px,rgba(95,183,255,.14) 20px 21px);
-  mask-image:linear-gradient(180deg,transparent,black 45%,transparent);
-}
-.mcx-net{
-  top:52%;bottom:15%;left:0;right:0;
-  opacity:.90;border-top:2px solid rgba(218,240,255,.68);
-  background:
-    repeating-linear-gradient(90deg,transparent 0 17px,rgba(190,226,255,.28) 17px 18px),
-    repeating-linear-gradient(0deg,transparent 0 12px,rgba(190,226,255,.22) 12px 13px);
-  mask-image:linear-gradient(180deg,black 10%,rgba(0,0,0,.55) 82%,transparent 100%);
-}
-.mcx-lights{top:0;width:120px;height:27px;opacity:1;filter:drop-shadow(0 0 5px rgba(111,206,255,1))}
-.mcx-lights-left{left:-2px;transform:rotate(16deg)}
-.mcx-lights-right{right:-2px;transform:rotate(-16deg)}
-/* Short jagged energetic paint streaks – never tall geometric wedges. */
-.mcx-blast{top:23%;height:43%;width:35%;opacity:1;filter:none}
-.mcx-blast-a{
-  left:4%;
-  transform:rotate(-11deg);
-  background:
-    repeating-linear-gradient(166deg,transparent 0 4px,rgba(255,221,34,.35) 4px 6px,transparent 6px 13px),
-    linear-gradient(106deg,rgba(255,222,0,.92),rgba(255,189,0,.88) 32%,rgba(255,213,5,.20) 72%,transparent);
-  clip-path:polygon(0 60%,10% 18%,28% 30%,43% 0,38% 30%,75% 7%,59% 41%,98% 19%,77% 57%,100% 47%,75% 74%,94% 86%,39% 73%,17% 100%,25% 70%,0 94%);
-}
-.mcx-blast-b{
-  right:4%;
-  transform:rotate(11deg);
-  background:
-    repeating-linear-gradient(14deg,transparent 0 5px,rgba(20,204,255,.38) 5px 7px,transparent 7px 14px),
-    linear-gradient(260deg,rgba(2,172,255,.93),rgba(0,100,239,.87) 30%,rgba(0,139,252,.25) 72%,transparent);
-  clip-path:polygon(100% 60%,90% 18%,72% 30%,57% 0,62% 30%,25% 7%,41% 41%,2% 19%,23% 57%,0 47%,25% 74%,6% 86%,61% 73%,83% 100%,75% 70%,100% 94%);
-}
-/* Two-row header as in the approved sample. */
-.mcx-header{display:block;height:54px;min-height:0;padding:0;background:none}
-.mcx-brand{
-  position:absolute;top:3px;left:50%;transform:translateX(-50%);
-  display:flex;justify-content:center;align-items:center;
-  gap:5px;width:auto;max-width:71%;
-  font-size:clamp(9px,1.05cqw,12px);
-  text-shadow:0 1px 4px #000;
-}
-.mcx-brand strong{display:inline!important;font-size:inherit!important;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-.mcx-brand-logo{flex:0 0 18px;width:18px;height:18px;font-size:7px}
-.mcx-header-rule{width:clamp(15px,3cqw,40px);height:1px;background:linear-gradient(90deg,transparent,#ffd218);flex:0 0 auto}
-.mcx-header-rule:last-child{background:linear-gradient(90deg,#ffd218,transparent)}
-.mcx-fixture-meta{
-  position:absolute;top:23px;left:50%;transform:translateX(-50%);
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  white-space:nowrap;max-width:76%;height:24px;
-  padding:0 5px;border:1px solid rgba(82,153,205,.35);
-  background:rgba(0,12,31,.50);border-radius:6px;
-}
-.mcx-match-title{
-  font-size:clamp(11px,1.32cqw,15px);
-  padding:6px 9px;
-  margin:-1px 0;
-  box-shadow:0 2px 6px rgba(236,177,0,.31);
-}
-.mcx-date{font-size:clamp(8px,.9cqw,10px);justify-content:center;flex-wrap:nowrap;gap:7px;color:#fff}
-.mcx-date>span{white-space:nowrap}
-.mcx-date>strong{font-size:inherit}
-.mcx-date-sep{opacity:.6;display:inline}
-.mcx-reorder{position:absolute;top:4px;right:7px;z-index:8}
-.mcx-reorder .match-reorder-tools{display:flex;align-items:center;gap:3px}
-.mcx-reorder .slot-move-btn,.mcx-reorder .drag-handle{
-  font-size:9px!important;border-radius:6px!important;
-  padding:3px 4px!important;min-height:20px;
-  color:#f4f9ff!important;background:rgba(3,29,60,.79)!important;
-  border:1px solid rgba(134,191,246,.53)!important;
-}
-/* Reference player positions: ~17% / 30% and 72% / 85%. */
-.mcx-team{top:26px;bottom:4px;width:27%;justify-content:flex-end}
-.mcx-team-a{left:10%}
-.mcx-team-b{right:8%}
-.mcx-roster{grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(4px,.9cqw,9px)}
-.mcx-player{min-height:0}
-.mcx-portrait{overflow:hidden;min-height:0}
-.mcx-portrait>img{
-  object-fit:contain;object-position:center bottom;
-  transform:scale(1.06);transform-origin:center bottom;
-  filter:drop-shadow(0 5px 9px rgba(0,8,20,.71));
-}
-.mcx-silhouette{opacity:.65}
-.mcx-nameplate{
-  align-self:center;max-width:100%;
-  height:19px;line-height:19px;font-size:clamp(9px,1.4cqw,13px);
-  border-radius:3px;box-shadow:0 3px 7px rgba(0,7,30,.56);
-}
-.mcx-player-rating{height:17px;flex-basis:17px;gap:3px}
-.mcx-skill{height:14px;min-width:28px;font-size:9px}
-.mcx-stars{font-size:clamp(9px,1.35cqw,13px);letter-spacing:-1px}
-.mcx-player-games{display:none}
-.mcx-average{
-  height:17px;min-width:0;gap:4px;margin-top:1px;padding:0 9px;
-  background:rgba(2,19,43,.83);
-}
-.mcx-average span{font-size:8px}
-.mcx-average strong{font-size:11px}
-.mcx-showdown{
-  top:55%;width:20%;height:59%;
-  filter:drop-shadow(0 0 7px rgba(17,153,255,.46));
-}
-.mcx-showdown>strong{
-  font-size:clamp(36px,7cqw,64px);
-  text-shadow:0 2px 0 #062f88,2px 4px 0 #0a68c9,
-    0 0 14px #48b5ff,0 0 23px #008eff;
-}
-.mcx-ball{
-  width:clamp(45px,8cqw,75px);height:clamp(45px,8cqw,75px);
-  top:6%;opacity:.96;
-}
-.mcx-footer{
-  min-height:38px;padding:6px 9px;gap:7px;
-  background:linear-gradient(180deg,#092e55,#06172e);
-}
-.mcx-status{padding:5px 8px;font-size:9px}
-.mcx-controls,.mcx-action-group{gap:4px}
-.mcx-card .mcx-footer .btn,.mcx-card .match-manage-menu summary{
-  min-height:25px;padding:6px 8px;font-size:9px;border-radius:9px;
-}
-/* Scaled from the card width, not the browser width, to maintain the reference. */
-@container (max-width:650px){
-  .mcx-brand{font-size:9px;max-width:73%}
-  .mcx-fixture-meta{top:23px}
-  .mcx-date{font-size:8px;gap:4px}
-  .mcx-team{top:25px}
-  .mcx-nameplate{font-size:clamp(8px,1.4cqw,11px)}
-  .mcx-showdown>strong{font-size:clamp(32px,7cqw,46px)}
-  .mcx-reorder .drag-handle{font-size:8px!important}
-}
-@container (max-width:430px){
-  .mcx-card .mcx-scene{height:clamp(163px,40cqw,181px)}
-  .mcx-brand{font-size:8px;max-width:85%}
-  .mcx-header-rule{width:12px}
-  .mcx-team{width:39%;top:32px;bottom:4px}
-  .mcx-team-a{left:2%}
-  .mcx-team-b{right:2%}
-  .mcx-fixture-meta{top:22px;gap:3px;padding:0 3px}
-  .mcx-date{font-size:7px;gap:2px}
-  .mcx-match-title{font-size:11px;padding:5px 6px}
-  .mcx-nameplate{height:18px;line-height:18px;font-size:9px}
-  .mcx-player-rating{gap:1px}
-  .mcx-skill{min-width:24px;font-size:8px}
-  .mcx-stars{font-size:9px;letter-spacing:-1.5px}
-  .mcx-average{padding:0 5px}
-  .mcx-showdown{top:52%;width:13%}
-  .mcx-showdown>strong{font-size:32px}
-  .mcx-ball{width:42px;height:42px}
-  .mcx-footer{flex-wrap:wrap;align-items:center}
-  .mcx-controls{flex:1}
-}
-
-/* Keep transparent portrait edges clean; show silhouette only for missing/broken photos. */
-.mcx-portrait.mcx-has-photo .mcx-silhouette{opacity:0;visibility:hidden}
