@@ -75,9 +75,10 @@ function cinematicMatchCard(m) {
     +'<div class="mcx-blast mcx-blast-a" aria-hidden="true"></div>'
     +'<div class="mcx-blast mcx-blast-b" aria-hidden="true"></div>'
     +'<header class="mcx-header">'
-    +'<div class="mcx-brand"><span class="mcx-brand-logo">TLP</span><strong>Teachers Pickleball Competition</strong></div>'
-    +'<div class="mcx-match-title">MATCH '+Number(m.match_number||0)+'</div>'
-    +'<div class="mcx-date"><span>'+esc(dateFmt(m.scheduled_date))+'</span><span class="mcx-date-sep">│</span><strong>Slot '+Number(m.slot||0)+'</strong>'+reorderTools(m)+'</div>'
+    +'<div class="mcx-brand"><span class="mcx-header-rule" aria-hidden="true"></span><span class="mcx-brand-logo">TLP</span><strong>Teachers Pickleball Competition</strong><span class="mcx-header-rule" aria-hidden="true"></span></div>'
+    +'<div class="mcx-fixture-meta"><div class="mcx-match-title">MATCH '+Number(m.match_number||0)+'</div>'
+    +'<div class="mcx-date"><span>▣ '+esc(dateFmt(m.scheduled_date))+'</span><span class="mcx-date-sep">│</span><strong>▤ Slot '+Number(m.slot||0)+'</strong></div></div>'
+    +'<div class="mcx-reorder">'+reorderTools(m)+'</div>'
     +'</header>'
     +mcxTeam(a,sa,'a',aWon)
     +'<div class="mcx-showdown" aria-hidden="true"><div class="mcx-ball"></div><strong>'+(live?'LIVE':'VS')+'</strong></div>'
