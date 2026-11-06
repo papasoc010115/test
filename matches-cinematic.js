@@ -49,6 +49,25 @@ function mcxActions(m,locked,done,live) {
       +(locked?lockReplace:'<button class="btn secondary sm" onclick="openReplace(\''+id+'\')">Replace</button>'):'')
     +'</span>';
 }
+/* Presentation-only match number: 1, 2, 3, 4 by actual match order on
+ * each competition date. Database match_number and match id are untouched.
+ * Recalculate from the full day's schedule rather than the current filter. */
+function mcxDailyMatchNumber(m) {
+  if(!m || !m.scheduled_date)return Number(m?.slot||1);
+  const all=typeof matches!=='undefined'&&Array.isArray(matches)?matches:[];
+  const sameDay=all.filter(x=>x.scheduled_date===m.scheduled_date && x.status!=='CANCELLED')
+    .sort((a,b)=>Number(a.slot??999)-Number(b.slot??999)
+      ||Number(a.match_number??0)-Number(b.match_number??0));
+  const index=sameDay.findIndex(x=>x.id===m.id);
+  if(index>=0)return index+1;
+  // For cancelled records, retain their position among the full day's history.
+  const withCancelled=all.filter(x=>x.scheduled_date===m.scheduled_date)
+    .sort((a,b)=>Number(a.slot??999)-Number(b.slot??999)
+      ||Number(a.match_number??0)-Number(b.match_number??0));
+  const oldIndex=withCancelled.findIndex(x=>x.id===m.id);
+  return oldIndex>=0?oldIndex+1:Math.max(1,Number(m.slot)||1);
+}
+
 function cinematicMatchCard(m) {
   const lineup=lineups(m), done=m.status==='COMPLETED', live=m.status==='IN_PROGRESS';
   const locked=matchesLocked(),reorderable=isReorderableMatch(m);
@@ -71,8 +90,8 @@ function cinematicMatchCard(m) {
     +'<div class="mcx-scene mcx-stadium-asset" aria-label="Pickleball stadium matchup">'
     +'<header class="mcx-header">'
     +'<div class="mcx-brand"><span class="mcx-header-rule" aria-hidden="true"></span><span class="mcx-brand-logo">TLP</span><strong>Teachers Pickleball Competition</strong><span class="mcx-header-rule" aria-hidden="true"></span></div>'
-    +'<div class="mcx-fixture-meta"><div class="mcx-match-title">MATCH '+Number(m.match_number||0)+'</div>'
-    +'<div class="mcx-date"><span>▣ '+esc(dateFmt(m.scheduled_date))+'</span><span class="mcx-date-sep">│</span><strong>▤ Slot '+Number(m.slot||0)+'</strong></div></div>'
+    +'<div class="mcx-fixture-meta"><div class="mcx-match-title">MATCH '+mcxDailyMatchNumber(m)+'</div>'
+    +'<div class="mcx-date"><span class="mcx-date-label">▣ '+esc(dateFmt(m.scheduled_date))+'</span></div></div>'
     +'<div class="mcx-reorder">'+reorderTools(m)+'</div>'
     +'</header>'
     +mcxTeam(a,sa,'a',aWon)
