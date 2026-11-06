@@ -4,13 +4,13 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="20261106-participant-editorial-profile-v2">
+<meta name="app-build" content="20261107-portrait-fit-pickleball-v3">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#0b2d5c" />
   <title>TLP Teachers Pickleball</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
-  <link rel="stylesheet" href="/participant-profile.css?v=20261106-portrait-v2">
+  <link rel="stylesheet" href="/participant-profile.css?v=20261107-portrait-fit-v3">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
   <style>
@@ -630,10 +630,10 @@ async function resetAllScores(){if(!requireMatchesUnlocked())return;const first=
 async function generateNext8(){if(!requireMatchesUnlocked())return;const{data,error}=await sb.rpc('reshuffle_upcoming_matches',{p_competition_id:competition.id});if(error)return toast('Generate / Refresh failed: '+error.message,true);toast('Next 8 refreshed: '+(data?.generated||0)+' match(es) created. LOWEST-PLAYED first, four-player same-skill groups preferred, winner+loser teammates preferred, 1 Play / Week limits enforced, and all existing fairness rules preserved.');await loadAll()}
 sb.auth.getSession().then(({data})=>{session=data.session;applyAuth();loadAll().then(()=>{setTimeout(initStaticChoices,0);setupRealtime();if(isAdmin()&&location.hash.startsWith('#player-profile/'))go(location.hash.slice(1));else if(isAdmin()&&location.hash&&document.getElementById(location.hash.slice(1)))go(location.hash.slice(1));else go('matches')})});sb.auth.onAuthStateChange((_e,s)=>{session=s;applyAuth();if(!isAdmin())go('matches')});
 </script>
-<script src="/participant-profile.js?v=20261106-portrait-v2"></script>
+<script src="/participant-profile.js?v=20261107-portrait-fit-v3"></script>
 <script>
 (function(){
-  const CURRENT_BUILD='20261106-participant-editorial-profile-v2';
+  const CURRENT_BUILD='20261107-portrait-fit-pickleball-v3';
   async function checkForNewBuild(){
     try{
       const r=await fetch('/index.html?buildcheck='+Date.now(),{cache:'no-store'});
