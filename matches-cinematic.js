@@ -7,11 +7,11 @@ function mcxPortrait(p) {
   const name=p?.display_name||'Player TBD';
   const photo=typeof safeProfilePhotoUrl==='function'?safeProfilePhotoUrl(p?.profile_image_url):'';
   const initials=name.trim().split(/\s+/).slice(-2).map(x=>x[0]||'').join('').toUpperCase()||'?';
-  return '<div class="mcx-portrait">'
+  return '<div class="mcx-portrait'+(photo?' mcx-has-photo':'')+'">'
     +'<div class="mcx-silhouette" aria-hidden="true">'
     +'<svg viewBox="0 0 110 115" preserveAspectRatio="xMidYMax meet" focusable="false" aria-hidden="true"><circle cx="55" cy="35" r="23" fill="currentColor"/><path d="M4 114c0-31 18-54 51-54s51 23 51 54" fill="currentColor"/></svg>'
     +'<b>'+esc(initials)+'</b></div>'
-    +(photo?'<img src="'+esc(photo)+'" alt="'+esc(name)+'" loading="lazy" decoding="async" onerror="this.remove()">':'')
+    +(photo?'<img src="'+esc(photo)+'" alt="'+esc(name)+'" loading="lazy" decoding="async" onerror="this.parentNode.classList.remove(\'mcx-has-photo\');this.remove()">':'')
     +'</div>';
 }
 function mcxPlayer(p,st) {
