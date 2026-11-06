@@ -32,6 +32,8 @@ function mcxTeam(players,stats,side,won) {
     +'<div class="mcx-average"><span>TEAM AVG</span><strong>'+av+'</strong></div></div>';
 }
 function mcxActions(m,locked,done,live) {
+  // Public spectators must never receive match control buttons.
+  if(!isAdmin())return '';
   const id=m.id;
   const lockEdit='<button class="btn secondary sm locked-edit-btn" disabled title="Unlock Matches to edit the schedule">🔒 Edit Match</button>';
   const lockReplace='<button class="btn secondary sm locked-edit-btn" disabled title="Unlock Matches to replace a player">🔒 Replace</button>';
@@ -76,7 +78,11 @@ function cinematicMatchCard(m) {
   const sa=a.map(p=>statById(p?.id)||{}), sb=b.map(p=>statById(p?.id)||{});
   const aWon=done&&m.winner_team==='A',bWon=done&&m.winner_team==='B';
   const winnerNames=aWon?lineup.a1+' & '+lineup.a2:bWon?lineup.b1+' & '+lineup.b2:'';
+  const admin=isAdmin();
   const status=live?'LIVE NOW':m.status.replaceAll('_',' ');
+  // No idle READY TO PLAY badge or empty action toolbar on public match cards.
+  const showPublicStatus=done||live||m.status==='CANCELLED';
+  const showFooter=admin||showPublicStatus;
   const statusClass=done?'completed':m.status==='CANCELLED'?'cancelled':live||m.status.includes('REPLACEMENT')?'warn':'ready';
   const attrs=reorderable?' data-match-id="'+m.id+'" data-match-date="'+m.scheduled_date
     +'" ondragover="allowMatchDrop(event,\''+m.id+'\')" ondragleave="clearMatchDrop(event)" ondrop="dropMatchOn(event,\''+m.id+'\')"':'';
@@ -98,7 +104,9 @@ function cinematicMatchCard(m) {
     +mcxTeam(b,sb,'b',bWon)
     +'</div>'
     +liveDetails+completedDetails
-    +'<footer class="mcx-footer"><span class="mcx-status '+statusClass+'">'+(live?'<span class="mcx-live-dot"></span>':'')+esc(status)+'</span>'
-    +'<div class="mcx-controls">'+mcxActions(m,locked,done,live)+matchManagementActions(m)+'</div></footer>'
+    +(showFooter?'<footer class="mcx-footer">'
+      +'<span class="mcx-status '+statusClass+'">'+(live?'<span class="mcx-live-dot"></span>':'')+esc(status)+'</span>'
+      +(admin?'<div class="mcx-controls">'+mcxActions(m,locked,done,live)+matchManagementActions(m)+'</div>':'')
+      +'</footer>':'')
     +'</article>';
 }
