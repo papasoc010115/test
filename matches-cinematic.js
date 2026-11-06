@@ -68,12 +68,7 @@ function cinematicMatchCard(m) {
     +'<small>Total points '+Number(m.points_a||0)+' – '+Number(m.points_b||0)+'</small></div>':'';
   return '<article class="matchcard mcx-card'+(reorderable?' reorderable-match':'')+(locked?' locked-match-card':'')
     +(done?' completed-match-card':'')+(live?' mcx-is-live':'')+'"'+attrs+'>'
-    +'<div class="mcx-scene">'
-    +'<div class="mcx-lights mcx-lights-left" aria-hidden="true"></div>'
-    +'<div class="mcx-lights mcx-lights-right" aria-hidden="true"></div>'
-    +'<div class="mcx-net" aria-hidden="true"></div>'
-    +'<div class="mcx-blast mcx-blast-a" aria-hidden="true"></div>'
-    +'<div class="mcx-blast mcx-blast-b" aria-hidden="true"></div>'
+    +'<div class="mcx-scene mcx-stadium-asset" aria-label="Pickleball stadium matchup">'
     +'<header class="mcx-header">'
     +'<div class="mcx-brand"><span class="mcx-header-rule" aria-hidden="true"></span><span class="mcx-brand-logo">TLP</span><strong>Teachers Pickleball Competition</strong><span class="mcx-header-rule" aria-hidden="true"></span></div>'
     +'<div class="mcx-fixture-meta"><div class="mcx-match-title">MATCH '+Number(m.match_number||0)+'</div>'
@@ -81,7 +76,6 @@ function cinematicMatchCard(m) {
     +'<div class="mcx-reorder">'+reorderTools(m)+'</div>'
     +'</header>'
     +mcxTeam(a,sa,'a',aWon)
-    +'<div class="mcx-showdown" aria-hidden="true"><div class="mcx-ball"></div><strong>'+(live?'LIVE':'VS')+'</strong></div>'
     +mcxTeam(b,sb,'b',bWon)
     +'</div>'
     +liveDetails+completedDetails
