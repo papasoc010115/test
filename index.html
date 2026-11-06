@@ -4,7 +4,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="20261107-public-match-date-groups-v7">
+<meta name="app-build" content="20261107-clean-match-header-v8">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#0b2d5c" />
@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
   <link rel="stylesheet" href="/participant-profile.css?v=20261107-clean-gradient-v4">
   <link rel="preload" as="image" href="/assets/match-stadium-hd.webp" type="image/webp">
-  <link rel="stylesheet" href="/matches-cinematic.css?v=20261107-public-match-date-groups-v7">
+  <link rel="stylesheet" href="/matches-cinematic.css?v=20261107-clean-match-header-v8">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
   <style>
@@ -262,7 +262,7 @@
     </div>
   </div>
 </section>
-<section id="matches" class="page"><div class="pagehead"><div><h2>Matches</h2><p class="match-page-help">Enter scores, replace players, and manage the upcoming queue.</p></div><div class="match-page-actions"><button class="btn secondary" onclick="openFullLiveView()">Full Live View</button> <button id="matchLockBtn" class="btn yellow admin-only" onclick="toggleMatchLock()">🔒 Lock Matches</button> <button id="addMatchBtn" class="btn secondary admin-only" onclick="openManualMatch()">+ Add Match</button> <button id="reshuffleBtn" class="btn secondary admin-only" onclick="reshuffleUpcoming()">Reshuffle Upcoming 8</button> <button id="generateBtn" class="btn admin-only" onclick="generateNext8()">Generate / Refresh Next 8</button> <button id="resetScoresBtn" class="btn red admin-only" onclick="resetAllScores()">Reset All Scores</button></div></div><div id="matchLockBanner"></div><div id="liveArena" class="live-arena"></div><div class="toolbar"><select id="matchFilter" class="input" onchange="renderMatches()"><option value="UPCOMING">Upcoming</option><option value="COMPLETED">Completed</option><option value="CANCELLED">Cancelled</option><option value="ALL">All matches</option></select><input id="matchSearch" class="input" placeholder="Search player / match" oninput="renderMatches()"></div><div id="matchesList" class="match-date-groups"></div></section>
+<section id="matches" class="page"><div class="pagehead"><div><h2>Matches</h2><p class="match-page-help">Enter scores, replace players, and manage the upcoming queue.</p></div><div class="match-page-actions"><button id="matchLockBtn" class="btn yellow admin-only" onclick="toggleMatchLock()">🔒 Lock Matches</button> <button id="addMatchBtn" class="btn secondary admin-only" onclick="openManualMatch()">+ Add Match</button> <button id="reshuffleBtn" class="btn secondary admin-only" onclick="reshuffleUpcoming()">Reshuffle Upcoming 8</button> <button id="generateBtn" class="btn admin-only" onclick="generateNext8()">Generate / Refresh Next 8</button> <button id="resetScoresBtn" class="btn red admin-only" onclick="resetAllScores()">Reset All Scores</button></div></div><div id="matchLockBanner"></div><div id="liveArena" class="live-arena"></div><div class="toolbar"><select id="matchFilter" class="input" onchange="renderMatches()"><option value="UPCOMING">Upcoming</option><option value="COMPLETED">Completed</option><option value="CANCELLED">Cancelled</option><option value="ALL">All matches</option></select><input id="matchSearch" class="input" placeholder="Search player / match" oninput="renderMatches()"></div><div id="matchesList" class="match-date-groups"></div></section>
 <section id="participants" class="page"><div class="pagehead"><div><h2>Participants</h2><p>Open a dedicated profile to view a player’s complete match history, performance analytics, photo and match-generation settings.</p></div><button class="btn admin-only" onclick="openParticipant()">+ Add Participant</button></div><div class="toolbar"><input id="participantSearch" class="input" placeholder="Search participant" oninput="renderParticipants()"><select id="participantStatus" class="input" onchange="renderParticipants()"><option value="ALL">All</option><option value="ACTIVE">Active only</option><option value="INACTIVE">Inactive only</option></select></div><div class="card"><div class="tablewrap"><table><thead><tr>
 <th><button class="sort-th" onclick="setParticipantSort('player')">Player <span data-sort-indicator="player"></span></button></th>
 <th><button class="sort-th" onclick="setParticipantSort('rank')">Rank <span data-sort-indicator="rank"></span></button></th>
@@ -692,10 +692,10 @@ async function generateNext8(){if(!requireMatchesUnlocked())return;const{data,er
 sb.auth.getSession().then(({data})=>{session=data.session;applyAuth();loadAll().then(()=>{setTimeout(initStaticChoices,0);setupRealtime();if(isAdmin()&&location.hash.startsWith('#player-profile/'))go(location.hash.slice(1));else if(isAdmin()&&location.hash&&document.getElementById(location.hash.slice(1)))go(location.hash.slice(1));else go('matches')})});sb.auth.onAuthStateChange((_e,s)=>{session=s;applyAuth();if(!isAdmin())go('matches')});
 </script>
 <script src="/participant-profile.js?v=20261107-portrait-fit-v3"></script>
-<script src="/matches-cinematic.js?v=20261107-public-match-date-groups-v7"></script>
+<script src="/matches-cinematic.js?v=20261107-clean-match-header-v8"></script>
 <script>
 (function(){
-  const CURRENT_BUILD='20261107-public-match-date-groups-v7';
+  const CURRENT_BUILD='20261107-clean-match-header-v8';
   async function checkForNewBuild(){
     try{
       const r=await fetch('/index.html?buildcheck='+Date.now(),{cache:'no-store'});
