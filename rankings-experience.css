@@ -385,3 +385,49 @@
   #rankings .rl-record-pill b{font-size:13px;min-width:18px;height:19px}
   #rankings .rl-mobile-card .rl-mobile-stats span{font-size:9px}
 }
+
+
+/* Current rankings status and finalization notice (v12). */
+#rankings .ranking-progress-label{
+  display:inline-flex;align-items:center;gap:9px;margin:0 0 14px;
+  font-size:13px;font-weight:900;color:#ffdd62;
+}
+#rankings .ranking-progress-dot{
+  display:inline-block;position:relative;flex:0 0 11px;
+  width:11px;height:11px;border:2px solid #ffdd4b;
+  border-radius:50%;box-shadow:0 0 0 3px #ffdd4b20;
+}
+#rankings .ranking-progress-dot:after{
+  content:"";position:absolute;inset:2px;border-radius:50%;background:#ffdd4b;
+}
+#rankings .ranking-hero.ranking-final .ranking-progress-label{color:#c9ffdf}
+#rankings .ranking-hero.ranking-final .ranking-progress-dot{border-color:#74e5a0;box-shadow:0 0 0 3px #74e5a030}
+#rankings .ranking-hero.ranking-final .ranking-progress-dot:after{background:#74e5a0}
+#rankings .ranking-provisional-notice{
+  margin:-8px 0 24px;padding:17px 20px;
+  border:1px solid #d6e2ef;border-left:4px solid #e8b626;
+  background:#fff;border-radius:13px;
+  box-shadow:0 5px 18px #17395c0b;
+  color:#29445e;
+}
+#rankings .ranking-provisional-notice[hidden]{display:none!important}
+#rankings .ranking-notice-heading{
+  display:flex;align-items:center;gap:9px;
+  color:#153d66;font-weight:1000;font-size:14px;margin-bottom:9px;
+}
+#rankings .ranking-notice-heading>span{
+  display:grid;place-items:center;width:24px;height:24px;
+  border-radius:50%;color:#0d649c;background:#edf7ff;font-size:17px;
+}
+#rankings .ranking-provisional-notice p{
+  margin:0;color:#445e77;font-size:13px;line-height:1.7;
+}
+#rankings .ranking-provisional-notice strong{color:#173b5f;font-weight:950}
+@media(max-width:620px){
+  #rankings .ranking-progress-label{font-size:12px;gap:7px;margin-bottom:11px}
+  #rankings .ranking-provisional-notice{
+    margin:0 0 20px;padding:14px 15px;border-radius:11px;
+  }
+  #rankings .ranking-notice-heading{font-size:13px}
+  #rankings .ranking-provisional-notice p{font-size:12px;line-height:1.65}
+}
