@@ -231,41 +231,116 @@ function profileSettings(ctx){
    +(p.active?'<button class="pp-linkbtn" onclick="archiveParticipant(\''+p.id+'\')">Archive</button>':'<span class="pp-pill loss">Inactive</span>')+'</div></div>'
    +'</article></div>';
 }
+
+function profileFeaturePortrait(ctx){
+  const p=ctx.p;
+  const image=safeProfilePhotoUrl(p.profile_image_url);
+  return '<aside class="pp-editorial-left">'
+    +'<div class="pp-photo-frame">'
+    +'<div class="pp-photo-placeholder" aria-label="Profile photograph placeholder">'
+    +'<span class="pp-placeholder-halo"></span><span class="pp-placeholder-initial">'+esc(ppInitials(p.display_name))+'</span>'
+    +'<span class="pp-placeholder-caption">TLP PLAYERS</span></div>'
+    +(image?'<img class="pp-feature-img" src="'+esc(image)+'" alt="Profile photo of '+esc(p.display_name)+'" loading="eager" onerror="this.remove()">':'')
+    +'<span class="pp-photo-status">'+(p.active?'● ACTIVE PLAYER':'○ INACTIVE')+'</span>'
+    +'</div>'
+    +(isAdmin()?'<label class="pp-photo-upload"><span aria-hidden="true">↥</span> '+(p.profile_image_url?'Change profile photo':'Upload profile photo')+'<input type="file" accept="image/jpeg,image/png,image/webp" onchange="uploadParticipantPhoto(this)"></label>':'')
+    +'<div class="pp-left-details">'
+    +'<div class="pp-left-detail"><span>PLAYER ID</span><b>'+esc(p.player_code)+'</b></div>'
+    +'<div class="pp-left-detail"><span>CURRENT SKILL</span><b>'+Number(p.skill_level||3).toFixed(1)+' / 5.0</b></div>'
+    +'<div class="pp-left-detail"><span>COMPETITION</span><b>'+esc(competition?.name||'TLP Teachers Pickleball')+'</b></div>'
+    +'<div class="pp-left-detail"><span>PARTICIPATION</span><b>'+(p.can_play_next_match!==false?'Available for next match':'Not available for next match')+'</b></div>'
+    +'</div></aside>';
+}
+function profileCompactCard(label,value,note,styleClass=''){
+  return '<div class="pp-feature-stat '+styleClass+'"><span>'+esc(label)+'</span><strong>'+esc(value)+'</strong><small>'+esc(note)+'</small></div>';
+}
+function profileFeatureMain(ctx){
+  const p=ctx.p,s=ctx.s,r=ctx.r;
+  const played=Number(s.matches_played||0),wins=Number(s.match_wins||0),losses=Number(s.match_losses||0);
+  const pct=played?Math.min(100,Math.max(0,wins/played*100)):0;
+  const progress=ctx.target?Math.max(0,Math.min(100,played/ctx.target*100)):0;
+  const recent=ctx.completed.slice(0,6);
+  const maxDay=Math.max(1,ctx.dayCounts.Thursday,ctx.dayCounts.Friday,ctx.dayCounts.Other);
+  return '<div class="pp-editorial-main">'
+    +'<div class="pp-feature-eyebrow"><span class="pp-eyebrow-dot"></span> TLP TEACHERS PICKLEBALL · PLAYER PROFILE</div>'
+    +'<h2>'+esc(p.display_name)+'</h2>'
+    +'<div class="pp-feature-subhead"><span class="pp-verified">✓ Registered participant</span><span>Code '+esc(p.player_code)+'</span></div>'
+    +'<div class="pp-feature-skill"><div class="pp-skill-badge"><strong>'+Number(p.skill_level||3).toFixed(1)+'</strong><span>SKILL<br>LEVEL</span></div>'
+    +'<div class="pp-skill-text"><strong>'+ (Number(p.skill_level||3)>=4?'Advanced competitor':Number(p.skill_level||3)>=3?'Developing competitor':'Growing competitor')+'</strong><small>Player skill rating used in team balancing</small>'
+    +'<div class="pp-skill-progress"><span style="width:'+Math.max(0,Math.min(100,Number(p.skill_level||3)/5*100)).toFixed(1)+'%"></span></div></div></div>'
+    +'<div class="pp-feature-sectiontitle">Performance at a glance</div>'
+    +'<div class="pp-performance-box">'
+    +'<div class="pp-performance-ring" role="img" aria-label="Win rate '+pct.toFixed(1)+' percent" style="--pp-win:'+pct.toFixed(1)+'%"><div><b>'+pct.toFixed(0)+'%</b><small>Win rate</small></div></div>'
+    +'<div class="pp-performance-copy"><strong>'+ppNum(wins)+' wins <span>·</span> '+ppNum(losses)+' losses</strong>'
+    +'<p>Official results from '+ppNum(played)+' completed '+(played===1?'match':'matches')+'.</p>'
+    +'<div class="pp-performance-key"><span><i class="pp-win-key"></i> Wins '+ppNum(wins)+'</span><span><i class="pp-loss-key"></i> Losses '+ppNum(losses)+'</span></div>'
+    +'<div class="pp-performance-rank"><span>Current rank</span><strong>'+(r?'#'+r.official_rank:'—')+'</strong><span>of '+ppNum(rankings.filter(x=>x.active).length)+' active players</span></div>'
+    +'</div></div>'
+    +'<div class="pp-feature-sectiontitle">Competition highlights</div>'
+    +'<div class="pp-feature-tiles">'
+    +profileCompactCard('Matches played',ppNum(played),'of '+ppNum(ctx.target)+' target')
+    +profileCompactCard('Games won',ppNum(s.games_won||0),'vs '+ppNum(s.games_lost||0)+' lost')
+    +profileCompactCard('Point differential',signed(s.score_difference||0),'PF '+ppNum(s.points_for||0)+' · PA '+ppNum(s.points_against||0),Number(s.score_difference||0)>=0?'pp-stat-positive':'pp-stat-negative')
+    +'</div>'
+    +'<div class="pp-feature-sectiontitle">Recent form</div>'
+    +'<div class="pp-feature-recent">'+(recent.length?recent.map(row=>'<span class="pp-form-token '+(row.result==='W'?'win':'loss')+'" title="Match '+row.match_number+' · '+dateFmt(row.scheduled_date)+'">'+(row.result==='W'?'W':'L')+'</span>').join(''):'<span class="pp-feature-help">Results appear after the first completed match.</span>')+'</div>'
+    +'<div class="pp-feature-sectiontitle">Played by competition day</div>'
+    +'<div class="pp-feature-bars">'
+    +profileBar('Thursday',ctx.dayCounts.Thursday,maxDay)
+    +profileBar('Friday',ctx.dayCounts.Friday,maxDay)
+    +profileBar('Other',ctx.dayCounts.Other,maxDay)
+    +'</div></div>';
+}
+function profileFeatureRail(ctx){
+  const m=ctx.upcoming[0];
+  let schedule='';
+  if(m){
+    const side=matchPlayers.filter(x=>x.match_id===m.id);
+    const mine=side.find(x=>x.actual_player_id===ctx.p.id);
+    const teammate=side.find(x=>x.team===mine?.team&&x.actual_player_id!==ctx.p.id);
+    const opponents=side.filter(x=>x.team!==mine?.team).map(x=>ppPlayer(x.actual_player_id).display_name);
+    const dateParts=new Date(m.scheduled_date+'T12:00:00Z');
+    const weekday=dateParts.toLocaleDateString('en-US',{timeZone:'UTC',weekday:'long'});
+    const month=dateParts.toLocaleDateString('en-US',{timeZone:'UTC',month:'long'});
+    schedule='<div class="pp-fixture-date"><span>'+weekday+', '+month+'</span><strong>'+dateParts.getUTCDate()+'</strong><span>'+dateParts.getUTCFullYear()+'</span></div>'
+      +'<div class="pp-fixture-id">MATCH '+m.match_number+' <span>·</span> GAME '+m.slot+'</div>'
+      +'<div class="pp-fixture-side"><small>TEAMMATE</small><b>'+esc(ppPlayer(teammate?.actual_player_id).display_name)+'</b></div>'
+      +'<div class="pp-fixture-versus">VERSUS</div>'
+      +'<div class="pp-fixture-side"><small>OPPONENTS</small><b>'+esc(opponents.join(' & '))+'</b></div>'
+      +'<div class="pp-fixture-state">'+esc(ppLiveStatus(m))+'</div>';
+  }else schedule='<div class="pp-fixture-empty"><strong>No upcoming match</strong><p>A new fixture will appear here after scheduling.</p></div>';
+  const c=ctx.p,preferences=[
+    ['Weekly limit',c.one_play_per_week?'1 game / week':'Standard'],
+    ['Thursday double',c.double_games_thursday?'Yes':'No'],
+    ['Friday double',c.double_games_friday?'Yes':'No']
+  ];
+  return '<aside class="pp-editorial-rail"><div class="pp-next-fixture"><div class="pp-rail-kicker">UP NEXT</div><h3>Next Match</h3>'
+    +schedule+'<button type="button" class="pp-fixture-action" onclick="go(\'matches\')">View match schedule →</button></div>'
+    +'<div class="pp-rail-settings"><div class="pp-rail-kicker">PLAYER AVAILABILITY</div><h3>Match preferences</h3>'
+    +preferences.map(item=>'<div class="pp-rail-preference"><span>'+esc(item[0])+'</span><strong>'+esc(item[1])+'</strong></div>').join('')
+    +'<button class="pp-rail-settings-btn" type="button" onclick="profileTab(\'settings\')">Manage settings →</button></div></aside>';
+}
 function renderParticipantProfile(){
   const host=document.getElementById('ppContent');
   if(!host)return;
   const ctx=profileContext();
   if(!ctx){host.innerHTML='<div class="pp-empty">Player not found. <button class="pp-linkbtn" onclick="returnToParticipants()">All Participants</button></div>';return;}
-  const p=ctx.p,s=ctx.s,r=ctx.r;
-  const hero='<div class="pp-banner"><div class="pp-hero">'+profileAvatarHTML(p)
-    +'<div class="pp-hero-copy"><div class="pp-eyebrow">The Learning Place · Player '+esc(p.player_code)+'</div>'
-    +'<h2>'+esc(p.display_name)+'</h2><div class="pp-hero-meta">'
-    +'<span>Skill '+Number(p.skill_level||3).toFixed(1)+'</span><span>'+(p.active?'● Active player':'○ Inactive player')+'</span>'
-    +'<span>'+ppNum(s.matches_played||0)+' matches played</span></div></div>'
-    +'<div class="pp-rank"><small>Official ranking</small><strong>'+(r?'#'+r.official_rank:'—')+'</strong></div></div>'
-    +'<div class="pp-hero-foot"><div><strong>Player statistics &amp; match journey</strong><div style="font-size:11px;opacity:.72;margin-top:4px">Updated from live competition data</div></div>'
-    +(isAdmin()?'<label class="pp-upload-label">📷 '+(p.profile_image_url?'Change photo':'Upload photo')+' <input type="file" accept="image/jpeg,image/png,image/webp" onchange="uploadParticipantPhoto(this)"></label>':'')
-    +'</div></div>';
-  const cards='<div class="pp-stats">'
-    +profileStat('Matches played',ppNum(s.matches_played||0),'Completed matches')
-    +profileStat('Wins',ppNum(s.match_wins||0),'Match victories')
-    +profileStat('Losses',ppNum(s.match_losses||0),'Match defeats')
-    +profileStat('Win rate',Number(s.win_pct||0).toFixed(1)+'%','Competition performance')
-    +profileStat('Games won',ppNum(s.games_won||0),'Games lost: '+ppNum(s.games_lost||0))
-    +profileStat('Upcoming',ppNum(s.upcoming_matches||0),'Remaining: '+ppNum(Math.max(0,ctx.target-Number(s.matches_played||0))))
-    +profileStat('Points for',ppNum(s.points_for||0),'Points scored')
-    +profileStat('Points against',ppNum(s.points_against||0),'Points conceded')
-    +profileStat('Score difference',signed(s.score_difference||0),'PF minus PA',Number(s.score_difference)>=0?'pos':'neg')
-    +profileStat('Match target',ppNum(ctx.target),'Competition goal')
-    +profileStat('Unique partners',ppNum(ctx.partners.length),'Teammates played with')
-    +profileStat('Unique opponents',ppNum(ctx.opponents.length),'Players faced')
+  const s=ctx.s;
+  const top='<div class="pp-premium-layout">'+profileFeaturePortrait(ctx)+profileFeatureMain(ctx)+profileFeatureRail(ctx)+'</div>';
+  const details='<div class="pp-feature-secondary">'
+    +profileCompactCard('Points for',ppNum(s.points_for||0),'Total points scored')
+    +profileCompactCard('Points against',ppNum(s.points_against||0),'Points conceded')
+    +profileCompactCard('Remaining matches',ppNum(Math.max(0,ctx.target-Number(s.matches_played||0))),'To target of '+ppNum(ctx.target))
+    +profileCompactCard('Unique partners',ppNum(ctx.partners.length),'Different teammates')
+    +profileCompactCard('Unique opponents',ppNum(ctx.opponents.length),'Players faced')
     +'</div>';
   const tabs=[['overview','Overview'],['history','Match History'],['partners','Partners'],['opponents','Opponents'],['analytics','Analytics'],['settings','Settings']];
   const nav='<div class="pp-tabs" role="tablist" aria-label="Participant profile sections">'
     +tabs.map(([key,label])=>'<button type="button" role="tab" aria-selected="'+(key===profileActiveTab)+'" class="'+(key===profileActiveTab?'active':'')+'" onclick="profileTab(\''+key+'\')">'+label+'</button>').join('')+'</div>';
   const renderers={overview:profileOverview,history:profileHistory,partners:profilePartners,opponents:profileOpponents,analytics:profileAnalytics,settings:profileSettings};
-  host.innerHTML=hero+cards+nav+'<div class="pp-panel" role="tabpanel">'+renderers[profileActiveTab](ctx)+'</div>';
+  host.innerHTML='<div class="pp-premium-shell">'+top+details+nav+'<div class="pp-panel" role="tabpanel">'+renderers[profileActiveTab](ctx)+'</div></div>';
 }
+
 function renderParticipantList(){
   const q=(document.getElementById('participantSearch')?.value||'').toLowerCase(),status=document.getElementById('participantStatus')?.value||'ALL';
   const entries=participants.filter(p=>(p.display_name+' '+p.player_code).toLowerCase().includes(q)&&(status==='ALL'||(status==='ACTIVE'?p.active:!p.active))).map(p=>{
