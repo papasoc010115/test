@@ -4,7 +4,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="20261107-hd-stadium-skillcards-v6">
+<meta name="app-build" content="20261107-public-match-date-groups-v7">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#0b2d5c" />
@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
   <link rel="stylesheet" href="/participant-profile.css?v=20261107-clean-gradient-v4">
   <link rel="preload" as="image" href="/assets/match-stadium-hd.webp" type="image/webp">
-  <link rel="stylesheet" href="/matches-cinematic.css?v=20261107-hd-stadium-skillcards-v6">
+  <link rel="stylesheet" href="/matches-cinematic.css?v=20261107-public-match-date-groups-v7">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
   <style>
@@ -692,10 +692,10 @@ async function generateNext8(){if(!requireMatchesUnlocked())return;const{data,er
 sb.auth.getSession().then(({data})=>{session=data.session;applyAuth();loadAll().then(()=>{setTimeout(initStaticChoices,0);setupRealtime();if(isAdmin()&&location.hash.startsWith('#player-profile/'))go(location.hash.slice(1));else if(isAdmin()&&location.hash&&document.getElementById(location.hash.slice(1)))go(location.hash.slice(1));else go('matches')})});sb.auth.onAuthStateChange((_e,s)=>{session=s;applyAuth();if(!isAdmin())go('matches')});
 </script>
 <script src="/participant-profile.js?v=20261107-portrait-fit-v3"></script>
-<script src="/matches-cinematic.js?v=20261107-hd-stadium-skillcards-v6"></script>
+<script src="/matches-cinematic.js?v=20261107-public-match-date-groups-v7"></script>
 <script>
 (function(){
-  const CURRENT_BUILD='20261107-hd-stadium-skillcards-v6';
+  const CURRENT_BUILD='20261107-public-match-date-groups-v7';
   async function checkForNewBuild(){
     try{
       const r=await fetch('/index.html?buildcheck='+Date.now(),{cache:'no-store'});
