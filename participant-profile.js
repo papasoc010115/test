@@ -412,18 +412,49 @@ async function saveProfileSkill(input){
   await loadAll();toast('Skill level saved. Future match balancing uses the new rating.');
 }
 async function prepareProfilePhoto(file){
-  const temp=URL.createObjectURL(file);
+  const objectUrl=URL.createObjectURL(file);
   try{
-    const img=await new Promise((resolve,reject)=>{const el=new Image();el.onload=()=>resolve(el);el.onerror=()=>reject(new Error('Could not read image'));el.src=temp;});
-    const canvas=document.createElement('canvas');canvas.width=600;canvas.height=600;
-    const g=canvas.getContext('2d');
-    const size=Math.min(img.naturalWidth,img.naturalHeight),sx=(img.naturalWidth-size)/2,sy=(img.naturalHeight-size)/2;
-    g.drawImage(img,sx,sy,size,size,0,0,600,600);
-    let blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/webp',0.84));
-    if(!blob||blob.type!=='image/webp')blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',0.84));
-    if(!blob||blob.size>3145728)throw new Error('Photo cannot be optimized below 3 MB.');
-    return blob;
-  }finally{URL.revokeObjectURL(temp)}
+    const img=await new Promise((resolve,reject)=>{
+      const el=new Image();
+      el.onload=()=>resolve(el);
+      el.onerror=()=>reject(new Error('Could not read the selected photo.'));
+      el.src=objectUrl;
+    });
+    const naturalWidth=img.naturalWidth||img.width;
+    const naturalHeight=img.naturalHeight||img.height;
+    if(!naturalWidth||!naturalHeight)throw new Error('Invalid image dimensions.');
+
+    // Preserve the whole original image, including any transparent space.
+    // Do not crop to a square: portraits can be tall, and the CSS frame fits
+    // their full proportions against a pickleball gradient background.
+    const maxBytes=3145728;
+    const maxDimension=Math.max(naturalWidth,naturalHeight);
+    const dimensions=[1800,1500,1200,900,650];
+    const qualities=[0.86,0.82,0.78,0.73,0.68];
+    const canvas=document.createElement('canvas');
+    const g=canvas.getContext('2d',{alpha:true});
+    if(!g)throw new Error('Image processing is not available in this browser.');
+
+    const encode=(type,quality)=>new Promise(resolve=>canvas.toBlob(resolve,type,quality));
+    for(let i=0;i<dimensions.length;i++){
+      const scale=Math.min(1,dimensions[i]/maxDimension);
+      canvas.width=Math.max(1,Math.round(naturalWidth*scale));
+      canvas.height=Math.max(1,Math.round(naturalHeight*scale));
+      g.clearRect(0,0,canvas.width,canvas.height);
+      g.drawImage(img,0,0,canvas.width,canvas.height);
+
+      // WebP retains transparent backgrounds and provides smaller files.
+      let blob=await encode('image/webp',qualities[i]);
+      // PNG fallback also preserves alpha, which matters for player cutouts.
+      if(!blob||blob.type!=='image/webp'){
+        blob=await encode('image/png');
+      }
+      if(blob&&blob.size<=maxBytes)return blob;
+    }
+    throw new Error('The photo is too large to optimize. Choose a smaller image.');
+  }finally{
+    URL.revokeObjectURL(objectUrl);
+  }
 }
 async function uploadParticipantPhoto(input){
   if(!requireAdmin()||profileUploadBusy)return;
