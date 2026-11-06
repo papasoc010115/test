@@ -76,9 +76,13 @@
 }
 .mcx-card .mcx-date{
   display:flex;align-items:center;justify-content:center;
-  gap:6px;white-space:nowrap;
-  color:#fff;font-size:clamp(8px,1cqw,10px);
-  font-weight:850;text-shadow:0 1px 4px #0009;
+  gap:0;white-space:nowrap;
+  color:#fff;font-size:clamp(11px,1.7cqw,14px);
+  font-weight:950;text-shadow:0 1px 5px #000c;
+}
+.mcx-card .mcx-date-label{
+  display:inline-block;font-size:clamp(11px,1.7cqw,14px);
+  font-weight:950;letter-spacing:.01em;
 }
 .mcx-card .mcx-date>span,.mcx-card .mcx-date>strong{white-space:nowrap}
 .mcx-card .mcx-date-sep{opacity:.7}
@@ -270,7 +274,7 @@
   .mcx-card .mcx-brand{font-size:9px;max-width:81%}
   .mcx-card .mcx-fixture-meta{top:21px;height:21px;gap:4px}
   .mcx-card .mcx-match-title{height:21px;font-size:11px;padding:0 6px}
-  .mcx-card .mcx-date{font-size:8px;gap:4px}
+  .mcx-card .mcx-date{font-size:12px;gap:0}
   .mcx-card .mcx-team{top:22px}
   .mcx-card .mcx-nameplate{font-size:clamp(8px,1.5cqw,11px)}
   .mcx-card .mcx-average span{font-size:7px}
@@ -291,8 +295,8 @@
   .mcx-card .mcx-average{height:15px;flex-basis:15px;padding:0 5px;gap:3px}
   .mcx-card .mcx-average span{font-size:7px}
   .mcx-card .mcx-average strong{font-size:10px}
-  .mcx-card .mcx-fixture-meta{top:22px}
-  .mcx-card .mcx-date{font-size:7px;gap:2px}
+  .mcx-card .mcx-fixture-meta{top:22px;max-width:87%}
+  .mcx-card .mcx-date{font-size:11px;gap:0}
   .mcx-card .mcx-match-title{font-size:11px}
   .mcx-card .mcx-footer{
     grid-template-columns:1fr auto;row-gap:6px;padding:7px 8px;
