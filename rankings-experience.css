@@ -296,3 +296,92 @@
   #rankings .rl-mobile-list{display:grid;gap:8px}
   #rankings .ranking-card{display:none}
 }
+
+
+/* 2026 Ranking Cards V3 — distinct ranks / victories / defeats
+ * Each label has its own semantic tint; compact enough for Messenger/mobile.
+ */
+#rankings .rl-mobile-card{
+  gap:clamp(8px,1.8vw,14px);
+  border:1px solid #dae6f3;
+  background:linear-gradient(110deg,#fff 50%,#fbfdff);
+  box-shadow:0 5px 18px rgba(18,60,102,.065);
+}
+#rankings .rl-mobile-rank{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  width:49px;min-width:49px;min-height:60px;padding:8px 5px;
+  color:#1c5c9a;background:linear-gradient(145deg,#e9f3ff,#dcecff);
+  border:1px solid #c7ddf3;border-radius:13px;
+  box-shadow:inset 0 1px 0 #fff;
+}
+#rankings .rl-mobile-rank-number{
+  font-size:clamp(17px,2.4vw,22px);font-weight:1000;
+  line-height:1;letter-spacing:-.055em;font-variant-numeric:tabular-nums;
+}
+#rankings .rl-mobile-rank-medal{font-size:17px;line-height:1}
+#rankings .rl-mobile-rank.rl-rank-gold{
+  color:#785200;background:linear-gradient(150deg,#fff5cd,#ffe18b);
+  border-color:#f0c45b;box-shadow:inset 0 1px 0 #fff9,0 2px 10px #efca6a35;
+}
+#rankings .rl-mobile-rank.rl-rank-silver{
+  color:#435f7a;background:linear-gradient(150deg,#f6f9fd,#d9e4ef);
+  border-color:#c1d2e1;
+}
+#rankings .rl-mobile-rank.rl-rank-bronze{
+  color:#855038;background:linear-gradient(150deg,#fff0e4,#eebf9d);
+  border-color:#e1b18e;
+}
+#rankings .rl-mobile-card .rl-mobile-info{min-width:0}
+#rankings .rl-record{
+  display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin-top:9px;
+}
+#rankings .rl-record-pill{
+  display:inline-flex;align-items:center;gap:7px;
+  border-radius:10px;padding:5px 10px 5px 7px;
+  min-height:33px;border:1px solid transparent;
+  font-variant-numeric:tabular-nums;
+}
+#rankings .rl-record-pill b{
+  display:inline-grid;place-items:center;min-width:22px;height:22px;
+  font-size:15px;line-height:1;font-weight:1000;
+  background:#ffffffad;border-radius:7px;
+}
+#rankings .rl-record-pill span{
+  font-size:10px;font-weight:950;letter-spacing:.07em;
+}
+#rankings .rl-record-win{
+  color:#06754c;background:#e5f8ed;border-color:#a8e4c5;
+}
+#rankings .rl-record-loss{
+  color:#b23d46;background:#fff0f1;border-color:#f5c6cb;
+}
+#rankings .rl-mobile-card .rl-mobile-stats{margin-top:8px;gap:5px}
+#rankings .rl-mobile-card .rl-mobile-stats span{
+  background:#f1f5fa;color:#59738e;font-size:10px;
+  padding:4px 6px;border-radius:7px;
+}
+#rankings .rl-mobile-card .rl-mobile-side{min-width:64px}
+#rankings .rl-mobile-card .rl-mobile-side b{
+  font-size:clamp(15px,2.2vw,20px);color:#0e835d;
+}
+@media(max-width:620px){
+  #rankings .rl-mobile-card{gap:9px;padding:11px 9px}
+  #rankings .rl-mobile-rank{width:44px;min-width:44px;min-height:58px;padding:6px 4px}
+  #rankings .rl-mobile-card .rl-avatar{width:56px;flex-basis:56px;height:68px}
+  #rankings .rl-record{gap:5px;margin-top:8px}
+  #rankings .rl-record-pill{min-height:30px;padding:4px 7px 4px 5px;gap:5px}
+  #rankings .rl-record-pill b{min-width:20px;height:20px;font-size:14px}
+  #rankings .rl-record-pill span{font-size:9px}
+}
+@media(max-width:390px){
+  #rankings .rl-mobile-card{gap:6px;padding:9px 7px}
+  #rankings .rl-mobile-rank{width:36px;min-width:36px;min-height:50px;border-radius:10px}
+  #rankings .rl-mobile-rank-number{font-size:16px}
+  #rankings .rl-mobile-card .rl-avatar{width:45px;flex-basis:45px;height:59px}
+  #rankings .rl-mobile-card .rl-mobile-side{min-width:48px}
+  #rankings .rl-mobile-card .rl-mobile-side b{font-size:14px}
+  #rankings .rl-record-pill{padding:3px 6px 3px 4px}
+  #rankings .rl-record-pill span{font-size:8px}
+  #rankings .rl-record-pill b{font-size:13px;min-width:18px;height:19px}
+  #rankings .rl-mobile-card .rl-mobile-stats span{font-size:9px}
+}
