@@ -4,7 +4,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="20261106-exclusive-double-days-balance-v2">
+<meta name="app-build" content="20261106-replacement-match-balance-v3">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#0b2d5c" />
@@ -155,6 +155,13 @@
 
 .replacement-rules{display:flex;flex-wrap:wrap;gap:6px;margin:-2px 0 14px}
 .replacement-rules span{padding:5px 8px;border-radius:999px;background:#edf8f2;color:#16794b;border:1px solid #cdebdc;font-size:10px;font-weight:800}
+.replacement-match-summary{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 0}
+.replacement-team{border:1px solid #d8e5f2;border-radius:10px;background:#f8fbff;padding:9px;font-size:12px;line-height:1.55;color:#17355e}
+.replacement-team b{display:block;font-size:11px;margin-bottom:4px}
+.replacement-preview{margin:12px 0 0;padding:12px;border:1px solid #dce6f2;border-radius:10px;background:#f8fbff;font-size:12px;line-height:1.6}
+.replacement-preview strong{font-weight:800}
+.replacement-preview.warning{background:#fff8e9;border-color:#f3d48e}
+@media(max-width:520px){.replacement-match-summary{grid-template-columns:1fr}}
 .replacement-position-btn.selected-replace-position{background:#1559a8!important;color:#fff!important;border-color:#1559a8!important}
 #replaceSaveBtn:disabled{opacity:.45;cursor:not-allowed}
 
@@ -299,7 +306,7 @@
 <section id="audit" class="page"><div class="pagehead"><div><h2>Audit Log</h2><p>Administrative changes and recorded results.</p></div></div><div class="card"><div class="tablewrap"><table><thead><tr><th>Date</th><th>Action</th><th>Type</th><th>Details</th></tr></thead><tbody id="auditBody"></tbody></table></div></div></section>
 </main></div></div>
 <div id="loginModal" class="modalback"><div class="modal login-modal"><h3>Admin Login</h3><div class="field"><label>Email</label><input id="loginEmail" type="email" value="papasoc06@gmail.com" readonly></div><div class="field" style="margin-top:12px"><label>Password</label><input id="loginPassword" type="password" placeholder="Admin password" autocomplete="current-password" onkeydown="if(event.key==='Enter')adminLogin()"></div><div class="modalactions"><button class="btn secondary" onclick="closeModal('loginModal')">Cancel</button><button class="btn yellow" onclick="adminLogin()">Login</button></div></div></div><div id="scoreModal" class="modalback"><div class="modal"><h3 id="scoreTitle">Enter Match Result</h3><div id="scoreTeams" class="notice"></div><div class="formgrid"><div class="field"><label>Game 1 — Team A</label><input id="g1a" type="number" min="0" max="11"></div><div class="field"><label>Game 1 — Team B</label><input id="g1b" type="number" min="0" max="11"></div><div class="field"><label>Game 2 — Team A</label><input id="g2a" type="number" min="0" max="11"></div><div class="field"><label>Game 2 — Team B</label><input id="g2b" type="number" min="0" max="11"></div><div class="field"><label>Game 3 — Team A (if required)</label><input id="g3a" type="number" min="0" max="5"></div><div class="field"><label>Game 3 — Team B (if required)</label><input id="g3b" type="number" min="0" max="5"></div></div><div class="modalactions"><button class="btn secondary" onclick="closeModal('scoreModal')">Cancel</button><button class="btn green" onclick="saveScore()">Complete Match</button></div></div></div>
-<div id="replaceModal" class="modalback"><div class="modal"><h3>Replace Player</h3><div id="replaceInfo" class="notice"></div><div class="replacement-rules"><span>✓ Same skill level</span><span>✓ Never partnered with teammate</span><span>✓ No other match that day</span><span>✓ Next Match = Yes</span><span>✓ 1 Play / Week respected</span></div><div class="field"><label>Suggested Replacement</label><select id="replacementPlayer" disabled><option value="">Choose a player position above first</option></select><div id="replacementHint" class="small muted" style="margin-top:6px">Suggestions appear after selecting A1, A2, B1, or B2.</div></div><div class="modalactions"><button class="btn secondary" onclick="closeModal('replaceModal')">Cancel</button><button id="replaceSaveBtn" class="btn" onclick="saveReplacement()" disabled>Use Suggested Player</button></div></div></div>
+<div id="replaceModal" class="modalback"><div class="modal"><h3>Replace Player</h3><div id="replaceInfo" class="notice"></div><div class="replacement-rules"><span>✓ Flexible skill • team-average balance</span><span>✓ No repeated teammate</span><span>✓ Both opponents checked</span><span>✓ No conflicting games</span><span>✓ Thursday/Friday limits</span><span>✓ 1 Play / Week respected</span></div><div class="field"><label>Suggested Replacement</label><select id="replacementPlayer" onchange="previewReplacement()" disabled><option value="">Choose a player position above first</option></select><div id="replacementHint" class="small muted" style="margin-top:6px">Suggestions appear after selecting A1, A2, B1, or B2.</div></div><div id="replacementPreview" class="replacement-preview" style="display:none" aria-live="polite"></div><div class="modalactions"><button class="btn secondary" onclick="closeModal('replaceModal')">Cancel</button><button id="replaceSaveBtn" class="btn" onclick="saveReplacement()" disabled>Use Suggested Player</button></div></div></div>
 <div id="participantModal" class="modalback"><div class="modal"><h3 id="participantModalTitle">Add Participant</h3><div class="formgrid"><div class="field"><label>Display name</label><input id="participantName"></div><div class="field"><label>Skill level (1.0–5.0)</label><input id="participantSkill" type="number" min="1" max="5" step="0.1" value="3.0"></div></div><input type="hidden" id="participantId"><div class="modalactions"><button class="btn secondary" onclick="closeModal('participantModal')">Cancel</button><button class="btn" onclick="saveParticipant()">Save</button></div></div></div>
 <div id="manualModal" class="modalback"><div class="modal"><h3>Create Manual Match</h3><div class="formgrid"><div class="field"><label>Date</label><input id="manualDate" type="date"></div><div></div><div class="field"><label>Team A Player 1</label><select id="ma1"></select></div><div class="field"><label>Team A Player 2</label><select id="ma2"></select></div><div class="field"><label>Team B Player 1</label><select id="mb1"></select></div><div class="field"><label>Team B Player 2</label><select id="mb2"></select></div></div><div class="modalactions"><button class="btn secondary" onclick="closeModal('manualModal')">Cancel</button><button class="btn" onclick="saveManualMatch()">Create Match</button></div></div></div><div id="editMatchModal" class="modalback"><div class="modal"><h3 id="editMatchTitle">Edit Match</h3><div id="editMatchNotice" class="notice"></div><div class="formgrid"><div class="field"><label>Date</label><input id="editMatchDate" type="date"></div><div></div><div class="field"><label>Team A Player 1</label><select id="ea1"></select></div><div class="field"><label>Team A Player 2</label><select id="ea2"></select></div><div class="field"><label>Team B Player 1</label><select id="eb1"></select></div><div class="field"><label>Team B Player 2</label><select id="eb2"></select></div></div><div id="editMatchEligibilityHint" class="edit-match-hint">Player choices automatically exclude anyone who has already partnered with the selected teammate.</div><div class="modalactions"><button class="btn secondary" onclick="closeModal('editMatchModal')">Cancel</button><button class="btn" onclick="saveEditedMatch()">Save Match</button></div></div></div>
 <div id="liveScoreModal" class="modalback"><div class="modal"><h3 id="liveScoreTitle">Live Match</h3><div id="liveScoreInfo" class="notice"></div><div class="live-modal-scoreboard"><div class="live-control-side"><div id="liveTeamAName" class="live-control-names"></div><input id="liveScoreA" class="live-number" type="number" min="0" inputmode="numeric" onchange="commitLiveInputs()"><div class="score-buttons"><button class="btn secondary" onclick="adjustLiveScore('A',-1)">−1</button><button class="btn green" onclick="adjustLiveScore('A',1)">+1</button></div></div><div class="live-control-center"><div class="vs">VS</div><div id="liveGameLabel" class="live-game-pill" style="margin-top:10px;color:var(--navy);background:#eef4fb">Game 1</div></div><div class="live-control-side"><div id="liveTeamBName" class="live-control-names"></div><input id="liveScoreB" class="live-number" type="number" min="0" inputmode="numeric" onchange="commitLiveInputs()"><div class="score-buttons"><button class="btn secondary" onclick="adjustLiveScore('B',-1)">−1</button><button class="btn green" onclick="adjustLiveScore('B',1)">+1</button></div></div></div><div id="liveScoreStatus" class="live-status-line"></div><div class="modalactions"><button class="btn secondary" onclick="resetLiveGame()">Reset Current Game</button><button class="btn red" onclick="resetEntireMatch()">Reset Entire Match</button><button class="btn red" onclick="cancelLiveMatch()">Cancel Live</button><button class="btn secondary" onclick="closeModal('liveScoreModal')">Close</button><button class="btn yellow" onclick="finishLiveGame()">Finish Game</button></div></div></div><script>
@@ -506,9 +513,92 @@ async function finishLiveGame(){const m=matches.find(x=>x.id===activeLiveMatchId
 function setupRealtime(){if(realtimeChannel){try{sb.removeChannel(realtimeChannel)}catch(e){}}realtimeChannel=sb.channel('tlp-live-matches').on('postgres_changes',{event:'UPDATE',schema:'public',table:'matches'},async payload=>{const changed=payload.new;if(!changed?.id)return;const idx=matches.findIndex(m=>m.id===changed.id);if(idx>=0)matches[idx]={...matches[idx],...changed};else await loadAll();renderLiveArena();renderMatches();if(activeLiveMatchId===changed.id&&document.getElementById('liveScoreModal')?.classList.contains('show'))renderLiveScorerModal()}).on('postgres_changes',{event:'UPDATE',schema:'public',table:'competitions'},payload=>{if(!competition||payload.new?.id!==competition.id)return;competition={...competition,...payload.new};renderMatchLockState();renderMatches()}).subscribe(status=>{if(status==='CHANNEL_ERROR'||status==='TIMED_OUT')setTimeout(()=>setupRealtime(),1500)})}
 async function openScore(id){if(!requireAdmin())return;activeScoreMatch=matches.find(x=>x.id===id);if(!activeScoreMatch)return toast('Match not found.',true);const l=lineups(activeScoreMatch);document.getElementById('scoreTitle').textContent='Match '+activeScoreMatch.match_number+' — Final Score';document.getElementById('scoreTeams').innerHTML='<b>'+esc(l.a1)+' & '+esc(l.a2)+'</b> vs <b>'+esc(l.b1)+' & '+esc(l.b2)+'</b>'+(activeScoreMatch.status==='IN_PROGRESS'?'<div class="small" style="margin-top:5px">Live scoring is synchronized here. Finished games are loaded automatically.</div>':'');['g1a','g1b','g2a','g2b','g3a','g3b'].forEach(x=>document.getElementById(x).value='');const{data,error}=await sb.from('match_games').select('game_number,team_a_score,team_b_score').eq('match_id',id).order('game_number');if(error)return toast('Unable to load saved game scores: '+error.message,true);for(const g of (data||[])){const a=document.getElementById('g'+g.game_number+'a'),b=document.getElementById('g'+g.game_number+'b');if(a)a.value=g.team_a_score;if(b)b.value=g.team_b_score}if(activeScoreMatch.status==='IN_PROGRESS'){const n=Number(activeScoreMatch.live_game||1),a=document.getElementById('g'+n+'a'),b=document.getElementById('g'+n+'b');if(a&&b){a.value=Number(activeScoreMatch.live_score_a||0);b.value=Number(activeScoreMatch.live_score_b||0)}}document.getElementById('scoreModal').classList.add('show')}
 async function saveScore(){if(!activeScoreMatch)return;const val=id=>document.getElementById(id).value===''?null:+document.getElementById(id).value,{data,error}=await sb.rpc('record_match_result',{p_match_id:activeScoreMatch.id,p_g1a:val('g1a'),p_g1b:val('g1b'),p_g2a:val('g2a'),p_g2b:val('g2b'),p_g3a:val('g3a'),p_g3b:val('g3b')});if(error)return toast(error.message,true);closeModal('scoreModal');if(activeLiveMatchId===activeScoreMatch.id){closeModal('liveScoreModal');activeLiveMatchId=null}toast('Final score saved. Live score, standings, and match result are synchronized.');await loadAll()}
-function resetReplacementPicker(){destroyChoice('replacementPlayer');const el=document.getElementById('replacementPlayer');el.innerHTML='<option value="">Choose a player position above first</option>';el.disabled=true;document.getElementById('replaceSaveBtn').disabled=true;document.getElementById('replacementHint').textContent='Suggestions appear after selecting A1, A2, B1, or B2.'}
+function resetReplacementPicker(){destroyChoice('replacementPlayer');const el=document.getElementById('replacementPlayer');el.innerHTML='<option value="">Choose a player position above first</option>';el.disabled=true;document.getElementById('replaceSaveBtn').disabled=true;document.getElementById('replacementHint').textContent='Suggestions appear after selecting A1, A2, B1, or B2.';const preview=document.getElementById('replacementPreview');if(preview){preview.innerHTML='';preview.style.display='none'}}
 function openReplace(matchId){if(!requireMatchesUnlocked())return;const m=matches.find(x=>x.id===matchId),l=lineups(m),html=l.ps.map(x=>{const p=playerById(x.actual_player_id);return '<button class="btn secondary sm replacement-position-btn" style="margin:4px" onclick="chooseReplace(\''+matchId+'\',\''+x.team+'\','+x.position+',\''+p.id+'\',this)">'+x.team+x.position+': '+esc(p.display_name)+'</button>'}).join('');document.getElementById('replaceInfo').innerHTML='<b>Choose the player position to replace:</b><br>'+html;replaceCtx=null;resetReplacementPicker();document.getElementById('replaceModal').classList.add('show')}
-async function chooseReplace(matchId,team,pos,oldId,button){replaceCtx={matchId,team,pos,oldId};document.querySelectorAll('.replacement-position-btn').forEach(b=>b.classList.remove('selected-replace-position'));button?.classList.add('selected-replace-position');const oldPlayer=playerById(oldId),m=matches.find(x=>x.id===matchId),l=lineups(m),mateMp=l.ps.find(x=>x.team===team&&x.position!==pos),mate=playerById(mateMp?.actual_player_id);document.getElementById('replaceInfo').innerHTML='Replacing <b>'+esc(oldPlayer?.display_name)+'</b> (Skill '+Number(oldPlayer?.skill_level||0).toFixed(1)+') on Team '+team+'. Teammate: <b>'+esc(mate?.display_name||'—')+'</b>.';destroyChoice('replacementPlayer');const el=document.getElementById('replacementPlayer');el.disabled=true;el.innerHTML='<option value="">Loading suggestions…</option>';document.getElementById('replaceSaveBtn').disabled=true;document.getElementById('replacementHint').textContent='Checking skill level, partner history, same-day schedule, and Next Match availability…';const{data,error}=await sb.rpc('get_replacement_suggestions',{p_match_id:matchId,p_team:team,p_position:pos});if(error){el.innerHTML='<option value="">Unable to load suggestions</option>';document.getElementById('replacementHint').textContent=error.message;return toast(error.message,true)}const suggestions=data||[];if(!suggestions.length){el.innerHTML='<option value="">No eligible suggested players</option>';document.getElementById('replacementHint').textContent='No player currently meets all replacement rules for this position.';return}el.innerHTML='<option value="">Select suggested player…</option>'+suggestions.map(s=>'<option value="'+s.participant_id+'">'+esc(s.display_name)+' — Skill '+Number(s.skill_level).toFixed(1)+' — '+s.matches_played+' played</option>').join('');el.disabled=false;initChoice('replacementPlayer','Search suggested player');document.getElementById('replacementHint').textContent=suggestions.length+' eligible suggestion'+(suggestions.length===1?'':'s')+'. Only these players can be used.';document.getElementById('replaceSaveBtn').disabled=false}
+function previousOpponentEncounters(playerId,opponentIds,currentMatchId){
+  if(!playerId||!opponentIds?.length)return 0;
+  let count=0;
+  for(const m of matches){
+    if(m.id===currentMatchId||m.status!=='COMPLETED')continue;
+    const lineup=matchPlayers.filter(x=>x.match_id===m.id);
+    const candidate=lineup.find(x=>x.actual_player_id===playerId);
+    if(!candidate)continue;
+    count+=lineup.filter(x=>x.team!==candidate.team&&opponentIds.includes(x.actual_player_id)).length;
+  }
+  return count;
+}
+function previewReplacement(){
+  const preview=document.getElementById('replacementPreview');
+  const btn=document.getElementById('replaceSaveBtn');
+  const id=document.getElementById('replacementPlayer').value;
+  const person=replaceCtx?.suggestions?.find(x=>x.participant_id===id);
+  if(btn)btn.disabled=!person;
+  if(!preview)return;
+  if(!person){preview.style.display='none';preview.innerHTML='';return;}
+  const projected=(Number(person.skill_level)+replaceCtx.teammateSkill)/2;
+  const opponentAvg=replaceCtx.opponentAvg;
+  const gap=Math.abs(projected-opponentAvg);
+  const prior=previousOpponentEncounters(id,replaceCtx.opponentIds,replaceCtx.matchId);
+  preview.style.display='';
+  preview.className='replacement-preview'+(gap>0.5?' warning':'');
+  preview.innerHTML='<strong>'+esc(person.display_name)+' — Skill '+Number(person.skill_level).toFixed(1)+'</strong>'
+    +'<div>Projected teams: <b>'+projected.toFixed(2)+'</b> vs <b>'+opponentAvg.toFixed(2)+'</b> · Skill gap: <b>'+gap.toFixed(2)+'</b></div>'
+    +'<div>Previous encounters with either current opponent: <b>'+prior+'</b> ('+(prior?'rotation considered':'fresh opponents')+')</div>'
+    +'<div>Teammate history: <b>no previous partnership</b> · Schedule and weekly limits: <b>eligible</b></div>'
+    +(gap>0.5?'<div><b>Balance warning:</b> This is one of the eligible options, but the projected teams are uneven. Consider Edit Match if you need a closer team average.</div>':'');
+}
+async function chooseReplace(matchId,team,pos,oldId,button){
+  const oldPlayer=playerById(oldId);
+  const m=matches.find(x=>x.id===matchId);
+  if(!m)return toast('Match no longer exists. Refresh the match list.',true);
+  const l=lineups(m);
+  const mateMp=l.ps.find(x=>x.team===team&&x.position!==pos);
+  const mate=playerById(mateMp?.actual_player_id);
+  const opponents=l.ps.filter(x=>x.team!==team).map(x=>playerById(x.actual_player_id)).filter(Boolean);
+  if(!mate||opponents.length!==2)return toast('Match lineup is incomplete; refresh and try again.',true);
+  const request={matchId,team,pos,oldId,teammateSkill:Number(mate.skill_level),opponentAvg:(Number(opponents[0].skill_level)+Number(opponents[1].skill_level))/2,opponentIds:opponents.map(x=>x.id),suggestions:[]};
+  replaceCtx=request;
+  document.querySelectorAll('.replacement-position-btn').forEach(b=>b.classList.remove('selected-replace-position'));
+  button?.classList.add('selected-replace-position');
+  const otherSide=team==='A'?'B':'A';
+  document.getElementById('replaceInfo').innerHTML='Replacing <b>'+esc(oldPlayer?.display_name||'Player')+'</b> (Skill '+Number(oldPlayer?.skill_level||0).toFixed(1)+') in Match '+esc(m.match_number)+'.'
+    +'<div class="replacement-match-summary"><div class="replacement-team"><b>Team '+team+' · Teammate</b>'+esc(mate.display_name)+' (L'+Number(mate.skill_level).toFixed(1)+')</div>'
+    +'<div class="replacement-team"><b>Team '+otherSide+' · Opponents</b>'+opponents.map(x=>esc(x.display_name)+' (L'+Number(x.skill_level).toFixed(1)+')').join(' + ')+'<div>Team average: '+request.opponentAvg.toFixed(2)+'</div></div></div>';
+  destroyChoice('replacementPlayer');
+  const el=document.getElementById('replacementPlayer');
+  el.disabled=true;
+  el.innerHTML='<option value="">Loading eligible replacements…</option>';
+  document.getElementById('replaceSaveBtn').disabled=true;
+  const preview=document.getElementById('replacementPreview');
+  preview.style.display='none';preview.innerHTML='';
+  document.getElementById('replacementHint').textContent='Checking team balance, teammate history, both opponents, other matches and weekly rules…';
+  const{data,error}=await sb.rpc('get_replacement_suggestions',{p_match_id:matchId,p_team:team,p_position:pos});
+  if(replaceCtx!==request)return;
+  if(error){
+    el.innerHTML='<option value="">Unable to load suggestions</option>';
+    document.getElementById('replacementHint').textContent=error.message;
+    return toast(error.message,true);
+  }
+  const suggestions=data||[];
+  replaceCtx.suggestions=suggestions;
+  if(!suggestions.length){
+    el.innerHTML='<option value="">No eligible suggested players</option>';
+    document.getElementById('replacementHint').textContent='No player meets teammate, lineup, scheduling and rest-gap requirements. Try a different position or use Edit Match.';
+    return;
+  }
+  el.innerHTML='<option value="">Choose replacement (best match first)…</option>'+suggestions.map(candidate=>{
+    const projected=(Number(candidate.skill_level)+request.teammateSkill)/2;
+    const gap=Math.abs(projected-request.opponentAvg);
+    const prior=previousOpponentEncounters(candidate.participant_id,request.opponentIds,matchId);
+    return '<option value="'+candidate.participant_id+'">'+esc(candidate.display_name)+' · L'+Number(candidate.skill_level).toFixed(1)
+      +' · team '+projected.toFixed(2)+' vs '+request.opponentAvg.toFixed(2)
+      +' · gap '+gap.toFixed(2)+' · past opponents '+prior+'</option>';
+  }).join('');
+  el.disabled=false;
+  initChoice('replacementPlayer','Search eligible player');
+  document.getElementById('replacementHint').textContent=suggestions.length+' eligible replacement'+(suggestions.length===1?'':'s')+' ranked by projected team balance and past opponent encounters. Different skill levels are allowed.';
+  previewReplacement();
+}
 async function saveReplacement(){if(!requireMatchesUnlocked())return;if(!replaceCtx)return toast('Choose a player position first.',true);const id=document.getElementById('replacementPlayer').value;if(!id)return toast('Choose one of the suggested replacement players.',true);document.getElementById('replaceSaveBtn').disabled=true;const{data,error}=await sb.rpc('replace_match_player',{p_match_id:replaceCtx.matchId,p_team:replaceCtx.team,p_position:replaceCtx.pos,p_new_player_id:id});if(error){document.getElementById('replaceSaveBtn').disabled=false;return toast(error.message,true)}if(data&&!data.ok){document.getElementById('replaceSaveBtn').disabled=false;return toast(data.message||data.code,true)}closeModal('replaceModal');toast('Player replaced with an eligible suggested player.');await loadAll()}
 function openParticipant(id=''){if(!requireAdmin())return;const p=id?playerById(id):null;document.getElementById('participantId').value=id;document.getElementById('participantName').value=p?.display_name||'';document.getElementById('participantSkill').value=Number(p?.skill_level||3).toFixed(1);document.getElementById('participantModalTitle').textContent=p?'Edit Participant':'Add Participant';document.getElementById('participantModal').classList.add('show')}
 async function saveParticipant(){const id=document.getElementById('participantId').value,name=document.getElementById('participantName').value.trim(),skill=Number(document.getElementById('participantSkill').value);if(!name)return toast('Name is required.',true);if(!Number.isFinite(skill)||skill<1||skill>5)return toast('Skill level must be between 1.0 and 5.0.',true);let error;if(id){({error}=await sb.from('participants').update({display_name:name,skill_level:skill}).eq('id',id))}else{const r=await sb.rpc('next_player_code',{p_competition_id:competition.id});if(r.error)return toast(r.error.message,true);({error}=await sb.from('participants').insert({competition_id:competition.id,player_code:r.data,display_name:name,skill_level:skill,active:true,can_play_next_match:true,one_play_per_week:false}))}if(error)return toast(error.message,true);closeModal('participantModal');toast('Participant saved. Use Reshuffle Upcoming 8 to apply updated levels to future matches.');await loadAll()}
@@ -526,7 +616,7 @@ sb.auth.getSession().then(({data})=>{session=data.session;applyAuth();loadAll().
 </script>
 <script>
 (function(){
-  const CURRENT_BUILD='20261106-exclusive-double-days-balance-v2';
+  const CURRENT_BUILD='20261106-replacement-match-balance-v3';
   async function checkForNewBuild(){
     try{
       const r=await fetch('/index.html?buildcheck='+Date.now(),{cache:'no-store'});
