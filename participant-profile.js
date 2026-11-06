@@ -17,7 +17,7 @@ function ppInitials(full){
 }
 function profileAvatarHTML(p,className='pp-avatar'){
   const img=safeProfilePhotoUrl(p?.profile_image_url);
-  return '<div class="'+className+'">'+(img?'<img src="'+esc(img)+'" alt="'+esc(p?.display_name||'Player')+' portrait" loading="lazy" onerror="this.style.display=\\'none\\';this.parentNode.textContent='+JSON.stringify(ppInitials(p?.display_name))+'">':esc(ppInitials(p?.display_name)))+'</div>';
+  return '<div class="'+className+'">'+esc(ppInitials(p?.display_name))+(img?'<img src="'+esc(img)+'" alt="'+esc(p?.display_name||'Player')+' portrait" loading="lazy" onerror="this.remove()">':'')+'</div>';
 }
 function ppNum(v){return Number(v||0).toLocaleString('en-PH')}
 function ppAvg(v,places=1){return Number.isFinite(v)?v.toFixed(places):'—'}
@@ -212,7 +212,7 @@ function profileSettings(ctx){
   if(!isAdmin())return '<div class="pp-empty">Admin access required.</div>';
   const p=ctx.p;
   const toggle=(name,key,desc)=>'<div class="pp-config"><div><strong>'+esc(name)+'</strong><small>'+esc(desc)+'</small></div>'
-    +'<select aria-label="'+esc(name)+'" onchange="updateProfileSetting(\\''+key+'\\',this.value,this)" '+(profileUploadBusy?'disabled':'')+'>'
+    +'<select aria-label="'+esc(name)+'" onchange="updateProfileSetting(\''+key+'\',this.value,this)" '+(profileUploadBusy?'disabled':'')+'>'
     +'<option value="false" '+(p[key]!==true?'selected':'')+'>No</option>'
     +'<option value="true" '+(p[key]===true?'selected':'')+'>Yes</option></select></div>';
   return '<div class="pp-grid">'
@@ -227,8 +227,8 @@ function profileSettings(ctx){
    +toggle('Last Game Eligible','can_play_last_game','Allow this player in the final slot of each competition day.')
    +'<div class="pp-config"><div><strong>Match target</strong><small>Override the competition default of '+ppNum(competition?.target_matches_per_player||15)+' matches</small></div><input id="ppTargetMatches" type="number" min="1" max="100" value="'+ppNum(ctx.target)+'" onchange="saveProfileTarget(this)" aria-label="Target matches" style="width:90px"></div>'
    +'<div class="pp-config"><div><strong>Skill level</strong><small>1.0–5.0; displayed match averages update immediately</small></div><input id="ppSkillLevel" type="number" min="1" max="5" step=".1" value="'+Number(p.skill_level||3).toFixed(1)+'" onchange="saveProfileSkill(this)" aria-label="Skill level" style="width:90px"></div>'
-   +'<div class="pp-row"><div class="pp-row-text"><strong>Profile management</strong><small>Edit name or archive without deleting match history</small></div><div><button class="pp-linkbtn" onclick="openParticipant(\\''+p.id+'\\')">Edit name</button> '
-   +(p.active?'<button class="pp-linkbtn" onclick="archiveParticipant(\\''+p.id+'\\')">Archive</button>':'<span class="pp-pill loss">Inactive</span>')+'</div></div>'
+   +'<div class="pp-row"><div class="pp-row-text"><strong>Profile management</strong><small>Edit name or archive without deleting match history</small></div><div><button class="pp-linkbtn" onclick="openParticipant(\''+p.id+'\')">Edit name</button> '
+   +(p.active?'<button class="pp-linkbtn" onclick="archiveParticipant(\''+p.id+'\')">Archive</button>':'<span class="pp-pill loss">Inactive</span>')+'</div></div>'
    +'</article></div>';
 }
 function renderParticipantProfile(){
@@ -262,7 +262,7 @@ function renderParticipantProfile(){
     +'</div>';
   const tabs=[['overview','Overview'],['history','Match History'],['partners','Partners'],['opponents','Opponents'],['analytics','Analytics'],['settings','Settings']];
   const nav='<div class="pp-tabs" role="tablist" aria-label="Participant profile sections">'
-    +tabs.map(([key,label])=>'<button type="button" role="tab" aria-selected="'+(key===profileActiveTab)+'" class="'+(key===profileActiveTab?'active':'')+'" onclick="profileTab(\\''+key+'\\')">'+label+'</button>').join('')+'</div>';
+    +tabs.map(([key,label])=>'<button type="button" role="tab" aria-selected="'+(key===profileActiveTab)+'" class="'+(key===profileActiveTab?'active':'')+'" onclick="profileTab(\''+key+'\')">'+label+'</button>').join('')+'</div>';
   const renderers={overview:profileOverview,history:profileHistory,partners:profilePartners,opponents:profileOpponents,analytics:profileAnalytics,settings:profileSettings};
   host.innerHTML=hero+cards+nav+'<div class="pp-panel" role="tabpanel">'+renderers[profileActiveTab](ctx)+'</div>';
 }
@@ -289,15 +289,15 @@ function renderParticipantList(){
   entries.sort((a,b)=>{const av=get(a),bv=get(b);if(typeof av==='string')return av.localeCompare(bv)*dir;if(av===bv)return a.p.display_name.localeCompare(b.p.display_name);return(av-bv)*dir});
   document.getElementById('participantsBody').innerHTML=entries.map(x=>{
     const {p,st,rank,rem,skill,canLast,canNext}=x;
-    const playerCell='<div class="pp-player-cell">'+profileAvatarHTML(p,'pp-avatar-small')+'<div><button class="pp-click-name" onclick="openParticipantProfile(\\''+p.id+'\\')"><b>'+esc(p.display_name)+'</b></button><div class="small muted">'+esc(p.player_code)+'</div></div></div>';
-    const skillCell=isAdmin()?'<div class="skill-editor"><input class="skill-input" type="number" min="1" max="5" step=".1" value="'+skill.toFixed(1)+'" oninput="queueSkillSave(\\''+p.id+'\\',this)" onblur="flushSkillSave(\\''+p.id+'\\',this)" onkeydown="handleSkillKey(event,\\''+p.id+'\\',this)">'+skillBadge(skill)+'</div>':skillBadge(skill);
-    const toggle=(val,fn)=>isAdmin()?'<select class="lastgame-select '+(val?'lastgame-yes':'lastgame-no')+'" onchange="'+fn+'(\\''+p.id+'\\',this)"><option value="true" '+(val?'selected':'')+'>Yes</option><option value="false" '+(!val?'selected':'')+'>No</option></select>':'<span class="tag '+(val?'ready':'warn')+'">'+(val?'YES':'NO')+'</span>';
+    const playerCell='<div class="pp-player-cell">'+profileAvatarHTML(p,'pp-avatar-small')+'<div><button class="pp-click-name" onclick="openParticipantProfile(\''+p.id+'\')"><b>'+esc(p.display_name)+'</b></button><div class="small muted">'+esc(p.player_code)+'</div></div></div>';
+    const skillCell=isAdmin()?'<div class="skill-editor"><input class="skill-input" type="number" min="1" max="5" step=".1" value="'+skill.toFixed(1)+'" oninput="queueSkillSave(\''+p.id+'\',this)" onblur="flushSkillSave(\''+p.id+'\',this)" onkeydown="handleSkillKey(event,\''+p.id+'\',this)">'+skillBadge(skill)+'</div>':skillBadge(skill);
+    const toggle=(val,fn)=>isAdmin()?'<select class="lastgame-select '+(val?'lastgame-yes':'lastgame-no')+'" onchange="'+fn+'(\''+p.id+'\',this)"><option value="true" '+(val?'selected':'')+'>Yes</option><option value="false" '+(!val?'selected':'')+'>No</option></select>':'<span class="tag '+(val?'ready':'warn')+'">'+(val?'YES':'NO')+'</span>';
     return '<tr><td>'+playerCell+'</td><td><b>'+(rank?'#'+rank.official_rank:'—')+'</b></td><td>'+skillCell+'</td>'
       +'<td>'+toggle(canLast,'updateLastGame')+'</td><td>'+toggle(canNext,'updateNextMatch')+'</td>'
       +'<td>'+ppNum(st.matches_played||0)+'</td><td>'+ppNum(st.match_wins||0)+'</td><td>'+ppNum(st.upcoming_matches||0)+'</td><td>'+ppNum(rem)+'</td>'
       +'<td><span class="tag '+(p.active?'ready':'warn')+'">'+(p.active?'ACTIVE':'INACTIVE')+'</span></td>'
-      +'<td><button class="pp-linkbtn" onclick="openParticipantProfile(\\''+p.id+'\\')">View Profile</button> '
-      +(isAdmin()?'<button class="btn secondary sm" onclick="openParticipant(\\''+p.id+'\\')">Edit Name</button> '+(p.active?'<button class="btn red sm" onclick="archiveParticipant(\\''+p.id+'\\')">Archive</button>':''):'')+'</td></tr>';
+      +'<td><button class="pp-linkbtn" onclick="openParticipantProfile(\''+p.id+'\')">View Profile</button> '
+      +(isAdmin()?'<button class="btn secondary sm" onclick="openParticipant(\''+p.id+'\')">Edit Name</button> '+(p.active?'<button class="btn red sm" onclick="archiveParticipant(\''+p.id+'\')">Archive</button>':''):'')+'</td></tr>';
   }).join('');
   updateParticipantSortIndicators();
 }
