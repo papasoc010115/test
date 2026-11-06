@@ -4,7 +4,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="20261107-ranking-wins-losses-v11">
+<meta name="app-build" content="20261107-provisional-rankings-v12">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#0b2d5c" />
@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="/participant-profile.css?v=20261107-clean-gradient-v4">
   <link rel="preload" as="image" href="/assets/match-stadium-hd.webp" type="image/webp">
   <link rel="stylesheet" href="/matches-cinematic.css?v=20261107-clean-match-header-v8">
-  <link rel="stylesheet" href="/rankings-experience.css?v=20261107-rankings-v3">
+  <link rel="stylesheet" href="/rankings-experience.css?v=20261107-rankings-v4">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
   <style>
@@ -292,7 +292,8 @@
   <div class="ranking-hero">
     <div>
       <div class="ranking-kicker">TLP TEACHERS PICKLEBALL</div>
-      <h2>Official Rankings</h2>
+      <h2 id="rankingMainTitle">Current Competition Rankings</h2>
+      <div id="rankingProgressLabel" class="ranking-progress-label"><span class="ranking-progress-dot" aria-hidden="true"></span> Standings in Progress</div>
       <p>Match Wins <span>→</span> Head-to-Head <span>→</span> Score Difference</p>
     </div>
     <div class="ranking-legend">
@@ -300,12 +301,16 @@
       <div class="ranking-help"><b>PA</b><span>Points Against<br><small>Total points allowed</small></span></div>
     </div>
   </div>
+  <aside id="rankingProvisionalNotice" class="ranking-provisional-notice" role="note" aria-label="Important notice about current rankings">
+    <div class="ranking-notice-heading"><span aria-hidden="true">ⓘ</span> Important Notice</div>
+    <p>These rankings are <strong>not yet final</strong>. Player positions may change as additional matches are completed. Final rankings will be determined only after all active participants have completed their required <strong>15 games</strong>.</p>
+  </aside>
   <div class="rl-summary" aria-label="Competition overview">
     <div class="rl-summary-tile"><div class="rl-summary-icon" aria-hidden="true">♟</div><div><span>Active players</span><strong id="rlActiveCount">—</strong></div></div>
     <div class="rl-summary-tile"><div class="rl-summary-icon" aria-hidden="true">✓</div><div><span>Completed matches</span><strong id="rlFinishedCount">—</strong></div></div>
     <div class="rl-summary-tile"><div class="rl-summary-icon" aria-hidden="true">♛</div><div><span>Current leader</span><strong id="rlLeaderName">—</strong></div></div>
   </div>
-  <div class="rl-section-heading"><div><div class="rl-section-eyebrow">HONOR ROLL</div><h3>Top 3 Champions</h3><p>Leaders based on official competition results</p></div><span class="rl-live-label">Official standings</span></div>
+  <div class="rl-section-heading"><div><div class="rl-section-eyebrow">HONOR ROLL</div><h3 id="rankingTopThreeTitle">Current Top 3 Players</h3><p id="rankingTopThreeDescription">Current leaders based on completed competition matches</p></div><span class="rl-live-label" id="rankingStandingsStatus">Provisional standings</span></div>
   <div id="rankingPodium" class="rl-podium" aria-label="Top three players"></div>
   <div class="rl-section-heading"><div><div class="rl-section-eyebrow">ALL COMPETITORS</div><h3>Full Leaderboard</h3><p>Wins → Head-to-Head → Score Difference</p></div><span class="rl-live-label" id="rlAllCount">—</span></div>
   <div class="ranking-toolbar">
@@ -721,10 +726,10 @@ sb.auth.getSession().then(({data})=>{session=data.session;applyAuth();loadAll().
 </script>
 <script src="/participant-profile.js?v=20261107-portrait-fit-v3"></script>
 <script src="/matches-cinematic.js?v=20261107-clean-match-header-v8"></script>
-<script src="/rankings-experience.js?v=20261107-rankings-v3"></script>
+<script src="/rankings-experience.js?v=20261107-rankings-v4"></script>
 <script>
 (function(){
-  const CURRENT_BUILD='20261107-ranking-wins-losses-v11';
+  const CURRENT_BUILD='20261107-provisional-rankings-v12';
   async function checkForNewBuild(){
     try{
       const r=await fetch('/index.html?buildcheck='+Date.now(),{cache:'no-store'});
