@@ -354,3 +354,179 @@
   .mcx-controls,.mcx-action-group{gap:4px}
   .mcx-card .mcx-footer .btn,.mcx-card .match-manage-menu summary{font-size:9px;padding:6px 6px}
 }
+
+/* ===============================================================
+   V3 REFERENCE COMPOSITION  ·  MATCH 45 BROADCAST PROPORTIONS
+   Stadium background first; fixed portrait anchors above the court.
+   Photo boxes are intentionally absent.
+   =============================================================== */
+.matchcard.mcx-card{container-type:inline-size;border-color:#224975}
+.mcx-card .mcx-scene{
+  height:clamp(150px,23cqw,190px);
+  background:
+    radial-gradient(ellipse 27% 60% at 6% 18%,rgba(1,96,175,.38),transparent 86%),
+    radial-gradient(ellipse 28% 64% at 94% 19%,rgba(5,114,217,.37),transparent 88%),
+    linear-gradient(180deg,#020d20 0%,#051c3a 38%,#063366 75%,#042244 100%);
+}
+.mcx-card .mcx-scene::before{
+  background:
+    radial-gradient(ellipse 28% 48% at 1% 0%,rgba(143,226,255,.36),transparent 73%),
+    radial-gradient(ellipse 29% 49% at 99% 0%,rgba(143,226,255,.36),transparent 72%),
+    radial-gradient(ellipse 60% 14% at 50% 100%,rgba(22,162,233,.24),transparent 100%);
+}
+.mcx-card .mcx-scene::after{
+  inset:auto -8% -5px;height:36%;opacity:.65;
+  transform:perspective(340px) rotateX(64deg);
+  background:
+    repeating-linear-gradient(90deg,transparent 0 28px,rgba(95,183,255,.17) 28px 29px),
+    repeating-linear-gradient(0deg,transparent 0 20px,rgba(95,183,255,.14) 20px 21px);
+  mask-image:linear-gradient(180deg,transparent,black 45%,transparent);
+}
+.mcx-net{
+  top:52%;bottom:15%;left:0;right:0;
+  opacity:.90;border-top:2px solid rgba(218,240,255,.68);
+  background:
+    repeating-linear-gradient(90deg,transparent 0 17px,rgba(190,226,255,.28) 17px 18px),
+    repeating-linear-gradient(0deg,transparent 0 12px,rgba(190,226,255,.22) 12px 13px);
+  mask-image:linear-gradient(180deg,black 10%,rgba(0,0,0,.55) 82%,transparent 100%);
+}
+.mcx-lights{top:0;width:120px;height:27px;opacity:1;filter:drop-shadow(0 0 5px rgba(111,206,255,1))}
+.mcx-lights-left{left:-2px;transform:rotate(16deg)}
+.mcx-lights-right{right:-2px;transform:rotate(-16deg)}
+/* Short jagged energetic paint streaks – never tall geometric wedges. */
+.mcx-blast{top:23%;height:43%;width:35%;opacity:1;filter:none}
+.mcx-blast-a{
+  left:4%;
+  transform:rotate(-11deg);
+  background:
+    repeating-linear-gradient(166deg,transparent 0 4px,rgba(255,221,34,.35) 4px 6px,transparent 6px 13px),
+    linear-gradient(106deg,rgba(255,222,0,.92),rgba(255,189,0,.88) 32%,rgba(255,213,5,.20) 72%,transparent);
+  clip-path:polygon(0 60%,10% 18%,28% 30%,43% 0,38% 30%,75% 7%,59% 41%,98% 19%,77% 57%,100% 47%,75% 74%,94% 86%,39% 73%,17% 100%,25% 70%,0 94%);
+}
+.mcx-blast-b{
+  right:4%;
+  transform:rotate(11deg);
+  background:
+    repeating-linear-gradient(14deg,transparent 0 5px,rgba(20,204,255,.38) 5px 7px,transparent 7px 14px),
+    linear-gradient(260deg,rgba(2,172,255,.93),rgba(0,100,239,.87) 30%,rgba(0,139,252,.25) 72%,transparent);
+  clip-path:polygon(100% 60%,90% 18%,72% 30%,57% 0,62% 30%,25% 7%,41% 41%,2% 19%,23% 57%,0 47%,25% 74%,6% 86%,61% 73%,83% 100%,75% 70%,100% 94%);
+}
+/* Two-row header as in the approved sample. */
+.mcx-header{display:block;height:54px;min-height:0;padding:0;background:none}
+.mcx-brand{
+  position:absolute;top:3px;left:50%;transform:translateX(-50%);
+  display:flex;justify-content:center;align-items:center;
+  gap:5px;width:auto;max-width:71%;
+  font-size:clamp(9px,1.05cqw,12px);
+  text-shadow:0 1px 4px #000;
+}
+.mcx-brand strong{display:inline!important;font-size:inherit!important;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.mcx-brand-logo{flex:0 0 18px;width:18px;height:18px;font-size:7px}
+.mcx-header-rule{width:clamp(15px,3cqw,40px);height:1px;background:linear-gradient(90deg,transparent,#ffd218);flex:0 0 auto}
+.mcx-header-rule:last-child{background:linear-gradient(90deg,#ffd218,transparent)}
+.mcx-fixture-meta{
+  position:absolute;top:23px;left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  white-space:nowrap;max-width:76%;height:24px;
+  padding:0 5px;border:1px solid rgba(82,153,205,.35);
+  background:rgba(0,12,31,.50);border-radius:6px;
+}
+.mcx-match-title{
+  font-size:clamp(11px,1.32cqw,15px);
+  padding:6px 9px;
+  margin:-1px 0;
+  box-shadow:0 2px 6px rgba(236,177,0,.31);
+}
+.mcx-date{font-size:clamp(8px,.9cqw,10px);justify-content:center;flex-wrap:nowrap;gap:7px;color:#fff}
+.mcx-date>span{white-space:nowrap}
+.mcx-date>strong{font-size:inherit}
+.mcx-date-sep{opacity:.6;display:inline}
+.mcx-reorder{position:absolute;top:4px;right:7px;z-index:8}
+.mcx-reorder .match-reorder-tools{display:flex;align-items:center;gap:3px}
+.mcx-reorder .slot-move-btn,.mcx-reorder .drag-handle{
+  font-size:9px!important;border-radius:6px!important;
+  padding:3px 4px!important;min-height:20px;
+  color:#f4f9ff!important;background:rgba(3,29,60,.79)!important;
+  border:1px solid rgba(134,191,246,.53)!important;
+}
+/* Reference player positions: ~17% / 30% and 72% / 85%. */
+.mcx-team{top:26px;bottom:4px;width:27%;justify-content:flex-end}
+.mcx-team-a{left:10%}
+.mcx-team-b{right:8%}
+.mcx-roster{grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(4px,.9cqw,9px)}
+.mcx-player{min-height:0}
+.mcx-portrait{overflow:hidden;min-height:0}
+.mcx-portrait>img{
+  object-fit:contain;object-position:center bottom;
+  transform:scale(1.06);transform-origin:center bottom;
+  filter:drop-shadow(0 5px 9px rgba(0,8,20,.71));
+}
+.mcx-silhouette{opacity:.65}
+.mcx-nameplate{
+  align-self:center;max-width:100%;
+  height:19px;line-height:19px;font-size:clamp(9px,1.4cqw,13px);
+  border-radius:3px;box-shadow:0 3px 7px rgba(0,7,30,.56);
+}
+.mcx-player-rating{height:17px;flex-basis:17px;gap:3px}
+.mcx-skill{height:14px;min-width:28px;font-size:9px}
+.mcx-stars{font-size:clamp(9px,1.35cqw,13px);letter-spacing:-1px}
+.mcx-player-games{display:none}
+.mcx-average{
+  height:17px;min-width:0;gap:4px;margin-top:1px;padding:0 9px;
+  background:rgba(2,19,43,.83);
+}
+.mcx-average span{font-size:8px}
+.mcx-average strong{font-size:11px}
+.mcx-showdown{
+  top:55%;width:20%;height:59%;
+  filter:drop-shadow(0 0 7px rgba(17,153,255,.46));
+}
+.mcx-showdown>strong{
+  font-size:clamp(36px,7cqw,64px);
+  text-shadow:0 2px 0 #062f88,2px 4px 0 #0a68c9,
+    0 0 14px #48b5ff,0 0 23px #008eff;
+}
+.mcx-ball{
+  width:clamp(45px,8cqw,75px);height:clamp(45px,8cqw,75px);
+  top:6%;opacity:.96;
+}
+.mcx-footer{
+  min-height:38px;padding:6px 9px;gap:7px;
+  background:linear-gradient(180deg,#092e55,#06172e);
+}
+.mcx-status{padding:5px 8px;font-size:9px}
+.mcx-controls,.mcx-action-group{gap:4px}
+.mcx-card .mcx-footer .btn,.mcx-card .match-manage-menu summary{
+  min-height:25px;padding:6px 8px;font-size:9px;border-radius:9px;
+}
+/* Scaled from the card width, not the browser width, to maintain the reference. */
+@container (max-width:650px){
+  .mcx-brand{font-size:9px;max-width:73%}
+  .mcx-fixture-meta{top:23px}
+  .mcx-date{font-size:8px;gap:4px}
+  .mcx-team{top:25px}
+  .mcx-nameplate{font-size:clamp(8px,1.4cqw,11px)}
+  .mcx-showdown>strong{font-size:clamp(32px,7cqw,46px)}
+  .mcx-reorder .drag-handle{font-size:8px!important}
+}
+@container (max-width:430px){
+  .mcx-card .mcx-scene{height:clamp(163px,40cqw,181px)}
+  .mcx-brand{font-size:8px;max-width:85%}
+  .mcx-header-rule{width:12px}
+  .mcx-team{width:39%;top:32px;bottom:4px}
+  .mcx-team-a{left:2%}
+  .mcx-team-b{right:2%}
+  .mcx-fixture-meta{top:22px;gap:3px;padding:0 3px}
+  .mcx-date{font-size:7px;gap:2px}
+  .mcx-match-title{font-size:11px;padding:5px 6px}
+  .mcx-nameplate{height:18px;line-height:18px;font-size:9px}
+  .mcx-player-rating{gap:1px}
+  .mcx-skill{min-width:24px;font-size:8px}
+  .mcx-stars{font-size:9px;letter-spacing:-1.5px}
+  .mcx-average{padding:0 5px}
+  .mcx-showdown{top:52%;width:13%}
+  .mcx-showdown>strong{font-size:32px}
+  .mcx-ball{width:42px;height:42px}
+  .mcx-footer{flex-wrap:wrap;align-items:center}
+  .mcx-controls{flex:1}
+}
