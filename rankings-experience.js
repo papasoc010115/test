@@ -33,14 +33,14 @@ function rlPhoto(player,large=false){
 function rlMedal(rank){
   return rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':'';
 }
-function rlTopCard(r,index){
+function rlTopCard(r,index,isFinal){
   const place=Number(r.official_rank||index+1),p=rlPlayer(r);
-  const placeName=place===1?'CHAMPION':place===2?'RUNNER-UP':'THIRD PLACE';
+  const placeName=isFinal?(place===1?'CHAMPION':place===2?'RUNNER-UP':'THIRD PLACE'):(place===1?'CURRENT #1':place===2?'CURRENT #2':'CURRENT #3');
   const medal=rlMedal(place)||'🏅';
   const wins=rlNum(r.match_wins),pct=rlRate(r.win_pct),played=rlNum(r.matches_played);
   return '<article class="rl-podium-card" data-place="'+place+'" style="--rl-delay:'+(index*.12).toFixed(2)+'s" aria-label="'+placeName+': '+esc(r.display_name)+'">'
     +'<div class="rl-podium-top"><div class="rl-place"><strong>'+place+'</strong><span class="rl-place-title">'+placeName+'</span></div>'
-    +'<span class="rl-champion-crown" aria-hidden="true">'+(place===1?'♛':medal)+'</span></div>'
+    +'<span class="rl-champion-crown" aria-hidden="true">'+(place===1?(isFinal?'♛':'★'):medal)+'</span></div>'
     +rlPhoto(p,true)
     +'<div class="rl-podium-name"><strong title="'+esc(r.display_name)+'">'+esc(r.display_name)+'</strong>'
     +'<small>'+esc(r.player_code||p.player_code||'Player')+'</small></div>'
@@ -95,6 +95,16 @@ function rlMobileRow(r){
     +'</div></div>'
     +'<div class="rl-mobile-side"><b>'+rlRate(pct)+'</b><small>Win rate</small></div></article>';
 }
+/* Standings become final only when every active competitor has played
+ * at least the required 15 completed matches. Never infer completion
+ * from total tournament matches or only the current top three. */
+function rlIsFinalStandings(active){
+  return active.length>0&&active.every(r=>Number.isFinite(Number(r.matches_played))
+    &&Number(r.matches_played)>=15);
+}
+function rlSetText(id,value){
+  const el=document.getElementById(id);if(el)el.textContent=value;
+}
 function renderRankingExperience(){
   const podium=document.getElementById('rankingPodium'),body=document.getElementById('rankingsBody');
   if(!podium||!body)return;
@@ -102,11 +112,23 @@ function renderRankingExperience(){
     .sort((a,b)=>Number(a.official_rank||999)-Number(b.official_rank||999)
       ||String(a.display_name||'').localeCompare(String(b.display_name||'')));
   const top3=active.slice(0,3);
+  const isFinal=rlIsFinalStandings(active);
+  rlSetText('rankingMainTitle',isFinal?'Official Final Rankings':'Current Competition Rankings');
+  rlSetText('rankingProgressLabel',isFinal?'Competition Complete · Final Standings':'Standings in Progress');
+  rlSetText('rankingTopThreeTitle',isFinal?'Top 3 Champions':'Current Top 3 Players');
+  rlSetText('rankingTopThreeDescription',isFinal
+    ?'Final champions based on completed competition results'
+    :'Current leaders based on completed competition matches');
+  rlSetText('rankingStandingsStatus',isFinal?'Official final standings':'Provisional standings');
+  const notice=document.getElementById('rankingProvisionalNotice');
+  if(notice)notice.hidden=isFinal;
+  const hero=document.querySelector('#rankings .ranking-hero');
+  if(hero)hero.classList.toggle('ranking-final',isFinal);
   // Podium is always the official top three, even when the search field is used.
   // Search applies to the detailed leaderboard beneath the podium only.
-  const podiumSignature=top3.map(r=>[r.participant_id,r.official_rank,r.match_wins,r.matches_played,r.win_pct,rlPlayer(r).profile_image_url].join('|')).join('~');
+  const podiumSignature=(isFinal?'final:':'provisional:')+top3.map(r=>[r.participant_id,r.official_rank,r.match_wins,r.matches_played,r.win_pct,rlPlayer(r).profile_image_url].join('|')).join('~');
   if(podium.dataset.signature!==podiumSignature){
-    podium.innerHTML=top3.length?top3.map(rlTopCard).join('')
+    podium.innerHTML=top3.length?top3.map((r,i)=>rlTopCard(r,i,isFinal)).join('')
       :'<div class="rl-podium-empty">Ranking results will appear when official standings are available.</div>';
     podium.dataset.signature=podiumSignature;
   }
