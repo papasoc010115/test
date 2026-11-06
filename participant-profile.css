@@ -1,0 +1,98 @@
+
+/* TLP 2026 player profiles – dedicated page, responsive dashboard */
+#player-profile{max-width:1520px;margin:0 auto}
+.pp-back{display:inline-flex;align-items:center;gap:8px;border:0;background:transparent;color:#1755a0;font-weight:850;padding:7px 0 16px}
+.pp-back:hover{text-decoration:underline}
+.pp-banner{position:relative;overflow:hidden;background:linear-gradient(115deg,#082953 0%,#104985 65%,#0c669d 100%);color:#fff;border-radius:22px;padding:26px 28px;box-shadow:0 12px 30px #092c5940}
+.pp-banner:after{content:"";position:absolute;right:-45px;top:-85px;width:350px;height:350px;border-radius:50%;border:54px solid #ffffff0b;pointer-events:none}
+.pp-hero{position:relative;display:flex;gap:24px;align-items:center;flex-wrap:wrap;z-index:1}
+.pp-avatar{display:grid;place-items:center;width:122px;height:122px;flex:0 0 122px;border:4px solid #fff8;border-radius:26px;overflow:hidden;background:linear-gradient(145deg,#ffd941,#efaf00);color:#102849;font-size:34px;font-weight:950;box-shadow:0 6px 20px #0003}
+.pp-avatar img,.pp-tiny-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.pp-avatar-small{width:42px;height:42px;border-radius:13px;font-size:13px;flex:0 0 42px;display:grid;place-items:center;background:#deefff;color:#145292;font-weight:900;overflow:hidden}
+.pp-hero-copy{flex:1;min-width:220px}
+.pp-eyebrow{font-size:11px;font-weight:900;letter-spacing:.13em;text-transform:uppercase;opacity:.73}
+.pp-hero-copy h2{font-size:clamp(25px,3vw,40px);line-height:1.13;margin:5px 0 12px;color:white;font-weight:950;letter-spacing:-.03em}
+.pp-hero-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px}
+.pp-hero-meta span{background:#ffffff20;border:1px solid #ffffff28;padding:6px 10px;border-radius:999px;font-weight:750}
+.pp-rank{margin-left:auto;min-width:118px;padding:14px;background:#ffffff18;border:1px solid #ffffff40;border-radius:17px;text-align:center;position:relative;z-index:2}
+.pp-rank small{display:block;text-transform:uppercase;letter-spacing:.12em;font-size:10px;opacity:.8;font-weight:850}
+.pp-rank strong{display:block;font-size:38px;line-height:1.25}
+.pp-hero-foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;position:relative;z-index:1;margin-top:20px;padding-top:15px;border-top:1px solid #ffffff2a}
+.pp-upload-label{display:inline-flex;align-items:center;gap:8px;cursor:pointer;background:#fff;color:#0f3b71;padding:10px 14px;border-radius:10px;font-weight:800;font-size:12px}
+.pp-upload-label input{display:none}
+.pp-stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin:16px 0}
+.pp-stat{background:white;border:1px solid var(--line);border-radius:15px;padding:16px;box-shadow:0 3px 12px #0b2d5c0a}
+.pp-stat span{color:#64748b;text-transform:uppercase;font-size:10px;letter-spacing:.09em;font-weight:900}
+.pp-stat strong{display:block;font-size:27px;color:#103963;margin:6px 0 2px;line-height:1;font-weight:950}
+.pp-stat small{font-size:11px;color:#667085}
+.pp-tabs{display:flex;gap:6px;border-bottom:1px solid #dbe5ef;padding:4px 0 12px;margin-bottom:17px;overflow:auto;scrollbar-width:thin}
+.pp-tabs button{border:1px solid transparent;background:transparent;color:#526780;padding:11px 16px;border-radius:12px;font-size:12px;font-weight:850;white-space:nowrap}
+.pp-tabs button.active{background:#eaf4ff;border-color:#c5dcf6;color:#14569f}
+.pp-panel{animation:pp-in .16s ease}
+@keyframes pp-in{from{opacity:.4;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.pp-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);gap:14px}
+.pp-card{padding:19px;background:white;border:1px solid #dce5ee;border-radius:17px;box-shadow:0 4px 16px #0b2d5c0a;min-width:0}
+.pp-card h3{font-size:16px;color:#123967;font-weight:900;margin:0 0 7px}
+.pp-card-sub{font-size:12px;color:#6b7a90;margin:0 0 14px}
+.pp-full{grid-column:1/-1}
+.pp-kpi-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.pp-mini{border:1px solid #e0e9f2;background:#f8fbff;border-radius:11px;padding:12px}
+.pp-mini span{display:block;color:#64748b;font-size:10px;text-transform:uppercase;letter-spacing:.05em;font-weight:800}
+.pp-mini strong{display:block;margin-top:6px;color:#0f376b;font-size:22px;font-weight:950}
+.pp-mini small{display:block;font-size:11px;color:#77869b;margin-top:4px}
+.pp-result-w{color:#137a4b!important}.pp-result-l{color:#c02c2c!important}
+.pp-form{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.pp-form span{padding:7px 10px;border:1px solid #e0e9f2;border-radius:10px;background:#f8fafc;font-size:12px;font-weight:850}
+.pp-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #eef2f7}
+.pp-row:last-child{border:0}
+.pp-row-text strong{display:block;font-size:13px;color:#20344f}.pp-row-text small{display:block;font-size:11px;color:#7a889c;margin-top:3px}
+.pp-row-value{text-align:right;font-weight:800;font-size:13px;color:#123e70}
+.pp-tablewrap{overflow:auto;border:1px solid #e4eaf0;border-radius:12px}
+.pp-table{min-width:650px;font-size:12px}.pp-table th{background:#f6f9fd;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#697a91}
+.pp-table td{padding:12px 10px;vertical-align:middle}
+.pp-table tbody tr:last-child td{border-bottom:none}
+.pp-pill{border-radius:20px;background:#eef5fd;color:#174984;padding:5px 9px;display:inline-block;font-size:11px;font-weight:900;white-space:nowrap}
+.pp-pill.win{color:#08784b;background:#dff5e9}.pp-pill.loss{color:#ae2634;background:#ffe8ec}
+.pp-pill.pending{color:#805c0c;background:#fff4d8}
+.pp-empty{text-align:center;background:#f8fbfe;padding:32px 18px;border:1px dashed #c8d7e8;border-radius:12px;color:#7b899c;font-size:13px}
+.pp-bar-track{height:11px;border-radius:50px;background:#edf3fa;overflow:hidden;flex:1;min-width:40px}
+.pp-bar-fill{height:100%;background:linear-gradient(90deg,#145b9d,#21a4d6);border-radius:50px}
+.pp-bars{display:grid;gap:13px}.pp-barrow{display:flex;align-items:center;gap:9px;font-size:12px;color:#536d88}
+.pp-barrow span:first-child{width:125px;flex:0 0 125px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pp-barrow b{width:28px;text-align:right;font-size:12px;color:#174a82}
+.pp-pair-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.pp-pair{border:1px solid #e4eaf0;border-radius:13px;padding:12px;display:flex;align-items:center;gap:9px}
+.pp-pair-info{flex:1;min-width:0}.pp-pair strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px}
+.pp-pair small{color:#7a899a;font-size:11px}
+.pp-pair-stats{text-align:right;font-size:12px;color:#163a63;font-weight:900}
+.pp-section-caption{font-size:11px;color:#7c8ba1;margin:11px 0}
+.pp-config{border:1px solid #e0e8f3;border-radius:14px;padding:14px;background:#fbfdff;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.pp-config strong{display:block;font-size:13px;color:#173a67}.pp-config small{display:block;font-size:11px;color:#71839a;line-height:1.55;margin-top:4px}
+.pp-config select,.pp-config input[type=number]{border:1px solid #ccd9e7;background:white;border-radius:10px;padding:10px 12px;color:#12406d;font-size:13px;font-weight:850;min-width:86px}
+.pp-notice{border:1px solid #f4ddab;border-radius:13px;background:#fffae8;padding:13px;color:#7b5b13;font-size:12px;line-height:1.6}
+.pp-two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pp-info-number{font-variant-numeric:tabular-nums}
+.pp-click-name{border:0;background:transparent;text-align:left;padding:0;color:#153b73;cursor:pointer;font:inherit}
+.pp-click-name:hover{text-decoration:underline}
+.pp-player-cell{display:flex;align-items:center;gap:9px;min-width:180px}
+.pp-linkbtn{border:1px solid #cadcec;border-radius:10px;padding:8px 11px;background:#fff;color:#15559c;font-weight:800;font-size:12px;white-space:nowrap}
+.pp-linkbtn:hover{background:#eaf4ff}
+.pp-matches-mobile{display:none}
+@media(max-width:1180px){.pp-stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:850px){.pp-grid{grid-template-columns:1fr}.pp-pair-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:650px){
+  #player-profile{padding-bottom:40px}
+  .pp-banner{border-radius:16px;padding:17px 14px}
+  .pp-hero{gap:11px}.pp-avatar{width:85px;height:85px;flex-basis:85px;border-radius:19px;font-size:23px}
+  .pp-hero-copy{min-width:160px;flex:1}.pp-hero-copy h2{font-size:23px;margin:3px 0 8px}
+  .pp-hero-meta{gap:5px}.pp-hero-meta span{font-size:10px;padding:4px 7px}
+  .pp-rank{margin-left:0;min-width:92px;padding:9px}.pp-rank strong{font-size:25px}
+  .pp-hero-foot{margin-top:12px}.pp-hero-foot .btn{padding:9px;font-size:11px}
+  .pp-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0}
+  .pp-stat{padding:12px;border-radius:12px}.pp-stat strong{font-size:23px}
+  .pp-tabs{padding-bottom:8px;margin-bottom:12px;gap:3px}.pp-tabs button{padding:10px 12px}
+  .pp-card{padding:13px;border-radius:13px}
+  .pp-two-col{grid-template-columns:1fr}.pp-pair-grid{grid-template-columns:1fr}
+  .pp-kpi-strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pp-config{gap:9px}.pp-config select{min-width:82px}
+}
