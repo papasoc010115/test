@@ -99,8 +99,16 @@ function rlMobileRow(r){
  * at least the required 15 completed matches. Never infer completion
  * from total tournament matches or only the current top three. */
 function rlIsFinalStandings(active){
-  return active.length>0&&active.every(r=>Number.isFinite(Number(r.matches_played))
-    &&Number(r.matches_played)>=15);
+  // Check the complete participant roster, not just players appearing in the
+  // rankings view. An active player with a missing standings row is incomplete.
+  const roster=participants.filter(p=>p.active===true);
+  if(!roster.length)return false;
+  return roster.every(p=>{
+    const r=active.find(row=>row.participant_id===p.id)
+      ||active.find(row=>row.player_code&&row.player_code===p.player_code);
+    return !!r&&Number.isFinite(Number(r.matches_played))
+      &&Number(r.matches_played)>=15;
+  });
 }
 function rlSetText(id,value){
   const el=document.getElementById(id);if(el)el.textContent=value;
