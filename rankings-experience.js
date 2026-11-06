@@ -75,13 +75,19 @@ function rlTableRow(r){
 }
 function rlMobileRow(r){
   const rank=Number(r.official_rank||0),p=rlPlayer(r),pct=Number(r.win_pct||0);
+  const rankStyle=rank===1?'rl-rank-gold':rank===2?'rl-rank-silver':rank===3?'rl-rank-bronze':'rl-rank-standard';
   return '<article class="rl-mobile-card" aria-label="Rank '+rank+' '+esc(r.display_name)+'">'
-    +'<span class="rl-mobile-rank">#'+rank+'</span>'+rlPhoto(p)
+    +'<span class="rl-mobile-rank '+rankStyle+'"><span class="rl-mobile-rank-number">#'+rank+'</span>'
+    +(rank<=3?'<span class="rl-mobile-rank-medal" aria-hidden="true">'+rlMedal(rank)+'</span>':'')
+    +'</span>'+rlPhoto(p)
     +'<div class="rl-mobile-info"><strong>'+esc(r.display_name)+'</strong>'
-    +'<small>'+esc(r.player_code||'')+(rank<=3?' · '+rlMedal(rank):'')+'</small>'
+    +'<small>'+esc(r.player_code||'')+'</small>'
+    +'<div class="rl-record" aria-label="'+rlNum(r.match_wins)+' wins and '+rlNum(r.match_losses)+' losses">'
+    +'<span class="rl-record-pill rl-record-win"><b>'+rlNum(r.match_wins)+'</b><span>WINS</span></span>'
+    +'<span class="rl-record-pill rl-record-loss"><b>'+rlNum(r.match_losses)+'</b><span>LOSSES</span></span>'
+    +'</div>'
     +'<div class="rl-mobile-stats">'
     +'<span>'+rlNum(r.matches_played)+' played</span>'
-    +'<span>'+rlNum(r.match_wins)+'W–'+rlNum(r.match_losses)+'L</span>'
     +'<span>H2H '+rlNum(r.h2h_score)+'</span>'
     +'<span>Games '+rlNum(r.games_won)+'–'+rlNum(r.games_lost)+'</span>'
     +'<span>PF/PA '+rlNum(r.points_for)+'/'+rlNum(r.points_against)+'</span>'
