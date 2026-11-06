@@ -1,87 +1,90 @@
-/* TLP Teachers Pickleball – broadcast match cards, Nov 2026
- * Presentation only. Uses existing live match and participant data.
- * Existing scoring, lock, reshuffle, drag/drop and management handlers stay intact.
+/* TLP Teachers Pickleball | Match broadcast cards v2
+ * The stadium is painted first. Portraits and labels are positioned over it.
+ * Uses all existing Supabase data and match-management functions unchanged.
+ * Safe for all match statuses, draggable slots and responsive widths.
  */
-function mcvPortrait(player){
-  const name=player?.display_name||'Player TBD';
-  const raw=player?.profile_image_url;
-  const photo=typeof safeProfilePhotoUrl==='function'?safeProfilePhotoUrl(raw):'';
-  const initials=(name.trim().split(/\s+/).map(x=>x[0]).slice(-2).join('')||'?').toUpperCase();
-  return '<div class="mcv-portrait" aria-label="'+esc(name)+' portrait">'
-    +'<div class="mcv-person-fallback" aria-hidden="true">'
-    +'<svg viewBox="0 0 140 155" preserveAspectRatio="xMidYMax meet" focusable="false"><circle cx="70" cy="50" r="31" fill="currentColor" opacity=".45"/><path d="M5 153C5 113 29 89 70 89s65 24 65 64" fill="currentColor" opacity=".45"/></svg>'
-    +'<span>'+esc(initials)+'</span></div>'
-    +(photo?'<img src="'+esc(photo)+'" loading="lazy" decoding="async" alt="'+esc(name)+'" onerror="this.remove()">':'')
+function mcxPortrait(p) {
+  const name=p?.display_name||'Player TBD';
+  const photo=typeof safeProfilePhotoUrl==='function'?safeProfilePhotoUrl(p?.profile_image_url):'';
+  const initials=name.trim().split(/\s+/).slice(-2).map(x=>x[0]||'').join('').toUpperCase()||'?';
+  return '<div class="mcx-portrait">'
+    +'<div class="mcx-silhouette" aria-hidden="true">'
+    +'<svg viewBox="0 0 110 115" preserveAspectRatio="xMidYMax meet" focusable="false" aria-hidden="true"><circle cx="55" cy="35" r="23" fill="currentColor"/><path d="M4 114c0-31 18-54 51-54s51 23 51 54" fill="currentColor"/></svg>'
+    +'<b>'+esc(initials)+'</b></div>'
+    +(photo?'<img src="'+esc(photo)+'" alt="'+esc(name)+'" loading="lazy" decoding="async" onerror="this.remove()">':'')
     +'</div>';
 }
-function mcvPlayer(player,stats,isWinner){
-  const name=player?.display_name||'TBD';
-  const skill=Number(player?.skill_level||3);
-  const label=Number.isFinite(skill)?skill.toFixed(1):'3.0';
-  const fill=Math.round(Math.max(0,Math.min(5,skill))*20);
-  return '<div class="mcv-player'+(isWinner?' mcv-winning-player':'')+'">'
-    +mcvPortrait(player)
-    +'<div class="mcv-player-info">'
-    +'<div class="mcv-nameplate" title="'+esc(name)+'">'+esc(name)+'</div>'
-    +'<div class="mcv-skillline"><span class="mcv-skill-chip">'+label+'</span>'
-    +'<span class="mcv-stars" title="Skill '+label+' out of 5" aria-label="Skill '+label+' out of 5" style="--fill:'+fill+'%">★★★★★</span></div>'
-    +'<span class="mcv-played">'+Number(stats?.matches_played||0)+' played</span>'
-    +'</div></div>';
+function mcxPlayer(p,st) {
+  const name=p?.display_name||'TBD';
+  const skill=p&&Number.isFinite(Number(p.skill_level))?Number(p.skill_level):3;
+  const stars=Math.max(0,Math.min(100,skill/5*100));
+  return '<div class="mcx-player" title="'+esc(name)+' · Skill '+skill.toFixed(1)+'">'
+    +mcxPortrait(p)
+    +'<div class="mcx-nameplate">'+esc(name)+'</div>'
+    +'<div class="mcx-player-rating"><b class="mcx-skill">'+skill.toFixed(1)+'</b>'
+    +'<span class="mcx-stars" style="--mcx-fill:'+stars.toFixed(0)+'%" aria-label="Skill '+skill.toFixed(1)+' out of 5">★★★★★</span></div>'
+    +'<span class="mcx-player-games">'+Number(st?.matches_played||0)+' played</span></div>';
 }
-function mcvSide(players,average,side,winner){
-  return '<div class="mcv-side mcv-side-'+side+(winner?' mcv-side-winner':'')+'">'
-    +'<div class="mcv-side-label">TEAM '+(side==='a'?'A':'B')+(winner?' · WINNER':'')+'</div>'
-    +'<div class="mcv-player-pair">'+players.map(x=>mcvPlayer(x.p,x.st,winner)).join('')+'</div>'
-    +'<div class="mcv-avg"><span>TEAM AVG</span><strong>'+average+'</strong></div></div>';
+function mcxTeam(players,stats,side,won) {
+  const av=(players.reduce((sum,p)=>sum+Number(p?.skill_level||3),0)/2).toFixed(1);
+  return '<div class="mcx-team mcx-team-'+side+(won?' mcx-team-winner':'')+'">'
+    +'<div class="mcx-roster">'+players.map((p,i)=>mcxPlayer(p,stats[i]||{})).join('')+'</div>'
+    +'<div class="mcx-average"><span>TEAM AVG</span><strong>'+av+'</strong></div></div>';
 }
-function mcvActions(m,locked,done,live){
+function mcxActions(m,locked,done,live) {
   const id=m.id;
   const lockEdit='<button class="btn secondary sm locked-edit-btn" disabled title="Unlock Matches to edit the schedule">🔒 Edit Match</button>';
   const lockReplace='<button class="btn secondary sm locked-edit-btn" disabled title="Unlock Matches to replace a player">🔒 Replace</button>';
   if(m.status==='CANCELLED')return '<span class="cancelled-caption">Cancelled · lineup preserved</span>';
-  if(done)return isAdmin()?'<span class="mcv-primary-actions">'
+  if(done) return isAdmin()?'<span class="mcx-action-group">'
     +(locked?lockEdit:'<button class="btn secondary sm" onclick="openEditMatch(\''+id+'\')">Edit Match</button>')
     +'<button class="btn secondary sm" onclick="openScore(\''+id+'\')">View / Edit Score</button></span>':'';
-  if(live)return '<span class="mcv-primary-actions"><button class="btn sm live-admin-btn" onclick="openLiveScorer(\''+id+'\')">Live Score</button>'
+  if(live)return '<span class="mcx-action-group"><button class="btn sm live-admin-btn" onclick="openLiveScorer(\''+id+'\')">Live Score</button>'
     +(isAdmin()?'<button class="btn secondary sm" onclick="openScore(\''+id+'\')">Final Score</button>'
       +(locked?lockEdit:'<button class="btn secondary sm" onclick="openEditMatch(\''+id+'\')">Edit Match</button>'):'')
     +'</span>';
-  return '<span class="mcv-primary-actions"><button class="btn sm green" onclick="startLiveMatch(\''+id+'\')">▶ Start Live</button>'
+  return '<span class="mcx-action-group"><button class="btn sm green" onclick="startLiveMatch(\''+id+'\')">▶ Start Live</button>'
     +(isAdmin()?'<button class="btn secondary sm" onclick="openScore(\''+id+'\')">Final Score</button>'
       +(locked?lockEdit:'<button class="btn secondary sm" onclick="openEditMatch(\''+id+'\')">Edit Match</button>')
       +(locked?lockReplace:'<button class="btn secondary sm" onclick="openReplace(\''+id+'\')">Replace</button>'):'')
     +'</span>';
 }
-function cinematicMatchCard(m){
-  const l=lineups(m);
-  const done=m.status==='COMPLETED',live=m.status==='IN_PROGRESS',locked=matchesLocked();
-  const reorderable=isReorderableMatch(m);
-  const pick=(team,position)=>playerById(l.ps.find(x=>x.team===team&&x.position===position)?.actual_player_id);
-  const a=[pick('A',1),pick('A',2)],b=[pick('B',1),pick('B',2)];
-  const ast=a.map(p=>statById(p?.id)||{}),bst=b.map(p=>statById(p?.id)||{});
-  const avg=arr=>(arr.reduce((total,p)=>total+Number(p?.skill_level||3),0)/2).toFixed(1);
+function cinematicMatchCard(m) {
+  const lineup=lineups(m), done=m.status==='COMPLETED', live=m.status==='IN_PROGRESS';
+  const locked=matchesLocked(),reorderable=isReorderableMatch(m);
+  const pick=(team,pos)=>playerById(lineup.ps.find(x=>x.team===team&&x.position===pos)?.actual_player_id);
+  const a=[pick('A',1),pick('A',2)], b=[pick('B',1),pick('B',2)];
+  const sa=a.map(p=>statById(p?.id)||{}), sb=b.map(p=>statById(p?.id)||{});
   const aWon=done&&m.winner_team==='A',bWon=done&&m.winner_team==='B';
-  const winnerNames=aWon?l.a1+' & '+l.a2:bWon?l.b1+' & '+l.b2:'';
-  const attrs=reorderable?' data-match-id="'+m.id+'" data-match-date="'+m.scheduled_date
-    +'" ondragover="allowMatchDrop(event,\''+m.id+'\')" ondragleave="clearMatchDrop(event)" ondrop="dropMatchOn(event,\''+m.id+'\')"':'';
+  const winnerNames=aWon?lineup.a1+' & '+lineup.a2:bWon?lineup.b1+' & '+lineup.b2:'';
   const status=live?'LIVE NOW':m.status.replaceAll('_',' ');
   const statusClass=done?'completed':m.status==='CANCELLED'?'cancelled':live||m.status.includes('REPLACEMENT')?'warn':'ready';
-  const liveDetails=live?'<div class="mcv-live-banner"><span class="mcv-pulse"></span> LIVE · GAME '+m.live_game
-    +' <strong>'+m.live_score_a+' – '+m.live_score_b+'</strong> · GAMES '+m.games_won_a+'–'+m.games_won_b+'</div>':'';
-  const resultDetails=done?'<div class="mcv-completed-banner"><div class="mcv-winner-line"><span>🏆 WINNERS</span><strong>'+esc(winnerNames)+'</strong>'
-    +'<b>'+m.games_won_a+' – '+m.games_won_b+'</b></div>'+completedScoreStrip(m)
-    +'<span class="mcv-total-points">Total points '+m.points_a+' – '+m.points_b+'</span></div>':'';
-  return '<article class="matchcard mcv-card'+(reorderable?' reorderable-match':'')+(locked?' locked-match-card':'')
-    +(done?' completed-match-card':'')+(live?' mcv-is-live':'')+'"'+attrs+'>'
-    +'<header class="mcv-header"><div class="mcv-brand"><span class="mcv-logo">TLP</span><span>TEACHERS PICKLEBALL</span></div>'
-    +'<div class="mcv-match-label">MATCH '+m.match_number+'</div>'
-    +'<div class="mcv-meta"><span>'+dateFmt(m.scheduled_date)+'</span><span>·</span><strong>Slot '+m.slot+'</strong>'+reorderTools(m)+'</div></header>'
-    +'<div class="mcv-stage"><div class="mcv-court-lines" aria-hidden="true"></div>'
-    +mcvSide(a.map((p,i)=>({p,st:ast[i]})),avg(a),'a',aWon)
-    +'<div class="mcv-center"><div class="mcv-vs">'+(live?'LIVE':'VS')+'</div><span class="mcv-vs-sub">'+(done?'FINAL':'DOUBLES')+'</span></div>'
-    +mcvSide(b.map((p,i)=>({p,st:bst[i]})),avg(b),'b',bWon)+'</div>'
-    +liveDetails+resultDetails
-    +'<footer class="mcv-footer"><span class="mcv-status '+statusClass+'">'+(live?'<span class="mcv-pulse"></span>':'')+esc(status)+'</span>'
-    +'<div class="mcv-footer-controls">'+mcvActions(m,locked,done,live)+matchManagementActions(m)+'</div></footer>'
+  const attrs=reorderable?' data-match-id="'+m.id+'" data-match-date="'+m.scheduled_date
+    +'" ondragover="allowMatchDrop(event,\''+m.id+'\')" ondragleave="clearMatchDrop(event)" ondrop="dropMatchOn(event,\''+m.id+'\')"':'';
+  const liveDetails=live?'<div class="mcx-extra mcx-live"><span class="mcx-live-dot"></span> LIVE · GAME '+Number(m.live_game||1)
+    +' · <strong>'+Number(m.live_score_a||0)+' – '+Number(m.live_score_b||0)+'</strong> · GAMES '+Number(m.games_won_a||0)+'–'+Number(m.games_won_b||0)+'</div>':'';
+  const completedDetails=done?'<div class="mcx-extra mcx-final"><div><span>🏆 WINNERS</span><strong>'+esc(winnerNames)+'</strong>'
+    +'<b>'+Number(m.games_won_a||0)+' – '+Number(m.games_won_b||0)+'</b></div>'+completedScoreStrip(m)
+    +'<small>Total points '+Number(m.points_a||0)+' – '+Number(m.points_b||0)+'</small></div>':'';
+  return '<article class="matchcard mcx-card'+(reorderable?' reorderable-match':'')+(locked?' locked-match-card':'')
+    +(done?' completed-match-card':'')+(live?' mcx-is-live':'')+'"'+attrs+'>'
+    +'<div class="mcx-scene">'
+    +'<div class="mcx-lights mcx-lights-left" aria-hidden="true"></div>'
+    +'<div class="mcx-lights mcx-lights-right" aria-hidden="true"></div>'
+    +'<div class="mcx-net" aria-hidden="true"></div>'
+    +'<div class="mcx-blast mcx-blast-a" aria-hidden="true"></div>'
+    +'<div class="mcx-blast mcx-blast-b" aria-hidden="true"></div>'
+    +'<header class="mcx-header">'
+    +'<div class="mcx-brand"><span class="mcx-brand-logo">TLP</span><strong>Teachers Pickleball Competition</strong></div>'
+    +'<div class="mcx-match-title">MATCH '+Number(m.match_number||0)+'</div>'
+    +'<div class="mcx-date"><span>'+esc(dateFmt(m.scheduled_date))+'</span><span class="mcx-date-sep">│</span><strong>Slot '+Number(m.slot||0)+'</strong>'+reorderTools(m)+'</div>'
+    +'</header>'
+    +mcxTeam(a,sa,'a',aWon)
+    +'<div class="mcx-showdown" aria-hidden="true"><div class="mcx-ball"></div><strong>'+(live?'LIVE':'VS')+'</strong></div>'
+    +mcxTeam(b,sb,'b',bWon)
+    +'</div>'
+    +liveDetails+completedDetails
+    +'<footer class="mcx-footer"><span class="mcx-status '+statusClass+'">'+(live?'<span class="mcx-live-dot"></span>':'')+esc(status)+'</span>'
+    +'<div class="mcx-controls">'+mcxActions(m,locked,done,live)+matchManagementActions(m)+'</div></footer>'
     +'</article>';
 }
