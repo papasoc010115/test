@@ -4,7 +4,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="20261107-clean-match-header-v8">
+<meta name="app-build" content="20261107-public-rankings-podium-v9">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#0b2d5c" />
@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="/participant-profile.css?v=20261107-clean-gradient-v4">
   <link rel="preload" as="image" href="/assets/match-stadium-hd.webp" type="image/webp">
   <link rel="stylesheet" href="/matches-cinematic.css?v=20261107-clean-match-header-v8">
+  <link rel="stylesheet" href="/rankings-experience.css?v=20261107-rankings-v1">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
   <style>
@@ -225,6 +226,16 @@
 <body>
 <div class="app">
 <header class="topbar"><div class="brand"><div class="ball">TLP</div><div class="brand-copy"><h1>Teachers Pickleball Competition</h1><small>Fair play • rotating partners • live rankings</small></div></div><div class="top-actions"><span id="authState" class="pill">Read-only</span><div id="loginArea" class="loginbox"><button class="btn yellow sm" onclick="openLoginModal()">Admin Login</button></div><button id="logoutBtn" class="btn secondary sm" style="display:none" onclick="logout()">Log out</button></div></header>
+<nav class="public-tabs" aria-label="Public competition navigation">
+  <button type="button" class="public-tab active" data-public-page="matches" aria-current="page" onclick="go('matches')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 3v4M16 3v4M3 10h18M4 5h16a1 1 0 0 1 1 1v14H3V6a1 1 0 0 1 1-1Z"/></svg>
+    Matches
+  </button>
+  <button type="button" class="public-tab" data-public-page="rankings" onclick="go('rankings')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 21h8M12 17v4M7 3h10v8a5 5 0 0 1-10 0V3ZM7 6H4v3a4 4 0 0 0 4 4M17 6h3v3a4 4 0 0 0-4 4"/></svg>
+    Rankings
+  </button>
+</nav>
 <div class="shell"><aside class="side"><button class="navbtn active" data-page="dashboard">Dashboard</button><button class="navbtn" data-page="matches">Matches</button><button class="navbtn" data-page="participants">Participants</button><button class="navbtn" data-page="rankings">Rankings</button><button class="navbtn" data-page="results">Player Results</button><button class="navbtn" data-page="analytics">Analytics</button><div class="navsep"></div><button class="navbtn admin-only" data-page="settings">Settings</button><button class="navbtn admin-only" data-page="audit">Audit Log</button></aside>
 <main>
 <section id="dashboard" class="page active">
@@ -277,7 +288,7 @@
 <th class="admin-only">Actions</th>
 </tr></thead><tbody id="participantsBody"></tbody></table></div></div></section>
 <section id="player-profile" class="page"><button class="pp-back" type="button" onclick="returnToParticipants()">← Back to All Participants</button><div id="ppContent"></div></section>
-<section id="rankings" class="page">
+<section id="rankings" class="page tlp-rankings">
   <div class="ranking-hero">
     <div>
       <div class="ranking-kicker">TLP TEACHERS PICKLEBALL</div>
@@ -289,8 +300,16 @@
       <div class="ranking-help"><b>PA</b><span>Points Against<br><small>Total points allowed</small></span></div>
     </div>
   </div>
+  <div class="rl-summary" aria-label="Competition overview">
+    <div class="rl-summary-tile"><div class="rl-summary-icon" aria-hidden="true">♟</div><div><span>Active players</span><strong id="rlActiveCount">—</strong></div></div>
+    <div class="rl-summary-tile"><div class="rl-summary-icon" aria-hidden="true">✓</div><div><span>Completed matches</span><strong id="rlFinishedCount">—</strong></div></div>
+    <div class="rl-summary-tile"><div class="rl-summary-icon" aria-hidden="true">♛</div><div><span>Current leader</span><strong id="rlLeaderName">—</strong></div></div>
+  </div>
+  <div class="rl-section-heading"><div><div class="rl-section-eyebrow">HONOR ROLL</div><h3>Top 3 Champions</h3><p>Leaders based on official competition results</p></div><span class="rl-live-label">Official standings</span></div>
+  <div id="rankingPodium" class="rl-podium" aria-label="Top three players"></div>
+  <div class="rl-section-heading"><div><div class="rl-section-eyebrow">ALL COMPETITORS</div><h3>Full Leaderboard</h3><p>Wins → Head-to-Head → Score Difference</p></div><span class="rl-live-label" id="rlAllCount">—</span></div>
   <div class="ranking-toolbar">
-    <input id="rankingSearch" class="input" placeholder="Search player" oninput="renderRankings()">
+    <input id="rankingSearch" class="input" placeholder="Search player by name or ID" oninput="renderRankings()" aria-label="Search ranked players">
     <select id="rankingActive" class="input" disabled><option value="ACTIVE" selected>Active players only</option></select>
   </div>
   <div class="ranking-card">
@@ -301,6 +320,7 @@
       </table>
     </div>
   </div>
+  <div id="rankingMobileCards" class="rl-mobile-list" aria-label="Mobile player leaderboard"></div>
 </section>
 <section id="results" class="page"><div class="pagehead"><div><h2>Player Results</h2><p>Filter individual match history by teacher.</p></div></div><div class="toolbar"><select id="resultPlayer" class="input" onchange="renderResults()"><option value="">All players</option></select><select id="resultOutcome" class="input" onchange="renderResults()"><option value="">Win / Loss</option><option value="W">Wins</option><option value="L">Losses</option></select><input id="resultSearch" class="input" placeholder="Partner / opponent" oninput="renderResults()"></div><div id="playerSummary"></div><div class="card"><div class="tablewrap"><table><thead><tr><th>Date</th><th>Match</th><th>Player</th><th>Partner</th><th>Opponents</th><th>Result</th><th>Games</th><th>PF–PA</th><th>Diff</th></tr></thead><tbody id="resultsBody"></tbody></table></div></div></section>
 <section id="analytics" class="page"><div class="pagehead"><div><h2>Analytics</h2><p>Participation fairness and tournament performance.</p></div></div><div class="grid two"><div class="card"><div class="section-title"><h3>Matches Played Distribution</h3></div><div id="playedBars" class="chartbars"></div></div><div class="card"><div class="section-title"><h3>Win Leaders</h3></div><div id="winBars" class="chartbars"></div></div></div><div class="grid three" style="margin-top:14px"><div class="card center"><div class="muted small">2–0 Matches</div><div id="twoZero" class="kpi value">0</div></div><div class="card center"><div class="muted small">2–1 Matches</div><div id="twoOne" class="kpi value">0</div></div><div class="card center"><div class="muted small">Participation Balance</div><div id="balanceText" style="font-size:22px;font-weight:850;color:var(--navy);margin-top:8px">—</div></div></div></section>
@@ -331,21 +351,29 @@ function go(page){
     id=page.slice('player-profile/'.length);page='player-profile';
     if(!participants.some(x=>x.id===id)){page='participants';id=null}
   }
-  if(!isAdmin()&&page!=='matches')page='matches';
+  if(!isAdmin()&&page!=='matches'&&page!=='rankings')page='matches';
   if(page==='player-profile'&&id)currentProfilePlayerId=id;
   if(page==='player-profile'&&!currentProfilePlayerId)page='participants';
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.navbtn').forEach(x=>x.classList.remove('active'));
   document.getElementById(page)?.classList.add('active');
   document.querySelector('[data-page="'+(page==='player-profile'?'participants':page)+'"]')?.classList.add('active');
+  document.querySelectorAll('.public-tab').forEach(tab=>{
+    const active=tab.dataset.publicPage===page;
+    tab.classList.toggle('active',active);
+    if(active)tab.setAttribute('aria-current','page');
+    else tab.removeAttribute('aria-current');
+  });
   const targetHash=page==='player-profile'?'#player-profile/'+currentProfilePlayerId:'#'+page;
   if(location.hash!==targetHash)history.replaceState(null,'',targetHash);
   if(page==='player-profile'&&typeof renderParticipantProfile==='function')renderParticipantProfile();
+  if(page==='rankings')renderRankings();
   if(page==='audit'&&isAdmin())loadAudit();
 }document.querySelectorAll('.navbtn').forEach(b=>b.onclick=()=>go(b.dataset.page));
 function openLoginModal(){document.getElementById('loginModal').classList.add('show');setTimeout(()=>document.getElementById('loginPassword')?.focus(),50)}
 async function adminLogin(){if(isAdmin())return toast('You are already logged in as admin.');const password=document.getElementById('loginPassword').value;if(!password)return toast('Enter your admin password.',true);const {data,error}=await sb.auth.signInWithPassword({email:ADMIN_EMAIL,password});if(error)return toast(error.message,true);session=data.session;closeModal('loginModal');applyAuth();toast('Admin login successful. This browser will keep you signed in automatically.');await loadAll()}async function logout(){await sb.auth.signOut();session=null;applyAuth();go('matches');toast('Logged out.')}
-function applyAuth(){const admin=isAdmin();document.body.classList.toggle('public-mode',!admin);document.getElementById('authState').textContent=admin?'Admin mode':'Read-only';document.getElementById('loginArea').style.display=admin?'none':'flex';document.getElementById('logoutBtn').style.display=session?'inline-block':'none';document.querySelectorAll('.admin-only').forEach(el=>el.style.display=admin?'':'none');document.querySelectorAll('.side .navbtn').forEach(el=>el.style.display=admin?'':'none');if(!admin)go('matches');if(competition){renderMatchLockState();renderMatches();renderLiveArena()}}
+function applyAuth(){const admin=isAdmin();document.body.classList.toggle('public-mode',!admin);document.getElementById('authState').textContent=admin?'Admin mode':'Read-only';document.getElementById('loginArea').style.display=admin?'none':'flex';document.getElementById('logoutBtn').style.display=session?'inline-block':'none';document.querySelectorAll('.admin-only').forEach(el=>el.style.display=admin?'':'none');document.querySelectorAll('.side .navbtn').forEach(el=>el.style.display=admin?'':'none');if(!admin)go(location.hash==='#rankings'?'rankings':'matches');
+  if(competition){renderMatchLockState();renderMatches();renderLiveArena();renderRankings()}}
 async function loadAll(){const c=await sb.from('competitions').select('*').eq('active',true).limit(1).maybeSingle();if(c.error)return toast(c.error.message,true);competition=c.data;if(!competition)return toast('No active competition found.',true);const cid=competition.id;const [pa,st,ra,ma,mp,ga,re]=await Promise.all([sb.from('participants').select('*').eq('competition_id',cid).order('player_code'),sb.from('player_statistics').select('*').eq('competition_id',cid),sb.from('rankings').select('*').eq('competition_id',cid).order('official_rank').order('display_name'),sb.from('matches').select('*').eq('competition_id',cid).order('scheduled_date').order('slot'),sb.from('match_players').select('*'),sb.from('match_games').select('*'),sb.from('player_results').select('*').eq('competition_id',cid).order('scheduled_date',{ascending:false}).order('match_number',{ascending:false})]);participants=pa.data||[];stats=st.data||[];rankings=ra.data||[];matches=ma.data||[];matchPlayers=(mp.data||[]).filter(x=>matches.some(m=>m.id===x.match_id));games=(ga.data||[]).filter(x=>matches.some(m=>m.id===x.match_id));results=re.data||[];renderAll()}
 function matchesLocked(){return competition?.matches_locked===true}
 function requireMatchesUnlocked(){if(!requireAdmin())return false;if(matchesLocked()){toast('Matches are locked. Click Unlock Matches first.',true);return false}return true}
@@ -540,7 +568,7 @@ async function updateDoubleDay(id,day,select){
   const label=day==='thursday'?'Thursday':'Friday';
   toast((p.display_name||'Player')+': 2 Games '+label+' = '+(enabled?'Yes':'No')+'. When enabled, this player plays only on '+label+', with at least one game between appearances. Refresh Next 8 to apply.');
 }
-function renderRankings(){const q=(document.getElementById('rankingSearch')?.value||'').toLowerCase(),arr=rankings.filter(r=>r.active===true&&r.display_name.toLowerCase().includes(q));document.getElementById('rankingsBody').innerHTML=arr.map(r=>{const rank=Number(r.official_rank),medal=rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':'',rankClass=rank===1?'gold':rank===2?'silver':rank===3?'bronze':'standard',pct=Number(r.win_pct||0);return '<tr class="ranking-row rank-'+rankClass+'"><td><span class="rank-badge '+rankClass+'">'+(medal?'<span class="rank-medal">'+medal+'</span>':'')+'<span>'+rank+'</span></span></td><td><div class="ranking-player"><b>'+esc(r.display_name)+'</b><span>'+r.player_code+'</span></div></td><td>'+r.matches_played+'</td><td><b class="wins-value">'+r.match_wins+'</b></td><td>'+r.match_losses+'</td><td><span class="winpct '+(pct>=75?'high':pct>=50?'mid':'low')+'">'+r.win_pct+'%</span></td><td>'+r.h2h_score+'</td><td><span class="games-pill">'+r.games_won+'–'+r.games_lost+'</span></td><td>'+r.points_for+'</td><td>'+r.points_against+'</td><td><span class="diff-pill '+(r.score_difference>0?'positive':r.score_difference<0?'negative':'zero')+'">'+signed(r.score_difference)+'</span></td></tr>'}).join('')}
+function renderRankings(){if(typeof renderRankingExperience==='function')return renderRankingExperience();const q=(document.getElementById('rankingSearch')?.value||'').toLowerCase(),arr=rankings.filter(r=>r.active===true&&r.display_name.toLowerCase().includes(q));document.getElementById('rankingsBody').innerHTML=arr.map(r=>{const rank=Number(r.official_rank),medal=rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':'',rankClass=rank===1?'gold':rank===2?'silver':rank===3?'bronze':'standard',pct=Number(r.win_pct||0);return '<tr class="ranking-row rank-'+rankClass+'"><td><span class="rank-badge '+rankClass+'">'+(medal?'<span class="rank-medal">'+medal+'</span>':'')+'<span>'+rank+'</span></span></td><td><div class="ranking-player"><b>'+esc(r.display_name)+'</b><span>'+r.player_code+'</span></div></td><td>'+r.matches_played+'</td><td><b class="wins-value">'+r.match_wins+'</b></td><td>'+r.match_losses+'</td><td><span class="winpct '+(pct>=75?'high':pct>=50?'mid':'low')+'">'+r.win_pct+'%</span></td><td>'+r.h2h_score+'</td><td><span class="games-pill">'+r.games_won+'–'+r.games_lost+'</span></td><td>'+r.points_for+'</td><td>'+r.points_against+'</td><td><span class="diff-pill '+(r.score_difference>0?'positive':r.score_difference<0?'negative':'zero')+'">'+signed(r.score_difference)+'</span></td></tr>'}).join('')}
 function populateSelectors(){['resultPlayer','ma1','ma2','mb1','mb2','ea1','ea2','eb1','eb2'].forEach(destroyChoice);const activeOpts=participants.filter(p=>p.active&&p.can_play_next_match!==false).map(p=>'<option value="'+p.id+'">'+esc(p.display_name)+' — L'+Number(p.skill_level||3).toFixed(1)+'</option>').join(''),allOpts=participants.map(p=>'<option value="'+p.id+'">'+esc(p.display_name)+' — L'+Number(p.skill_level||3).toFixed(1)+(p.active?'':' (inactive)')+'</option>').join('');['ma1','ma2','mb1','mb2'].forEach(id=>document.getElementById(id).innerHTML=activeOpts);['ea1','ea2','eb1','eb2'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML=allOpts});const rp=document.getElementById('resultPlayer'),old=rp.value;rp.innerHTML='<option value="">All players</option>'+participants.map(p=>'<option value="'+p.id+'">'+esc(p.display_name)+'</option>').join('');rp.value=old}
 function renderResults(){const pid=document.getElementById('resultPlayer')?.value||'',out=document.getElementById('resultOutcome')?.value||'',q=(document.getElementById('resultSearch')?.value||'').toLowerCase();const arr=results.filter(r=>(!pid||r.participant_id===pid)&&(!out||r.result===out)&&((r.partner||'')+' '+(r.opponent_1||'')+' '+(r.opponent_2||'')).toLowerCase().includes(q));document.getElementById('resultsBody').innerHTML=arr.map(r=>'<tr><td>'+dateFmt(r.scheduled_date)+'</td><td>#'+r.match_number+'</td><td><b>'+esc(r.player)+'</b></td><td>'+esc(r.partner)+'</td><td>'+esc(r.opponent_1)+'<br>'+esc(r.opponent_2)+'</td><td><span class="tag '+(r.result==='W'?'ready':'warn')+'">'+(r.result||'—')+'</span></td><td>'+r.games_won+'–'+r.games_lost+'</td><td>'+r.points_for+'–'+r.points_against+'</td><td class="'+(r.score_difference>=0?'pos':'neg')+'">'+signed(r.score_difference)+'</td></tr>').join('');const ps=pid?rankings.find(x=>x.participant_id===pid):null;document.getElementById('playerSummary').innerHTML=ps?'<div class="grid kpis" style="grid-template-columns:repeat(5,1fr)"><div class="card kpi"><div class="label">Rank</div><div class="value">#'+ps.official_rank+'</div></div><div class="card kpi"><div class="label">Played</div><div class="value">'+ps.matches_played+'</div></div><div class="card kpi"><div class="label">Wins</div><div class="value">'+ps.match_wins+'</div></div><div class="card kpi"><div class="label">H2H</div><div class="value">'+ps.h2h_score+'</div></div><div class="card kpi"><div class="label">Score Diff</div><div class="value">'+signed(ps.score_difference)+'</div></div></div>':''}
 function renderAnalytics(){const active=stats.filter(s=>s.active).sort((a,b)=>a.matches_played-b.matches_played||a.display_name.localeCompare(b.display_name)),max=Math.max(1,...active.map(x=>x.matches_played));document.getElementById('playedBars').innerHTML=active.map(x=>'<div class="barrow"><span>'+esc(x.display_name)+'</span><div class="bar"><span style="width:'+(100*x.matches_played/max)+'%"></span></div><b>'+x.matches_played+'</b></div>').join('');const leaders=[...stats].sort((a,b)=>b.match_wins-a.match_wins||b.score_difference-a.score_difference).slice(0,12),mw=Math.max(1,...leaders.map(x=>x.match_wins));document.getElementById('winBars').innerHTML=leaders.map(x=>'<div class="barrow"><span>'+esc(x.display_name)+'</span><div class="bar"><span style="width:'+(100*x.match_wins/mw)+'%"></span></div><b>'+x.match_wins+'</b></div>').join('');const c=matches.filter(x=>x.status==='COMPLETED');document.getElementById('twoZero').textContent=c.filter(x=>(x.games_won_a===2&&x.games_won_b===0)||(x.games_won_b===2&&x.games_won_a===0)).length;document.getElementById('twoOne').textContent=c.filter(x=>x.games_won_a+x.games_won_b===3).length;const vals=active.map(x=>x.matches_played),spread=vals.length?Math.max(...vals)-Math.min(...vals):0;document.getElementById('balanceText').textContent=spread<=1?'EXCELLENT':spread===2?'GOOD':'NEEDS ATTENTION'}
@@ -689,13 +717,14 @@ function openManualMatch(){if(!requireMatchesUnlocked())return;document.getEleme
 async function saveManualMatch(){if(!requireMatchesUnlocked())return;const{error}=await sb.rpc('create_manual_match',{p_competition_id:competition.id,p_scheduled_date:document.getElementById('manualDate').value,p_team_a1:document.getElementById('ma1').value,p_team_a2:document.getElementById('ma2').value,p_team_b1:document.getElementById('mb1').value,p_team_b2:document.getElementById('mb2').value});if(error)return toast(error.message,true);closeModal('manualModal');toast('Manual match created.');await loadAll()}
 async function resetAllScores(){if(!requireMatchesUnlocked())return;const first=confirm('RESET ALL TEST SCORES? This will clear every completed/live game score and return all non-cancelled matches to Ready to Play. Match dates, players, skill levels, and schedules will stay unchanged.');if(!first)return;const second=confirm('This affects ALL matches in this competition. Continue with Reset All Scores?');if(!second)return;const{data,error}=await sb.rpc('reset_all_match_scores',{p_competition_id:competition.id});if(error)return toast(error.message,true);closeModal('liveScoreModal');closeModal('scoreModal');activeLiveMatchId=null;activeScoreMatch=null;toast('All test scores reset: '+(data?.matches_reset||0)+' matches cleared.');await loadAll()}
 async function generateNext8(){if(!requireMatchesUnlocked())return;const{data,error}=await sb.rpc('reshuffle_upcoming_matches',{p_competition_id:competition.id});if(error)return toast('Generate / Refresh failed: '+error.message,true);toast('Next 8 refreshed: '+(data?.generated||0)+' match(es) created. LOWEST-PLAYED first, four-player same-skill groups preferred, winner+loser teammates preferred, 1 Play / Week limits enforced, and all existing fairness rules preserved.');await loadAll()}
-sb.auth.getSession().then(({data})=>{session=data.session;applyAuth();loadAll().then(()=>{setTimeout(initStaticChoices,0);setupRealtime();if(isAdmin()&&location.hash.startsWith('#player-profile/'))go(location.hash.slice(1));else if(isAdmin()&&location.hash&&document.getElementById(location.hash.slice(1)))go(location.hash.slice(1));else go('matches')})});sb.auth.onAuthStateChange((_e,s)=>{session=s;applyAuth();if(!isAdmin())go('matches')});
+sb.auth.getSession().then(({data})=>{session=data.session;applyAuth();loadAll().then(()=>{setTimeout(initStaticChoices,0);setupRealtime();if(isAdmin()&&location.hash.startsWith('#player-profile/'))go(location.hash.slice(1));else if(location.hash==='#rankings')go('rankings');else if(isAdmin()&&location.hash&&document.getElementById(location.hash.slice(1)))go(location.hash.slice(1));else go('matches')})});sb.auth.onAuthStateChange((_e,s)=>{session=s;applyAuth();if(!isAdmin())go(location.hash==='#rankings'?'rankings':'matches')});
 </script>
 <script src="/participant-profile.js?v=20261107-portrait-fit-v3"></script>
 <script src="/matches-cinematic.js?v=20261107-clean-match-header-v8"></script>
+<script src="/rankings-experience.js?v=20261107-rankings-v1"></script>
 <script>
 (function(){
-  const CURRENT_BUILD='20261107-clean-match-header-v8';
+  const CURRENT_BUILD='20261107-public-rankings-podium-v9';
   async function checkForNewBuild(){
     try{
       const r=await fetch('/index.html?buildcheck='+Date.now(),{cache:'no-store'});
