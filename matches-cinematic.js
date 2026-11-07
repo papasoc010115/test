@@ -28,7 +28,9 @@ function mcxPlayer(p,st) {
 function mcxTeam(players,stats,side,won) {
   const av=(players.reduce((sum,p)=>sum+Number(p?.skill_level||3),0)/2).toFixed(1);
   return '<div class="mcx-team mcx-team-'+side+(won?' mcx-team-winner':'')+'">'
-    +'<div class="mcx-roster">'+players.map((p,i)=>mcxPlayer(p,stats[i]||{})).join('')+'</div>'
+    +'<div class="mcx-roster">'+players.map((p,i)=>mcxPlayer(p,stats[i]||{})).join('')
+    +(won?'<span class="mcx-winner-marker" aria-label="Winning team"><span class="mcx-winner-marker-icon" aria-hidden="true">🏆</span><strong>WINNER</strong></span>':'')
+    +'</div>'
     +'<div class="mcx-average"><span>TEAM AVG</span><strong>'+av+'</strong></div></div>';
 }
 function mcxActions(m,locked,done,live) {
