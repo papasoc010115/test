@@ -408,37 +408,43 @@
 .mcx-card.completed-match-card .mcx-team:not(.mcx-team-winner) .mcx-nameplate{
   filter:saturate(.72);opacity:.86;
 }
+/* Compact high-contrast badge floats in the gap above winning nameplates,
+   leaving both player heads and upper bodies visible. */
 .mcx-card.completed-match-card .mcx-winner-marker{
-  position:absolute;z-index:8;top:43%;left:50%;
+  position:absolute;z-index:8;top:28%;left:50%;
   transform:translate(-50%,-50%);
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
-  width:clamp(45px,7.1cqw,63px);
-  padding:5px 3px 6px;border-radius:11px;
-  background:linear-gradient(155deg,rgba(255,247,204,.98),rgba(255,208,44,.97) 50%,rgba(245,164,0,.96));
-  color:#17304d;border:1px solid #fff2aa;
-  box-shadow:0 0 0 3px rgba(255,221,82,.17),
-             0 0 20px rgba(255,214,60,.57),
-             0 6px 12px rgba(0,12,35,.53);
+  width:clamp(42px,6.2cqw,57px);
+  padding:5px 3px 6px;border-radius:10px;
+  background:linear-gradient(180deg,#fff 0%,#f1f7ff 100%);
+  color:#123456;border:2px solid #ff9416;
+  box-shadow:0 0 0 2px rgba(255,148,22,.14),0 7px 15px rgba(0,12,35,.42);
   pointer-events:none;
   animation:mcx-winner-glow 2.8s ease-in-out infinite;
 }
 .mcx-card .mcx-winner-marker-icon{
-  font-size:clamp(15px,2.5cqw,20px);line-height:1.1;
+  font-size:clamp(14px,2.1cqw,18px);line-height:1;
 }
 .mcx-card .mcx-winner-marker strong{
-  font-size:clamp(8px,1.38cqw,11px);letter-spacing:.055em;
-  font-weight:1000;line-height:1;
+  font-size:clamp(8px,1.2cqw,10px);
+  letter-spacing:.03em;font-weight:1000;line-height:1;color:#123456;
 }
 @keyframes mcx-winner-glow{
-  0%,100%{filter:brightness(1);box-shadow:0 0 0 3px #ffdd522b,0 0 15px #ffd63c6b,0 6px 12px #0007}
-  50%{filter:brightness(1.09);box-shadow:0 0 0 4px #ffdd5240,0 0 23px #ffd63cab,0 6px 14px #0008}
+  0%,100%{
+    transform:translate(-50%,-50%);
+    box-shadow:0 0 0 2px rgba(255,148,22,.14),0 7px 15px rgba(0,12,35,.42);
+  }
+  50%{
+    transform:translate(-50%,-53%);
+    box-shadow:0 0 0 3px rgba(255,148,22,.22),0 9px 18px rgba(0,12,35,.48);
+  }
 }
 @container (max-width:520px){
   .mcx-card.completed-match-card .mcx-winner-marker{
-    top:42%;width:42px;padding:4px 2px;border-radius:8px;
+    top:25%;width:39px;padding:3px 2px 4px;border-radius:8px;
   }
-  .mcx-card .mcx-winner-marker-icon{font-size:15px}
-  .mcx-card .mcx-winner-marker strong{font-size:8px;letter-spacing:0}
+  .mcx-card .mcx-winner-marker-icon{font-size:13px}
+  .mcx-card .mcx-winner-marker strong{font-size:7px;letter-spacing:0}
 }
 @media(prefers-reduced-motion:reduce){
   .mcx-card.completed-match-card .mcx-winner-marker{animation:none}
