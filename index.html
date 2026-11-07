@@ -4,7 +4,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="20261107-winner-matches-v13">
+<meta name="app-build" content="20261107-winner-contrast-v14">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#0b2d5c" />
@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
   <link rel="stylesheet" href="/participant-profile.css?v=20261107-clean-gradient-v4">
   <link rel="preload" as="image" href="/assets/match-stadium-hd.webp" type="image/webp">
-  <link rel="stylesheet" href="/matches-cinematic.css?v=20261107-winner-v13">
+  <link rel="stylesheet" href="/matches-cinematic.css?v=20261107-winner-contrast-v14">
   <link rel="stylesheet" href="/rankings-experience.css?v=20261107-rankings-v4">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
@@ -729,7 +729,7 @@ sb.auth.getSession().then(({data})=>{session=data.session;applyAuth();loadAll().
 <script src="/rankings-experience.js?v=20261107-rankings-v4"></script>
 <script>
 (function(){
-  const CURRENT_BUILD='20261107-winner-matches-v13';
+  const CURRENT_BUILD='20261107-winner-contrast-v14';
   async function checkForNewBuild(){
     try{
       const r=await fetch('/index.html?buildcheck='+Date.now(),{cache:'no-store'});
