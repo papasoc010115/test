@@ -369,3 +369,77 @@
     width:27px;height:27px;flex-basis:27px;font-size:16px;
   }
 }
+
+
+/* Completed match WINNER treatment — scoped to the victorious side only.
+   Badge sits between cutout portraits without changing the two-column roster. */
+.mcx-card.completed-match-card .mcx-team-winner .mcx-roster{
+  position:relative;
+}
+.mcx-card.completed-match-card .mcx-team-winner .mcx-portrait>img{
+  filter:drop-shadow(0 1px 2px rgba(255,247,169,.55))
+         drop-shadow(0 0 9px rgba(255,213,55,.78))
+         drop-shadow(0 5px 6px rgba(0,7,28,.6));
+}
+.mcx-card.completed-match-card .mcx-team-winner .mcx-silhouette{
+  filter:drop-shadow(0 0 9px rgba(255,215,72,.65));
+}
+.mcx-card.completed-match-card .mcx-team-winner .mcx-nameplate,
+.mcx-card.completed-match-card .mcx-team-b.mcx-team-winner .mcx-nameplate{
+  background:linear-gradient(105deg,#fff0a3 0%,#ffe04b 40%,#ffb900 100%);
+  color:#172a40;
+  border:1px solid #fff4b1;
+  text-shadow:0 1px 0 #fff8;
+  box-shadow:0 0 0 2px rgba(255,211,46,.21),
+             0 0 14px rgba(255,209,45,.47),
+             0 3px 8px rgba(0,7,27,.7);
+}
+.mcx-card.completed-match-card .mcx-team-winner .mcx-average{
+  border-color:#fff2a4;
+  box-shadow:0 0 13px #ffdc4870,0 3px 7px #001124af;
+}
+.mcx-card.completed-match-card .mcx-team-winner .mcx-average strong{
+  color:#ffdf43;
+}
+.mcx-card.completed-match-card .mcx-team:not(.mcx-team-winner) .mcx-portrait>img{
+  filter:grayscale(.15) saturate(.72) brightness(.8)
+         drop-shadow(0 4px 5px rgba(0,6,25,.7));
+}
+.mcx-card.completed-match-card .mcx-team:not(.mcx-team-winner) .mcx-nameplate{
+  filter:saturate(.72);opacity:.86;
+}
+.mcx-card.completed-match-card .mcx-winner-marker{
+  position:absolute;z-index:8;top:43%;left:50%;
+  transform:translate(-50%,-50%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  width:clamp(45px,7.1cqw,63px);
+  padding:5px 3px 6px;border-radius:11px;
+  background:linear-gradient(155deg,rgba(255,247,204,.98),rgba(255,208,44,.97) 50%,rgba(245,164,0,.96));
+  color:#17304d;border:1px solid #fff2aa;
+  box-shadow:0 0 0 3px rgba(255,221,82,.17),
+             0 0 20px rgba(255,214,60,.57),
+             0 6px 12px rgba(0,12,35,.53);
+  pointer-events:none;
+  animation:mcx-winner-glow 2.8s ease-in-out infinite;
+}
+.mcx-card .mcx-winner-marker-icon{
+  font-size:clamp(15px,2.5cqw,20px);line-height:1.1;
+}
+.mcx-card .mcx-winner-marker strong{
+  font-size:clamp(8px,1.38cqw,11px);letter-spacing:.055em;
+  font-weight:1000;line-height:1;
+}
+@keyframes mcx-winner-glow{
+  0%,100%{filter:brightness(1);box-shadow:0 0 0 3px #ffdd522b,0 0 15px #ffd63c6b,0 6px 12px #0007}
+  50%{filter:brightness(1.09);box-shadow:0 0 0 4px #ffdd5240,0 0 23px #ffd63cab,0 6px 14px #0008}
+}
+@container (max-width:520px){
+  .mcx-card.completed-match-card .mcx-winner-marker{
+    top:42%;width:42px;padding:4px 2px;border-radius:8px;
+  }
+  .mcx-card .mcx-winner-marker-icon{font-size:15px}
+  .mcx-card .mcx-winner-marker strong{font-size:8px;letter-spacing:0}
+}
+@media(prefers-reduced-motion:reduce){
+  .mcx-card.completed-match-card .mcx-winner-marker{animation:none}
+}
