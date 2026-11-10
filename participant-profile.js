@@ -217,6 +217,7 @@ function profileSettings(ctx){
     +'<option value="true" '+(p[key]===true?'selected':'')+'>Yes</option></select></div>';
   return '<div class="pp-grid">'
    +'<article class="pp-card"><h3>Match generation preferences</h3><p class="pp-card-sub">Saved immediately and applied on the next Generate / Refresh or Reshuffle</p>'
+   +toggle('First Game','first_game','Yes: prioritize this player for Match 1 of the day. No: normal matchmaking. An eligible two-game player can still return after a rest match.')
    +toggle('1 Play / Week','one_play_per_week','At most one match in a Monday–Sunday week. Incompatible with either two-game day.')
    +toggle('2 Games Thursday','double_games_thursday','Thursday only, up to two separated games; cannot play Friday.')
    +toggle('2 Games Friday','double_games_friday','Friday only, up to two separated games; cannot play Thursday.')
@@ -345,7 +346,7 @@ function renderParticipantList(){
   const q=(document.getElementById('participantSearch')?.value||'').toLowerCase(),status=document.getElementById('participantStatus')?.value||'ALL';
   const entries=participants.filter(p=>(p.display_name+' '+p.player_code).toLowerCase().includes(q)&&(status==='ALL'||(status==='ACTIVE'?p.active:!p.active))).map(p=>{
     const st=statById(p.id)||{},target=p.target_matches||competition?.target_matches_per_player||15;
-    return {p,st,rank:ppRank(p),rem:Math.max(0,target-(st.matches_played||0)),skill:Number(p.skill_level||3),canLast:p.can_play_last_game!==false,canNext:p.can_play_next_match!==false};
+    return {p,st,rank:ppRank(p),rem:Math.max(0,target-(st.matches_played||0)),skill:Number(p.skill_level||3),canLast:p.can_play_last_game!==false,canNext:p.can_play_next_match!==false,firstGame:p.first_game===true};
   });
   const dir=participantSortDir==='asc'?1:-1;
   const get=x=>{switch(participantSortKey){
@@ -353,6 +354,7 @@ function renderParticipantList(){
     case 'skill':return x.skill;
     case 'lastGame':return x.canLast?1:0;
     case 'nextMatch':return x.canNext?1:0;
+    case 'firstGame':return x.firstGame?1:0;
     case 'rank':return x.rank?.official_rank||999;
     case 'played':return Number(x.st.matches_played||0);
     case 'wins':return Number(x.st.match_wins||0);
@@ -363,12 +365,12 @@ function renderParticipantList(){
   }};
   entries.sort((a,b)=>{const av=get(a),bv=get(b);if(typeof av==='string')return av.localeCompare(bv)*dir;if(av===bv)return a.p.display_name.localeCompare(b.p.display_name);return(av-bv)*dir});
   document.getElementById('participantsBody').innerHTML=entries.map(x=>{
-    const {p,st,rank,rem,skill,canLast,canNext}=x;
+    const {p,st,rank,rem,skill,canLast,canNext,firstGame}=x;
     const playerCell='<div class="pp-player-cell">'+profileAvatarHTML(p,'pp-avatar-small')+'<div><button class="pp-click-name" onclick="openParticipantProfile(\''+p.id+'\')"><b>'+esc(p.display_name)+'</b></button><div class="small muted">'+esc(p.player_code)+'</div></div></div>';
     const skillCell=isAdmin()?'<div class="skill-editor"><input class="skill-input" type="number" min="1" max="5" step=".1" value="'+skill.toFixed(1)+'" oninput="queueSkillSave(\''+p.id+'\',this)" onblur="flushSkillSave(\''+p.id+'\',this)" onkeydown="handleSkillKey(event,\''+p.id+'\',this)">'+skillBadge(skill)+'</div>':skillBadge(skill);
     const toggle=(val,fn)=>isAdmin()?'<select class="lastgame-select '+(val?'lastgame-yes':'lastgame-no')+'" onchange="'+fn+'(\''+p.id+'\',this)"><option value="true" '+(val?'selected':'')+'>Yes</option><option value="false" '+(!val?'selected':'')+'>No</option></select>':'<span class="tag '+(val?'ready':'warn')+'">'+(val?'YES':'NO')+'</span>';
     return '<tr><td>'+playerCell+'</td><td><b>'+(rank?'#'+rank.official_rank:'—')+'</b></td><td>'+skillCell+'</td>'
-      +'<td>'+toggle(canLast,'updateLastGame')+'</td><td>'+toggle(canNext,'updateNextMatch')+'</td>'
+      +'<td>'+toggle(canLast,'updateLastGame')+'</td><td>'+toggle(canNext,'updateNextMatch')+'</td><td>'+toggle(firstGame,'updateFirstGame')+'</td>'
       +'<td>'+ppNum(st.matches_played||0)+'</td><td>'+ppNum(st.match_wins||0)+'</td><td>'+ppNum(st.upcoming_matches||0)+'</td><td>'+ppNum(rem)+'</td>'
       +'<td><span class="tag '+(p.active?'ready':'warn')+'">'+(p.active?'ACTIVE':'INACTIVE')+'</span></td>'
       +'<td><button class="pp-linkbtn" onclick="openParticipantProfile(\''+p.id+'\')">View Profile</button> '
@@ -378,7 +380,7 @@ function renderParticipantList(){
 }
 async function updateProfileSetting(field,value,select){
   if(!requireAdmin()||!currentProfilePlayerId)return;
-  const allowed=['one_play_per_week','double_games_thursday','double_games_friday','can_play_last_game','can_play_next_match'];
+  const allowed=['first_game','one_play_per_week','double_games_thursday','double_games_friday','can_play_last_game','can_play_next_match'];
   if(!allowed.includes(field))return;
   const on=value==='true',patch={[field]:on};
   const p=playerById(currentProfilePlayerId);if(!p)return;
