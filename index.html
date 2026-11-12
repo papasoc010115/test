@@ -4,7 +4,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="20261112-ranking-exclusion-v16">
+<meta name="app-build" content="20261112-potential-ranking-v17">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#0b2d5c" />
@@ -746,12 +746,12 @@ async function resetAllScores(){if(!requireMatchesUnlocked())return;const first=
 async function generateNext8(){if(!requireMatchesUnlocked())return;const{data,error}=await sb.rpc('reshuffle_upcoming_matches',{p_competition_id:competition.id});if(error)return toast('Generate / Refresh failed: '+error.message,true);toast('Next 8 refreshed: '+(data?.generated||0)+' match(es) created. LOWEST-PLAYED first, four-player same-skill groups preferred, winner+loser teammates preferred, 1 Play / Week limits enforced, and all existing fairness rules preserved.');await loadAll()}
 sb.auth.getSession().then(({data})=>{session=data.session;applyAuth();loadAll().then(()=>{setTimeout(initStaticChoices,0);setupRealtime();if(isAdmin()&&location.hash.startsWith('#player-profile/'))go(location.hash.slice(1));else if(location.hash==='#rankings')go('rankings');else if(isAdmin()&&location.hash&&document.getElementById(location.hash.slice(1)))go(location.hash.slice(1));else go('matches')})});sb.auth.onAuthStateChange((_e,s)=>{session=s;applyAuth();if(!isAdmin())go(location.hash==='#rankings'?'rankings':'matches')});
 </script>
-<script src="/participant-profile.js?v=20261112-ranking-exclusion-v1"></script>
+<script src="/participant-profile.js?v=20261112-potential-ranking-v2"></script>
 <script src="/matches-cinematic.js?v=20261107-winner-v13"></script>
 <script src="/rankings-experience.js?v=20261112-ranking-exclusion-v1"></script>
 <script>
 (function(){
-  const CURRENT_BUILD='20261112-ranking-exclusion-v16';
+  const CURRENT_BUILD='20261112-potential-ranking-v17';
   async function checkForNewBuild(){
     try{
       const r=await fetch('/index.html?buildcheck='+Date.now(),{cache:'no-store'});
