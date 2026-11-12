@@ -116,11 +116,20 @@ function rlSetText(id,value){
 function renderRankingExperience(){
   const podium=document.getElementById('rankingPodium'),body=document.getElementById('rankingsBody');
   if(!podium||!body)return;
-  const active=rankings.filter(r=>r.active===true).slice()
-    .sort((a,b)=>Number(a.official_rank||999)-Number(b.official_rank||999)
-      ||String(a.display_name||'').localeCompare(String(b.display_name||'')));
+  // Retain the database's official ordering but remove excluded players
+  // from every presentation surface. Re-number visible positions 1..N
+  // without mutating the source rankings or historical statistics.
+  const allActive=rankings.filter(r=>r.active===true);
+  const active=allActive.filter(r=>{
+    const p=rlPlayer(r);
+    return p.exclude_from_rankings!==true;
+  }).slice().sort((a,b)=>Number(a.official_rank||999)-Number(b.official_rank||999)
+    ||String(a.display_name||'').localeCompare(String(b.display_name||'')))
+    .map((r,index)=>({...r,official_rank:index+1}));
   const top3=active.slice(0,3);
-  const isFinal=rlIsFinalStandings(active);
+  // Finalization remains based on the full active player roster, including
+  // excluded players who must still complete their required matches.
+  const isFinal=rlIsFinalStandings(allActive);
   rlSetText('rankingMainTitle',isFinal?'Official Final Rankings':'Current Competition Rankings');
   rlSetText('rankingProgressLabel',isFinal?'Competition Complete · Final Standings':'Standings in Progress');
   rlSetText('rankingTopThreeTitle',isFinal?'Top 3 Champions':'Current Top 3 Players');
