@@ -21,7 +21,14 @@ function profileAvatarHTML(p,className='pp-avatar'){
 }
 function ppNum(v){return Number(v||0).toLocaleString('en-PH')}
 function ppAvg(v,places=1){return Number.isFinite(v)?v.toFixed(places):'—'}
-function ppRank(p){return rankings.find(r=>r.participant_id===p.id)||null}
+function ppRank(p){
+  if(p.exclude_from_rankings===true)return null;
+  const included=rankings.filter(r=>r.active===true&&participants.some(x=>
+    (x.id===r.participant_id||x.player_code===r.player_code)&&x.exclude_from_rankings!==true))
+    .slice().sort((a,b)=>Number(a.official_rank||999)-Number(b.official_rank||999));
+  const index=included.findIndex(r=>r.participant_id===p.id||r.player_code===p.player_code);
+  return index<0?null:{...included[index],official_rank:index+1};
+}
 function ppPlayer(id){return playerById(id)||{display_name:'Unknown player',skill_level:0,id}}
 function ppDateDay(date){return new Date(date+'T12:00:00Z').getUTCDay()}
 function ppMatch(m){return matches.find(x=>x.id===m.match_id)}
@@ -133,7 +140,7 @@ function profileOverview(ctx){
   +'<div class="pp-row"><div class="pp-row-text"><strong>'+ppNum(s.matches_played)+' of '+ppNum(ctx.target)+' matches</strong><small>'+ppNum(Math.max(0,ctx.target-Number(s.matches_played||0)))+' remaining</small></div><div class="pp-row-value">'+progress.toFixed(0)+'%</div></div>'
   +'<div class="pp-bar-track" style="height:14px;margin:14px 0 18px"><div class="pp-bar-fill" style="width:'+progress.toFixed(1)+'%"></div></div>'
   +'<div class="pp-kpi-strip">'
-  +profileMini('Official rank',ctx.r?'#'+ctx.r.official_rank:'—','Current standing')
+  +profileMini('Current rank',ctx.p.exclude_from_rankings===true?'Excluded':ctx.r?'#'+ctx.r.official_rank:'—','Current visible standing')
   +profileMini('Current streak',ctx.currentStreak.count?ctx.currentStreak.count+' '+(ctx.currentStreak.result==='W'?'wins':'losses'):'—','Consecutive completed matches')
   +profileMini('Longest win streak',ppNum(ctx.highestWinStreak),'Matches won consecutively')
   +'</div></article>'
@@ -226,6 +233,7 @@ function profileSettings(ctx){
    +'<article class="pp-card"><h3>Participation and profile</h3><p class="pp-card-sub">Control availability and target matches</p>'
    +toggle('Next Match Available','can_play_next_match','Allow this player in the next generated schedule.')
    +toggle('Last Game Eligible','can_play_last_game','Allow this player in the final slot of each competition day.')
+   +toggle('Exclude from Rankings','exclude_from_rankings','Yes: hide this player from public and admin rankings, including the Top 3. Their match results, profile and matchmaking eligibility remain unchanged. Default: No.')
    +'<div class="pp-config"><div><strong>Match target</strong><small>Override the competition default of '+ppNum(competition?.target_matches_per_player||15)+' matches</small></div><input id="ppTargetMatches" type="number" min="1" max="100" value="'+ppNum(ctx.target)+'" onchange="saveProfileTarget(this)" aria-label="Target matches" style="width:90px"></div>'
    +'<div class="pp-config"><div><strong>Skill level</strong><small>1.0–5.0; displayed match averages update immediately</small></div><input id="ppSkillLevel" type="number" min="1" max="5" step=".1" value="'+Number(p.skill_level||3).toFixed(1)+'" onchange="saveProfileSkill(this)" aria-label="Skill level" style="width:90px"></div>'
    +'<div class="pp-row"><div class="pp-row-text"><strong>Profile management</strong><small>Edit name or archive without deleting match history</small></div><div><button class="pp-linkbtn" onclick="openParticipant(\''+p.id+'\')">Edit name</button> '
@@ -275,7 +283,7 @@ function profileFeatureMain(ctx){
     +'<div class="pp-performance-copy"><strong>'+ppNum(wins)+' wins <span>·</span> '+ppNum(losses)+' losses</strong>'
     +'<p>Official results from '+ppNum(played)+' completed '+(played===1?'match':'matches')+'.</p>'
     +'<div class="pp-performance-key"><span><i class="pp-win-key"></i> Wins '+ppNum(wins)+'</span><span><i class="pp-loss-key"></i> Losses '+ppNum(losses)+'</span></div>'
-    +'<div class="pp-performance-rank"><span>Current rank</span><strong>'+(r?'#'+r.official_rank:'—')+'</strong><span>of '+ppNum(rankings.filter(x=>x.active).length)+' active players</span></div>'
+    +'<div class="pp-performance-rank"><span>Current rank</span><strong>'+(p.exclude_from_rankings===true?'Excluded':r?'#'+r.official_rank:'—')+'</strong><span>of '+ppNum(rankings.filter(x=>x.active&&participants.some(p=>p.id===x.participant_id&&p.exclude_from_rankings!==true)).length)+' ranked players</span></div>'
     +'</div></div>'
     +'<div class="pp-feature-sectiontitle">Competition highlights</div>'
     +'<div class="pp-feature-tiles">'
@@ -369,7 +377,7 @@ function renderParticipantList(){
     const playerCell='<div class="pp-player-cell">'+profileAvatarHTML(p,'pp-avatar-small')+'<div><button class="pp-click-name" onclick="openParticipantProfile(\''+p.id+'\')"><b>'+esc(p.display_name)+'</b></button><div class="small muted">'+esc(p.player_code)+'</div></div></div>';
     const skillCell=isAdmin()?'<div class="skill-editor"><input class="skill-input" type="number" min="1" max="5" step=".1" value="'+skill.toFixed(1)+'" oninput="queueSkillSave(\''+p.id+'\',this)" onblur="flushSkillSave(\''+p.id+'\',this)" onkeydown="handleSkillKey(event,\''+p.id+'\',this)">'+skillBadge(skill)+'</div>':skillBadge(skill);
     const toggle=(val,fn)=>isAdmin()?'<select class="lastgame-select '+(val?'lastgame-yes':'lastgame-no')+'" onchange="'+fn+'(\''+p.id+'\',this)"><option value="true" '+(val?'selected':'')+'>Yes</option><option value="false" '+(!val?'selected':'')+'>No</option></select>':'<span class="tag '+(val?'ready':'warn')+'">'+(val?'YES':'NO')+'</span>';
-    return '<tr><td>'+playerCell+'</td><td><b>'+(rank?'#'+rank.official_rank:'—')+'</b></td><td>'+skillCell+'</td>'
+    return '<tr><td>'+playerCell+'</td><td><b>'+(p.exclude_from_rankings===true?'Excluded':rank?'#'+rank.official_rank:'—')+'</b></td><td>'+skillCell+'</td>'
       +'<td>'+toggle(canLast,'updateLastGame')+'</td><td>'+toggle(canNext,'updateNextMatch')+'</td><td>'+toggle(firstGame,'updateFirstGame')+'</td>'
       +'<td>'+ppNum(st.matches_played||0)+'</td><td>'+ppNum(st.match_wins||0)+'</td><td>'+ppNum(st.upcoming_matches||0)+'</td><td>'+ppNum(rem)+'</td>'
       +'<td><span class="tag '+(p.active?'ready':'warn')+'">'+(p.active?'ACTIVE':'INACTIVE')+'</span></td>'
@@ -380,7 +388,7 @@ function renderParticipantList(){
 }
 async function updateProfileSetting(field,value,select){
   if(!requireAdmin()||!currentProfilePlayerId)return;
-  const allowed=['first_game','one_play_per_week','double_games_thursday','double_games_friday','can_play_last_game','can_play_next_match'];
+  const allowed=['first_game','one_play_per_week','double_games_thursday','double_games_friday','can_play_last_game','can_play_next_match','exclude_from_rankings'];
   if(!allowed.includes(field))return;
   const on=value==='true',patch={[field]:on};
   const p=playerById(currentProfilePlayerId);if(!p)return;
@@ -393,7 +401,7 @@ async function updateProfileSetting(field,value,select){
   if(error){toast('Unable to save settings: '+error.message,true);await loadAll();return;}
   Object.assign(p,patch);
   await loadAll();
-  toast('Profile preferences saved. Use Generate / Refresh when you want to apply them to upcoming matches.');
+  toast(field==='exclude_from_rankings'?'Ranking visibility updated. Matchmaking and recorded results are unchanged.':'Profile preferences saved. Use Generate / Refresh when you want to apply them to upcoming matches.');
 }
 async function saveProfileTarget(input){
   if(!requireAdmin())return;
