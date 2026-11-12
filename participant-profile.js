@@ -29,6 +29,32 @@ function ppRank(p){
   const index=included.findIndex(r=>r.participant_id===p.id||r.player_code===p.player_code);
   return index<0?null:{...included[index],official_rank:index+1};
 }
+function ppHypotheticalRank(p){
+  if(!p||!p.active)return null;
+  // Evaluate only this excluded player as if re-included, while retaining
+  // every other player's current visibility preference. The underlying
+  // official ranking order and historical results are never changed.
+  const ordered=rankings.filter(r=>r.active===true)
+    .filter(r=>participants.some(player=>(player.id===r.participant_id||player.player_code===r.player_code)
+      &&(player.exclude_from_rankings!==true||player.id===p.id)))
+    .slice().sort((a,b)=>Number(a.official_rank||999)-Number(b.official_rank||999)
+      ||String(a.display_name||'').localeCompare(String(b.display_name||'')));
+  const index=ordered.findIndex(r=>r.participant_id===p.id||r.player_code===p.player_code);
+  return index<0?null:{rank:index+1,total:ordered.length};
+}
+function ppProfileRankText(p,r){
+  if(p.exclude_from_rankings===true){
+    const hypothetical=ppHypotheticalRank(p);
+    return hypothetical?'#'+hypothetical.rank:'—';
+  }
+  return r?'#'+r.official_rank:'—';
+}
+function ppProfileRankLabel(p){
+  return p.exclude_from_rankings===true?'Potential rank (if included)':'Current rank';
+}
+function ppProfileRankNote(p){
+  return p.exclude_from_rankings===true?'Unofficial · excluded from published rankings':'Current published standing';
+}
 function ppPlayer(id){return playerById(id)||{display_name:'Unknown player',skill_level:0,id}}
 function ppDateDay(date){return new Date(date+'T12:00:00Z').getUTCDay()}
 function ppMatch(m){return matches.find(x=>x.id===m.match_id)}
@@ -140,7 +166,7 @@ function profileOverview(ctx){
   +'<div class="pp-row"><div class="pp-row-text"><strong>'+ppNum(s.matches_played)+' of '+ppNum(ctx.target)+' matches</strong><small>'+ppNum(Math.max(0,ctx.target-Number(s.matches_played||0)))+' remaining</small></div><div class="pp-row-value">'+progress.toFixed(0)+'%</div></div>'
   +'<div class="pp-bar-track" style="height:14px;margin:14px 0 18px"><div class="pp-bar-fill" style="width:'+progress.toFixed(1)+'%"></div></div>'
   +'<div class="pp-kpi-strip">'
-  +profileMini('Current rank',ctx.p.exclude_from_rankings===true?'Excluded':ctx.r?'#'+ctx.r.official_rank:'—','Current visible standing')
+  +profileMini(ppProfileRankLabel(ctx.p),ppProfileRankText(ctx.p,ctx.r),ppProfileRankNote(ctx.p))
   +profileMini('Current streak',ctx.currentStreak.count?ctx.currentStreak.count+' '+(ctx.currentStreak.result==='W'?'wins':'losses'):'—','Consecutive completed matches')
   +profileMini('Longest win streak',ppNum(ctx.highestWinStreak),'Matches won consecutively')
   +'</div></article>'
@@ -283,7 +309,7 @@ function profileFeatureMain(ctx){
     +'<div class="pp-performance-copy"><strong>'+ppNum(wins)+' wins <span>·</span> '+ppNum(losses)+' losses</strong>'
     +'<p>Official results from '+ppNum(played)+' completed '+(played===1?'match':'matches')+'.</p>'
     +'<div class="pp-performance-key"><span><i class="pp-win-key"></i> Wins '+ppNum(wins)+'</span><span><i class="pp-loss-key"></i> Losses '+ppNum(losses)+'</span></div>'
-    +'<div class="pp-performance-rank"><span>Current rank</span><strong>'+(p.exclude_from_rankings===true?'Excluded':r?'#'+r.official_rank:'—')+'</strong><span>of '+ppNum(rankings.filter(x=>x.active&&participants.some(p=>p.id===x.participant_id&&p.exclude_from_rankings!==true)).length)+' ranked players</span></div>'
+    +'<div class="pp-performance-rank"><span>'+ppProfileRankLabel(p)+'</span><strong>'+ppProfileRankText(p,r)+'</strong><span>'+(p.exclude_from_rankings===true?'Unofficial · only visible in this profile · excluded from rankings':'of '+ppNum(rankings.filter(x=>x.active&&participants.some(p=>p.id===x.participant_id&&p.exclude_from_rankings!==true)).length)+' ranked players')+'</span></div>'
     +'</div></div>'
     +'<div class="pp-feature-sectiontitle">Competition highlights</div>'
     +'<div class="pp-feature-tiles">'
