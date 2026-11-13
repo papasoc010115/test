@@ -4,7 +4,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="20261113-public-match-visibility-v18">
+<meta name="app-build" content="20261113-slot-range-preferences-v19">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#0b2d5c" />
@@ -317,9 +317,9 @@
 <th><button class="sort-th" onclick="setParticipantSort('player')">Player <span data-sort-indicator="player"></span></button></th>
 <th><button class="sort-th" onclick="setParticipantSort('rank')">Rank <span data-sort-indicator="rank"></span></button></th>
 <th><button class="sort-th" onclick="setParticipantSort('skill')">Skill <span data-sort-indicator="skill"></span></button></th>
-<th><button class="sort-th" onclick="setParticipantSort('lastGame')">Last Game? <span data-sort-indicator="lastGame"></span></button></th>
+<th><button class="sort-th" onclick="setParticipantSort('lastGame')">3rd &amp; 4th Match? <span data-sort-indicator="lastGame"></span></button></th>
 <th><button class="sort-th" onclick="setParticipantSort('nextMatch')">Next Match? <span data-sort-indicator="nextMatch"></span></button></th>
-<th><button class="sort-th" onclick="setParticipantSort('firstGame')" title="Yes: schedule this player in Match 1 of a competition day">First Game? <span data-sort-indicator="firstGame"></span></button></th>
+<th><button class="sort-th" onclick="setParticipantSort('firstGame')" title="Yes: prioritize first appearance in Match 1 or Match 2">1st &amp; 2nd Match? <span data-sort-indicator="firstGame"></span></button></th>
 <th><button class="sort-th" onclick="setParticipantSort('played')">Played <span data-sort-indicator="played"></span></button></th>
 <th><button class="sort-th" onclick="setParticipantSort('wins')">Wins <span data-sort-indicator="wins"></span></button></th>
 <th><button class="sort-th" onclick="setParticipantSort('upcoming')">Upcoming <span data-sort-indicator="upcoming"></span></button></th>
@@ -634,7 +634,7 @@ async function persistSkillLevel(id,input,value,showToast){
   renderDashboard();
   if(showToast)toast((p?.display_name||'Player')+' skill saved at '+value.toFixed(1)+'.');
 }
-async function updateLastGame(id,select){if(!requireAdmin())return;const value=select.value==='true';select.disabled=true;const{error}=await sb.from('participants').update({can_play_last_game:value}).eq('id',id);select.disabled=false;if(error){toast(error.message,true);await loadAll();return}const p=playerById(id);if(p)p.can_play_last_game=value;select.classList.toggle('lastgame-yes',value);select.classList.toggle('lastgame-no',!value);toast((p?.display_name||'Player')+(value?' can play the last game.':' will be excluded from the last game when auto-scheduling.'))}
+async function updateLastGame(id,select){if(!requireAdmin())return;const value=select.value==='true';select.disabled=true;const{error}=await sb.from('participants').update({can_play_last_game:value}).eq('id',id);select.disabled=false;if(error){toast(error.message,true);await loadAll();return}const p=playerById(id);if(p)p.can_play_last_game=value;select.classList.toggle('lastgame-yes',value);select.classList.toggle('lastgame-no',!value);toast((p?.display_name||'Player')+(value?' can play Match 3 or 4.':' will be excluded from Match 3 and Match 4 when auto-scheduling.'))}
 async function updateFirstGame(id,select){
   if(!requireAdmin())return;
   const value=select.value==='true',p=playerById(id);
@@ -645,15 +645,15 @@ async function updateFirstGame(id,select){
     .eq('id',id).eq('competition_id',competition.id);
   select.disabled=false;
   if(error){
-    toast('First Game preference was not saved: '+error.message,true);
+    toast('1st & 2nd Match preference was not saved: '+error.message,true);
     await loadAll();return;
   }
   p.first_game=value;
   select.classList.toggle('lastgame-yes',value);
   select.classList.toggle('lastgame-no',!value);
   toast((p.display_name||'Player')+(value
-    ?' is prioritized for Match 1 on their assigned competition day.'
-    :' now has no first-game preference.')
+    ?' is prioritized for Match 1 or Match 2 on their assigned competition day.'
+    :' now has no early-match preference.')
     +' Use Generate / Refresh after unlocking matches to apply this preference.');
 }
 async function updateNextMatch(id,select){if(!requireAdmin())return;const value=select.value==='true',p=playerById(id);select.disabled=true;const{error}=await sb.from('participants').update({can_play_next_match:value}).eq('id',id);if(error){select.disabled=false;toast('Next-match availability was not saved: '+error.message,true);await loadAll();return}if(p)p.can_play_next_match=value;select.classList.toggle('lastgame-yes',value);select.classList.toggle('lastgame-no',!value);if(matchesLocked()){select.disabled=false;toast((p?.display_name||'Player')+' availability saved. Matches are locked, so the current schedule was not changed. It will apply after Unlock + Refresh.');return}toast((p?.display_name||'Player')+(value?' is available for the next match.':' is unavailable for the next match. Rebuilding upcoming matches…'));const{data,error:schedulerError}=await sb.rpc('reshuffle_upcoming_matches',{p_competition_id:competition.id});if(schedulerError){toast('Availability saved, but upcoming matches could not be rebuilt: '+schedulerError.message,true);await loadAll();return}await loadAll();toast('Upcoming queue updated. Only players with Next Match = Yes are scheduled. '+(data?.generated??0)+' match(es) generated.')}
@@ -837,12 +837,12 @@ async function resetAllScores(){if(!requireMatchesUnlocked())return;const first=
 async function generateNext8(){if(!requireMatchesUnlocked())return;const{data,error}=await sb.rpc('reshuffle_upcoming_matches',{p_competition_id:competition.id});if(error)return toast('Generate / Refresh failed: '+error.message,true);toast('Next 8 refreshed: '+(data?.generated||0)+' match(es) created. LOWEST-PLAYED first, four-player same-skill groups preferred, winner+loser teammates preferred, 1 Play / Week limits enforced, and all existing fairness rules preserved.');await loadAll()}
 sb.auth.getSession().then(({data})=>{session=data.session;applyAuth();loadAll().then(()=>{setTimeout(initStaticChoices,0);setupRealtime();if(isAdmin()&&location.hash.startsWith('#player-profile/'))go(location.hash.slice(1));else if(location.hash==='#rankings')go('rankings');else if(isAdmin()&&location.hash&&document.getElementById(location.hash.slice(1)))go(location.hash.slice(1));else go('matches')})});sb.auth.onAuthStateChange((_e,s)=>{session=s;applyAuth();if(!isAdmin())go(location.hash==='#rankings'?'rankings':'matches')});
 </script>
-<script src="/participant-profile.js?v=20261112-potential-ranking-v2"></script>
+<script src="/participant-profile.js?v=20261113-slot-range-v3"></script>
 <script src="/matches-cinematic.js?v=20261107-winner-v13"></script>
 <script src="/rankings-experience.js?v=20261112-ranking-exclusion-v1"></script>
 <script>
 (function(){
-  const CURRENT_BUILD='20261113-public-match-visibility-v18';
+  const CURRENT_BUILD='20261113-slot-range-preferences-v19';
   async function checkForNewBuild(){
     try{
       const r=await fetch('/index.html?buildcheck='+Date.now(),{cache:'no-store'});
