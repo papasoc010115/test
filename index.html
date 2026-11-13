@@ -4,7 +4,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="20261112-potential-ranking-v17">
+<meta name="app-build" content="20261113-public-match-visibility-v18">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#0b2d5c" />
@@ -221,6 +221,45 @@
 .cancelled-caption{color:#818b99;font-size:11px;font-weight:650}
 @media(max-width:760px){.match-manage-popover{right:0;bottom:calc(100% + 5px)}.manage-option{padding:11px 12px}}
 
+
+/* Administrative match publication control and spectator empty state. */
+.public-matches-toggle{
+  border:1px solid transparent;
+  font-weight:850;
+  white-space:nowrap;
+  transition:background .18s ease,border-color .18s ease,box-shadow .18s ease;
+}
+.public-matches-toggle.is-published{
+  background:#e5f7ed;color:#075f43;border-color:#9bd7b9;
+}
+.public-matches-toggle.is-hidden{
+  background:#fff1e9;color:#a24724;border-color:#edbda7;
+}
+.public-matches-toggle:hover:not(:disabled){
+  box-shadow:0 3px 12px rgba(8,50,92,.15);
+}
+.public-matches-toggle:disabled{opacity:.6;cursor:wait}
+.public-matches-concealed .toolbar{display:none}
+.public-matches-empty{
+  max-width:780px;margin:32px auto;
+  padding:clamp(25px,5vw,54px) 24px;
+  text-align:center;background:linear-gradient(145deg,#fff,#f3f8fe);
+  border:1px solid #cdddec;border-radius:20px;
+  box-shadow:0 8px 26px rgba(15,57,101,.07);
+}
+.public-matches-empty-icon{
+  width:64px;height:64px;border-radius:18px;
+  display:grid;place-items:center;margin:0 auto 18px;
+  font-size:31px;color:#155a98;background:#e5f1ff;
+}
+.public-matches-empty h3{color:#143b64;font-size:clamp(21px,3vw,30px);font-weight:950;margin:0 0 10px}
+.public-matches-empty p{color:#647d99;font-size:13px;line-height:1.65;margin:0 auto;max-width:380px}
+@media(max-width:630px){
+  .public-matches-empty{margin:18px 0;padding:35px 16px;border-radius:15px}
+  .public-matches-empty-icon{width:55px;height:55px;font-size:26px}
+  .public-matches-toggle{width:100%;justify-content:center}
+}
+
 </style>
 </head>
 <body>
@@ -273,7 +312,7 @@
     </div>
   </div>
 </section>
-<section id="matches" class="page"><div class="pagehead"><div><h2>Matches</h2><p class="match-page-help">Enter scores, replace players, and manage the upcoming queue.</p></div><div class="match-page-actions"><button id="matchLockBtn" class="btn yellow admin-only" onclick="toggleMatchLock()">🔒 Lock Matches</button> <button id="addMatchBtn" class="btn secondary admin-only" onclick="openManualMatch()">+ Add Match</button> <button id="reshuffleBtn" class="btn secondary admin-only" onclick="reshuffleUpcoming()">Reshuffle Upcoming 8</button> <button id="generateBtn" class="btn admin-only" onclick="generateNext8()">Generate / Refresh Next 8</button> <button id="resetScoresBtn" class="btn red admin-only" onclick="resetAllScores()">Reset All Scores</button></div></div><div id="matchLockBanner"></div><div id="liveArena" class="live-arena"></div><div class="toolbar"><select id="matchFilter" class="input" onchange="renderMatches()"><option value="UPCOMING">Upcoming</option><option value="COMPLETED">Completed</option><option value="CANCELLED">Cancelled</option><option value="ALL">All matches</option></select><input id="matchSearch" class="input" placeholder="Search player / match" oninput="renderMatches()"></div><div id="matchesList" class="match-date-groups"></div></section>
+<section id="matches" class="page"><div class="pagehead"><div><h2>Matches</h2><p class="match-page-help">Enter scores, replace players, and manage the upcoming queue.</p></div><div class="match-page-actions"><button id="publicMatchesBtn" type="button" class="btn admin-only public-matches-toggle" onclick="togglePublicMatches()" aria-pressed="true" title="Control whether spectators can see generated matches">🌐 Display to Public: Yes</button> <button id="matchLockBtn" class="btn yellow admin-only" onclick="toggleMatchLock()">🔒 Lock Matches</button> <button id="addMatchBtn" class="btn secondary admin-only" onclick="openManualMatch()">+ Add Match</button> <button id="reshuffleBtn" class="btn secondary admin-only" onclick="reshuffleUpcoming()">Reshuffle Upcoming 8</button> <button id="generateBtn" class="btn admin-only" onclick="generateNext8()">Generate / Refresh Next 8</button> <button id="resetScoresBtn" class="btn red admin-only" onclick="resetAllScores()">Reset All Scores</button></div></div><div id="matchLockBanner"></div><div id="liveArena" class="live-arena"></div><div class="toolbar"><select id="matchFilter" class="input" onchange="renderMatches()"><option value="UPCOMING">Upcoming</option><option value="COMPLETED">Completed</option><option value="CANCELLED">Cancelled</option><option value="ALL">All matches</option></select><input id="matchSearch" class="input" placeholder="Search player / match" oninput="renderMatches()"></div><div id="matchesList" class="match-date-groups"></div></section>
 <section id="participants" class="page"><div class="pagehead"><div><h2>Participants</h2><p>Open a dedicated profile to view a player’s complete match history, performance analytics, photo and match-generation settings.</p></div><button class="btn admin-only" onclick="openParticipant()">+ Add Participant</button></div><div class="toolbar"><input id="participantSearch" class="input" placeholder="Search participant" oninput="renderParticipants()"><select id="participantStatus" class="input" onchange="renderParticipants()"><option value="ALL">All</option><option value="ACTIVE">Active only</option><option value="INACTIVE">Inactive only</option></select></div><div class="card"><div class="tablewrap"><table><thead><tr>
 <th><button class="sort-th" onclick="setParticipantSort('player')">Player <span data-sort-indicator="player"></span></button></th>
 <th><button class="sort-th" onclick="setParticipantSort('rank')">Rank <span data-sort-indicator="rank"></span></button></th>
@@ -383,7 +422,46 @@ function applyAuth(){const admin=isAdmin();document.body.classList.toggle('publi
 async function loadAll(){const c=await sb.from('competitions').select('*').eq('active',true).limit(1).maybeSingle();if(c.error)return toast(c.error.message,true);competition=c.data;if(!competition)return toast('No active competition found.',true);const cid=competition.id;const [pa,st,ra,ma,mp,ga,re]=await Promise.all([sb.from('participants').select('*').eq('competition_id',cid).order('player_code'),sb.from('player_statistics').select('*').eq('competition_id',cid),sb.from('rankings').select('*').eq('competition_id',cid).order('official_rank').order('display_name'),sb.from('matches').select('*').eq('competition_id',cid).order('scheduled_date').order('slot'),sb.from('match_players').select('*'),sb.from('match_games').select('*'),sb.from('player_results').select('*').eq('competition_id',cid).order('scheduled_date',{ascending:false}).order('match_number',{ascending:false})]);participants=pa.data||[];stats=st.data||[];rankings=ra.data||[];matches=ma.data||[];matchPlayers=(mp.data||[]).filter(x=>matches.some(m=>m.id===x.match_id));games=(ga.data||[]).filter(x=>matches.some(m=>m.id===x.match_id));results=re.data||[];renderAll()}
 function matchesLocked(){return competition?.matches_locked===true}
 function requireMatchesUnlocked(){if(!requireAdmin())return false;if(matchesLocked()){toast('Matches are locked. Click Unlock Matches first.',true);return false}return true}
-function renderMatchLockState(){const locked=matchesLocked(),btn=document.getElementById('matchLockBtn'),banner=document.getElementById('matchLockBanner');if(btn){btn.textContent=locked?'🔓 Unlock Matches':'🔒 Lock Matches';btn.className='btn '+(locked?'red':'yellow')+' admin-only'}const ids=['addMatchBtn','reshuffleBtn','generateBtn','resetScoresBtn'];ids.forEach(id=>{const el=document.getElementById(id);if(el){el.disabled=locked;el.title=locked?'Unlock Matches to use this control.':''}});if(banner){banner.className=locked?'match-lock-banner locked':'match-lock-banner unlocked';banner.innerHTML=locked?'<b>🔒 MATCHES LOCKED</b><span>Schedule, players, dates, slot order, generation, cancellation, deletion and replacements are frozen. Live scoring and final score entry still work.</span>':'<b>🔓 Matches Unlocked</b><span>Schedule and lineups are editable.</span>'}}
+function publicMatchesVisible(){return competition?.public_matches_visible!==false}
+function renderPublicMatchesControl(){
+  const btn=document.getElementById('publicMatchesBtn');
+  if(!btn)return;
+  const visible=publicMatchesVisible();
+  btn.textContent='🌐 Display to Public: '+(visible?'Yes':'No');
+  btn.className='btn admin-only public-matches-toggle '+(visible?'is-published':'is-hidden');
+  btn.setAttribute('aria-pressed',String(visible));
+  btn.title=visible
+    ?'Currently visible to visitors. Click to hide all public match cards.'
+    :'Currently hidden from visitors. Click to publish the match schedule.';
+  btn.style.display=isAdmin()?'':'none';
+}
+async function togglePublicMatches(){
+  if(!requireAdmin()||!competition)return;
+  const nextVisible=!publicMatchesVisible();
+  const btn=document.getElementById('publicMatchesBtn');
+  if(btn)btn.disabled=true;
+  try{
+    const {data,error}=await sb.from('competitions')
+      .update({public_matches_visible:nextVisible})
+      .eq('id',competition.id)
+      .select('public_matches_visible')
+      .single();
+    if(error)throw error;
+    if(data?.public_matches_visible!==nextVisible)throw new Error('Publication setting was not confirmed.');
+    competition.public_matches_visible=nextVisible;
+    renderPublicMatchesControl();
+    renderMatches();
+    renderLiveArena();
+    toast(nextVisible?'Public match schedule is now visible.':'Public match schedule hidden. Admin matches are unchanged.');
+  }catch(e){
+    toast('Unable to save public match visibility: '+(e.message||e),true);
+    renderPublicMatchesControl();
+  }finally{
+    if(btn)btn.disabled=false;
+  }
+}
+function renderMatchLockState(){
+  renderPublicMatchesControl();const locked=matchesLocked(),btn=document.getElementById('matchLockBtn'),banner=document.getElementById('matchLockBanner');if(btn){btn.textContent=locked?'🔓 Unlock Matches':'🔒 Lock Matches';btn.className='btn '+(locked?'red':'yellow')+' admin-only'}const ids=['addMatchBtn','reshuffleBtn','generateBtn','resetScoresBtn'];ids.forEach(id=>{const el=document.getElementById(id);if(el){el.disabled=locked;el.title=locked?'Unlock Matches to use this control.':''}});if(banner){banner.className=locked?'match-lock-banner locked':'match-lock-banner unlocked';banner.innerHTML=locked?'<b>🔒 MATCHES LOCKED</b><span>Schedule, players, dates, slot order, generation, cancellation, deletion and replacements are frozen. Live scoring and final score entry still work.</span>':'<b>🔓 Matches Unlocked</b><span>Schedule and lineups are editable.</span>'}}
 async function toggleMatchLock(){if(!requireAdmin())return;const locking=!matchesLocked(),message=locking?'Lock the current matches? Add, edit, replace, reorder, reshuffle and generate will be disabled. Live scoring will still work.':'Unlock matches and allow schedule/lineup editing again?';if(!confirm(message))return;const{data,error}=await sb.rpc('set_matches_locked',{p_competition_id:competition.id,p_locked:locking});if(error)return toast(error.message,true);competition.matches_locked=!!data?.matches_locked;renderMatchLockState();renderMatches();toast(locking?'Matches locked. The schedule will not change until you unlock it.':'Matches unlocked. Schedule editing is enabled again.');await loadAll()}
 function renderAll(){renderMatchLockState();renderDashboard();renderMatches();renderLiveArena();renderParticipants();renderRankings();renderResults();renderAnalytics();renderSettings();populateSelectors();if(document.getElementById('player-profile')?.classList.contains('active')&&typeof renderParticipantProfile==='function')renderParticipantProfile();setTimeout(()=>{initStaticChoices();initPlayerChoices()},0)}
 function lineups(m){const ps=matchPlayers.filter(x=>x.match_id===m.id),get=(t,p)=>playerById(ps.find(x=>x.team===t&&x.position===p)?.actual_player_id)?.display_name||'TBD';return{a1:get('A',1),a2:get('A',2),b1:get('B',1),b2:get('B',2),ps}}
@@ -446,6 +524,18 @@ document.getElementById('top10').innerHTML=top.length?top.map((r,i)=>'<div class
 document.getElementById('participationWatch').innerHTML=watch.length?watch.map(s=>{const pct=targetPerPlayer?Math.min(100,Math.round(((s.matches_played||0)/targetPerPlayer)*100)):0;return '<div class="dash-watch-row"><div><b>'+esc(s.display_name)+'</b><small>'+(s.matches_played||0)+' played • '+(s.upcoming_matches||0)+' upcoming</small></div><div class="dash-watch-progress"><span style="width:'+pct+'%"></span></div><strong>'+Math.max(0,targetPerPlayer-(s.matches_played||0))+' left</strong></div>'}).join(''):'<div class="empty">No active participants.</div>';
 document.getElementById('matchOverview').innerHTML='<div class="dash-mini-stat"><span>2–0 Matches</span><strong>'+twoZero+'</strong><small>Straight-set wins</small></div><div class="dash-mini-stat"><span>2–1 Matches</span><strong>'+twoOne+'</strong><small>Three-game matches</small></div><div class="dash-mini-stat"><span>Queue</span><strong>'+upcoming.length+'</strong><small>Upcoming / live</small></div><div class="dash-mini-stat '+(balanced?'good':'attention')+'"><span>Fairness</span><strong>'+(balanced?'Excellent':spread===2?'Good':'Needs Attention')+'</strong><small>Spread '+spread+' match'+(spread===1?'':'es')+'</small></div>'}
 function renderMatches(){
+  const concealed=!isAdmin()&&!publicMatchesVisible();
+  const section=document.getElementById('matches');
+  section?.classList.toggle('public-matches-concealed',concealed);
+  if(concealed){
+    const host=document.getElementById('matchesList');
+    if(host)host.innerHTML='<div class="public-matches-empty" role="status" aria-live="polite">'
+      +'<div class="public-matches-empty-icon" aria-hidden="true">▦</div>'
+      +'<h3>No matches generated yet</h3>'
+      +'<p>Upcoming competition matches will appear here once the schedule is available.</p>'
+      +'</div>';
+    return;
+  }
   const filter=document.getElementById('matchFilter')?.value||'UPCOMING';
   const query=(document.getElementById('matchSearch')?.value||'').trim().toLowerCase();
   const filtered=matches.filter(m=>filter==='ALL'
@@ -607,6 +697,7 @@ function getLiveMatch(){return matches.find(m=>m.status==='IN_PROGRESS')||null}
 function getUpNextMatch(live){const ready=matches.filter(m=>m.status==='READY_TO_PLAY').sort((a,b)=>a.scheduled_date.localeCompare(b.scheduled_date)||a.slot-b.slot);if(!live)return ready[0]||null;return ready.find(m=>m.scheduled_date>live.scheduled_date||(m.scheduled_date===live.scheduled_date&&m.slot>live.slot))||ready[0]||null}
 function compactTeams(m){if(!m)return'';const l=lineups(m);return esc(l.a1)+' / '+esc(l.a2)+' vs '+esc(l.b1)+' / '+esc(l.b2)}
 function renderLiveArena(){const root=document.getElementById('liveArena');if(!root)return;
+  if(!isAdmin()&&!publicMatchesVisible()){root.innerHTML='';root.hidden=true;return}
   // Spectators see live scores, never the empty-status notice or administrative controls.
   if(!isAdmin()){
     const live=getLiveMatch();
@@ -642,7 +733,7 @@ async function adjustLiveScore(team,delta){const m=matches.find(x=>x.id===active
 async function commitLiveInputs(){const a=Number(document.getElementById('liveScoreA').value||0),b=Number(document.getElementById('liveScoreB').value||0);await saveLiveScoreValues(a,b)}
 async function resetLiveGame(){if(!activeLiveMatchId||!confirm('Reset the current live game score to 0–0?'))return;const{error}=await sb.rpc('reset_live_score',{p_match_id:activeLiveMatchId});if(error)return toast(error.message,true);const m=matches.find(x=>x.id===activeLiveMatchId);if(m){m.live_score_a=0;m.live_score_b=0}renderLiveScorerModal();renderLiveArena();renderMatches();toast('Current game score reset.')}
 async function finishLiveGame(){const m=matches.find(x=>x.id===activeLiveMatchId);if(!m)return;const target=Number(m.live_game)===3?5:11;if(!((Number(m.live_score_a)===target&&Number(m.live_score_b)<target)||(Number(m.live_score_b)===target&&Number(m.live_score_a)<target)))return toast('A team must reach '+target+' exactly before finishing this game.',true);if(!confirm('Finish Game '+m.live_game+' at '+m.live_score_a+'–'+m.live_score_b+'?'))return;const{data,error}=await sb.rpc('finish_live_game',{p_match_id:m.id});if(error)return toast(error.message,true);await loadAll();if(data?.match_complete){closeModal('liveScoreModal');activeLiveMatchId=null;toast('Match completed. Rankings and Next 8 are updated.')}else{activeLiveMatchId=m.id;renderLiveScorerModal();toast('Game finished. Game '+data.next_game+' is ready.')}}
-function setupRealtime(){if(realtimeChannel){try{sb.removeChannel(realtimeChannel)}catch(e){}}realtimeChannel=sb.channel('tlp-live-matches').on('postgres_changes',{event:'UPDATE',schema:'public',table:'matches'},async payload=>{const changed=payload.new;if(!changed?.id)return;const idx=matches.findIndex(m=>m.id===changed.id);if(idx>=0)matches[idx]={...matches[idx],...changed};else await loadAll();renderLiveArena();renderMatches();if(activeLiveMatchId===changed.id&&document.getElementById('liveScoreModal')?.classList.contains('show'))renderLiveScorerModal()}).on('postgres_changes',{event:'UPDATE',schema:'public',table:'competitions'},payload=>{if(!competition||payload.new?.id!==competition.id)return;competition={...competition,...payload.new};renderMatchLockState();renderMatches()}).subscribe(status=>{if(status==='CHANNEL_ERROR'||status==='TIMED_OUT')setTimeout(()=>setupRealtime(),1500)})}
+function setupRealtime(){if(realtimeChannel){try{sb.removeChannel(realtimeChannel)}catch(e){}}realtimeChannel=sb.channel('tlp-live-matches').on('postgres_changes',{event:'UPDATE',schema:'public',table:'matches'},async payload=>{const changed=payload.new;if(!changed?.id)return;const idx=matches.findIndex(m=>m.id===changed.id);if(idx>=0)matches[idx]={...matches[idx],...changed};else await loadAll();renderLiveArena();renderMatches();if(activeLiveMatchId===changed.id&&document.getElementById('liveScoreModal')?.classList.contains('show'))renderLiveScorerModal()}).on('postgres_changes',{event:'UPDATE',schema:'public',table:'competitions'},payload=>{if(!competition||payload.new?.id!==competition.id)return;competition={...competition,...payload.new};renderMatchLockState();renderMatches();renderLiveArena()}).subscribe(status=>{if(status==='CHANNEL_ERROR'||status==='TIMED_OUT')setTimeout(()=>setupRealtime(),1500)})}
 async function openScore(id){if(!requireAdmin())return;activeScoreMatch=matches.find(x=>x.id===id);if(!activeScoreMatch)return toast('Match not found.',true);const l=lineups(activeScoreMatch);document.getElementById('scoreTitle').textContent='Match '+activeScoreMatch.match_number+' — Final Score';document.getElementById('scoreTeams').innerHTML='<b>'+esc(l.a1)+' & '+esc(l.a2)+'</b> vs <b>'+esc(l.b1)+' & '+esc(l.b2)+'</b>'+(activeScoreMatch.status==='IN_PROGRESS'?'<div class="small" style="margin-top:5px">Live scoring is synchronized here. Finished games are loaded automatically.</div>':'');['g1a','g1b','g2a','g2b','g3a','g3b'].forEach(x=>document.getElementById(x).value='');const{data,error}=await sb.from('match_games').select('game_number,team_a_score,team_b_score').eq('match_id',id).order('game_number');if(error)return toast('Unable to load saved game scores: '+error.message,true);for(const g of (data||[])){const a=document.getElementById('g'+g.game_number+'a'),b=document.getElementById('g'+g.game_number+'b');if(a)a.value=g.team_a_score;if(b)b.value=g.team_b_score}if(activeScoreMatch.status==='IN_PROGRESS'){const n=Number(activeScoreMatch.live_game||1),a=document.getElementById('g'+n+'a'),b=document.getElementById('g'+n+'b');if(a&&b){a.value=Number(activeScoreMatch.live_score_a||0);b.value=Number(activeScoreMatch.live_score_b||0)}}document.getElementById('scoreModal').classList.add('show')}
 async function saveScore(){if(!activeScoreMatch)return;const val=id=>document.getElementById(id).value===''?null:+document.getElementById(id).value,{data,error}=await sb.rpc('record_match_result',{p_match_id:activeScoreMatch.id,p_g1a:val('g1a'),p_g1b:val('g1b'),p_g2a:val('g2a'),p_g2b:val('g2b'),p_g3a:val('g3a'),p_g3b:val('g3b')});if(error)return toast(error.message,true);closeModal('scoreModal');if(activeLiveMatchId===activeScoreMatch.id){closeModal('liveScoreModal');activeLiveMatchId=null}toast('Final score saved. Live score, standings, and match result are synchronized.');await loadAll()}
 function resetReplacementPicker(){destroyChoice('replacementPlayer');const el=document.getElementById('replacementPlayer');el.innerHTML='<option value="">Choose a player position above first</option>';el.disabled=true;document.getElementById('replaceSaveBtn').disabled=true;document.getElementById('replacementHint').textContent='Suggestions appear after selecting A1, A2, B1, or B2.';const preview=document.getElementById('replacementPreview');if(preview){preview.innerHTML='';preview.style.display='none'}}
@@ -751,7 +842,7 @@ sb.auth.getSession().then(({data})=>{session=data.session;applyAuth();loadAll().
 <script src="/rankings-experience.js?v=20261112-ranking-exclusion-v1"></script>
 <script>
 (function(){
-  const CURRENT_BUILD='20261112-potential-ranking-v17';
+  const CURRENT_BUILD='20261113-public-match-visibility-v18';
   async function checkForNewBuild(){
     try{
       const r=await fetch('/index.html?buildcheck='+Date.now(),{cache:'no-store'});
