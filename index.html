@@ -4,7 +4,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="20261113-slot-range-preferences-v19">
+<meta name="app-build" content="20261113-public-completed-visible-v20">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#0b2d5c" />
@@ -239,7 +239,8 @@
   box-shadow:0 3px 12px rgba(8,50,92,.15);
 }
 .public-matches-toggle:disabled{opacity:.6;cursor:wait}
-.public-matches-concealed .toolbar{display:none}
+.public-matches-concealed .toolbar{display:flex}
+.public-matches-concealed #matchFilter{min-width:150px}
 .public-matches-empty{
   max-width:780px;margin:32px auto;
   padding:clamp(25px,5vw,54px) 24px;
@@ -524,7 +525,25 @@ document.getElementById('top10').innerHTML=top.length?top.map((r,i)=>'<div class
 document.getElementById('participationWatch').innerHTML=watch.length?watch.map(s=>{const pct=targetPerPlayer?Math.min(100,Math.round(((s.matches_played||0)/targetPerPlayer)*100)):0;return '<div class="dash-watch-row"><div><b>'+esc(s.display_name)+'</b><small>'+(s.matches_played||0)+' played • '+(s.upcoming_matches||0)+' upcoming</small></div><div class="dash-watch-progress"><span style="width:'+pct+'%"></span></div><strong>'+Math.max(0,targetPerPlayer-(s.matches_played||0))+' left</strong></div>'}).join(''):'<div class="empty">No active participants.</div>';
 document.getElementById('matchOverview').innerHTML='<div class="dash-mini-stat"><span>2–0 Matches</span><strong>'+twoZero+'</strong><small>Straight-set wins</small></div><div class="dash-mini-stat"><span>2–1 Matches</span><strong>'+twoOne+'</strong><small>Three-game matches</small></div><div class="dash-mini-stat"><span>Queue</span><strong>'+upcoming.length+'</strong><small>Upcoming / live</small></div><div class="dash-mini-stat '+(balanced?'good':'attention')+'"><span>Fairness</span><strong>'+(balanced?'Excellent':spread===2?'Good':'Needs Attention')+'</strong><small>Spread '+spread+' match'+(spread===1?'':'es')+'</small></div>'}
 function renderMatches(){
-  const concealed=!isAdmin()&&!publicMatchesVisible();
+  const admin=isAdmin();
+  const filterSelect=document.getElementById('matchFilter');
+  // Spectators only need Upcoming and Completed. Admins retain the
+  // Cancelled and All matches filters.
+  if(filterSelect){
+    Array.from(filterSelect.options).forEach(option=>{
+      if(option.value==='CANCELLED'||option.value==='ALL'){
+        option.hidden=!admin;
+        option.disabled=!admin;
+      }
+    });
+    if(!admin&&!['UPCOMING','COMPLETED'].includes(filterSelect.value)){
+      filterSelect.value='UPCOMING';
+    }
+  }
+  const filter=filterSelect?.value||'UPCOMING';
+  // Only unpublished upcoming fixtures are hidden. Completed match
+  // results, photographs, scores and public search remain available.
+  const concealed=!admin&&!publicMatchesVisible()&&filter==='UPCOMING';
   const section=document.getElementById('matches');
   section?.classList.toggle('public-matches-concealed',concealed);
   if(concealed){
@@ -536,7 +555,6 @@ function renderMatches(){
       +'</div>';
     return;
   }
-  const filter=document.getElementById('matchFilter')?.value||'UPCOMING';
   const query=(document.getElementById('matchSearch')?.value||'').trim().toLowerCase();
   const filtered=matches.filter(m=>filter==='ALL'
     ||(filter==='COMPLETED'?m.status==='COMPLETED'
@@ -842,7 +860,7 @@ sb.auth.getSession().then(({data})=>{session=data.session;applyAuth();loadAll().
 <script src="/rankings-experience.js?v=20261112-ranking-exclusion-v1"></script>
 <script>
 (function(){
-  const CURRENT_BUILD='20261113-slot-range-preferences-v19';
+  const CURRENT_BUILD='20261113-public-completed-visible-v20';
   async function checkForNewBuild(){
     try{
       const r=await fetch('/index.html?buildcheck='+Date.now(),{cache:'no-store'});
