@@ -250,7 +250,7 @@ function profileSettings(ctx){
     +'<option value="true" '+(p[key]===true?'selected':'')+'>Yes</option></select></div>';
   return '<div class="pp-grid">'
    +'<article class="pp-card"><h3>Match generation preferences</h3><p class="pp-card-sub">Saved immediately and applied on the next Generate / Refresh or Reshuffle</p>'
-   +toggle('First Game','first_game','Yes: prioritize this player for Match 1 of the day. No: normal matchmaking. An eligible two-game player can still return after a rest match.')
+   +toggle('1st & 2nd Match','first_game','Yes: prioritize this player for Match 1 or 2. Their first match that day must be in either slot. No: normal matchmaking. Doubles can return later only with the required rest and 3rd & 4th eligibility.')
    +toggle('1 Play / Week','one_play_per_week','At most one match in a Monday–Sunday week. Incompatible with either two-game day.')
    +toggle('2 Games Thursday','double_games_thursday','Thursday only, up to two separated games; cannot play Friday.')
    +toggle('2 Games Friday','double_games_friday','Friday only, up to two separated games; cannot play Thursday.')
@@ -258,7 +258,7 @@ function profileSettings(ctx){
    +'</article>'
    +'<article class="pp-card"><h3>Participation and profile</h3><p class="pp-card-sub">Control availability and target matches</p>'
    +toggle('Next Match Available','can_play_next_match','Allow this player in the next generated schedule.')
-   +toggle('Last Game Eligible','can_play_last_game','Allow this player in the final slot of each competition day.')
+   +toggle('3rd & 4th Match Eligible','can_play_last_game','Yes: may be selected for Match 3 or Match 4. No: exclude from both later matches. Match 1 and Match 2 remain available.')
    +toggle('Exclude from Rankings','exclude_from_rankings','Yes: hide this player from public and admin rankings, including the Top 3. Their match results, profile and matchmaking eligibility remain unchanged. Default: No.')
    +'<div class="pp-config"><div><strong>Match target</strong><small>Override the competition default of '+ppNum(competition?.target_matches_per_player||15)+' matches</small></div><input id="ppTargetMatches" type="number" min="1" max="100" value="'+ppNum(ctx.target)+'" onchange="saveProfileTarget(this)" aria-label="Target matches" style="width:90px"></div>'
    +'<div class="pp-config"><div><strong>Skill level</strong><small>1.0–5.0; displayed match averages update immediately</small></div><input id="ppSkillLevel" type="number" min="1" max="5" step=".1" value="'+Number(p.skill_level||3).toFixed(1)+'" onchange="saveProfileSkill(this)" aria-label="Skill level" style="width:90px"></div>'
@@ -346,6 +346,8 @@ function profileFeatureRail(ctx){
   }else schedule='<div class="pp-fixture-empty"><strong>No upcoming match</strong><p>A new fixture will appear here after scheduling.</p></div>';
   const c=ctx.p,preferences=[
     ['Weekly limit',c.one_play_per_week?'1 game / week':'Standard'],
+    ['1st & 2nd preferred',c.first_game?'Yes':'No'],
+    ['3rd & 4th eligible',c.can_play_last_game!==false?'Yes':'No'],
     ['Thursday double',c.double_games_thursday?'Yes':'No'],
     ['Friday double',c.double_games_friday?'Yes':'No']
   ];
