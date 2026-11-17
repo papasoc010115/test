@@ -92,87 +92,101 @@
     }
     ctx.restore();
   }
-  function card(ctx,match,images,bg,x,y,w,h){
-    ctx.save();path(ctx,x,y,w,h,30);ctx.clip();
-    ctx.fillStyle=grad(ctx,x,y,x,y+h,[[0,'#061426'],[.62,'#0a396c'],[1,'#04172f']]);ctx.fillRect(x,y,w,h);
-    if(bg){ctx.drawImage(bg,x,y+h*.15,w,h*.72);}
-    else {
-      poly(ctx,[[x,y+h*.62],[x+w*.37,y+h*.14],[x+w*.3,y+h*.58],[x,y+h*.86]],'#d9ae00');
-      poly(ctx,[[x+w,y+h*.62],[x+w*.63,y+h*.14],[x+w*.7,y+h*.58],[x+w,y+h*.86]],'#008ee5');
-      ball(ctx,x+w*.5,y+h*.43,w*.075);label(ctx,'VS',x+w*.5,y+h*.55,w*.18,w*.11,'#fff',true,900,true);
+  // One full-width fixture per row. The uploaded artwork is used only
+  // for its decorative header/footer, never for baked dates or fixtures.
+  const posterWidth=1800;
+  const rowLayout={margin:40,top:572,height:540,gap:30,footer:335};
+  function drawHeader(ctx,art,w){
+    const hh=422;
+    ctx.fillStyle=grad(ctx,0,0,w,hh,[[0,'#d4edff'],[.44,'#fff'],[1,'#e0f3ff']]);ctx.fillRect(0,0,w,hh);
+    // The original 3:4 artwork and the new tall template have different
+    // header heights. Crop before their date bar, retaining the branding.
+    if(art){
+      const aw=art.naturalWidth,ah=art.naturalHeight;
+      const top=Math.round(ah*(aw/ah<.65?.132:.18));
+      ctx.drawImage(art,0,0,aw,top,0,0,w,hh);
+      // A blank background has no lettering. Check just the logo's
+      // central area, excluding decorative corner bands.
+      let hasTitle=false;
+      try{
+        const pixels=ctx.getImageData(Math.round(w*.22),Math.round(hh*.25),Math.round(w*.59),Math.round(hh*.50)).data;
+        let dark=0,total=0;
+        for(let i=0;i<pixels.length;i+=64){total++;if(pixels[i]<50&&pixels[i+1]<100&&pixels[i+2]<160)dark++}
+        hasTitle=total>0&&dark/total>.075;
+      }catch(e){}
+      if(hasTitle)return;
     }
-    ctx.fillStyle=grad(ctx,x,y,x,y+h,[[0,'rgba(2,13,29,.72)'],[.23,'rgba(2,13,29,0)'],[.66,'rgba(2,13,29,0)'],[1,'#03162f']]);ctx.fillRect(x,y,w,h);
-    const pw=w*.217,ph=h*.61,py=y+h*.22,positions=[.015,.231,.553,.769];
-    match.players.forEach((p,i)=>{
-      const px=x+w*positions[i];
-      portrait(ctx,p,images.get(p.photo),px,py,pw,ph);
-      const left=i<2;
-      const g=grad(ctx,px,py+ph,px+pw,py+ph+25,left?[[0,'#fff083'],[.38,'#ffdb18'],[1,'#ec9c00']]:[[0,'#27c2ff'],[.42,'#087cd9'],[1,'#0753a2']]);
-      rect(ctx,px+2,py+ph-5,pw-4,h*.10,12,g,left?'#fff6a6':'#a1eaff',2.5);
-      label(ctx,p.name,px+pw/2,py+ph-5+h*.05,pw-18,Math.min(31,w*.041),left?'#092344':'#fff',true,900,!left);
-    });
-    rect(ctx,x+w*.32,y+h*.035,w*.36,h*.13,13,grad(ctx,x,y,x,y+h*.16,[[0,'#ffdf35'],[1,'#ffb900']]),'#fff2a0',3);
-    label(ctx,'MATCH '+match.number,x+w/2,y+h*.10,w*.32,Math.min(43,w*.056),'#071b37',true);
-    ctx.restore();
-    ctx.save();ctx.shadowColor='#23bfff';ctx.shadowBlur=15;rect(ctx,x,y,w,h,30,null,'#b9f1ff',4);ctx.restore();
+    // Same competition wordmark on blank artwork or an unavailable asset.
+    const wash=grad(ctx,0,85,w,340,[[0,'rgba(235,247,255,.96)'],[.5,'#fff'],[1,'rgba(233,246,255,.96)']]);
+    rect(ctx,150,42,w-300,340,35,wash);
+    poly(ctx,[[225,306],[702,104],[821,83],[649,163],[210,355]],'#f6be03');
+    ball(ctx,725,92,58);
+    label(ctx,'TLP',493,225,540,178,'#092c57',true,900);
+    ctx.fillStyle='#12365c';ctx.fillRect(855,86,5,238);
+    label(ctx,'TEACHERS',1250,111,715,85,'#082d59',true,900);
+    label(ctx,'PICKLEBALL',1250,204,735,85,'#082d59',true,900);
+    rect(ctx,900,260,700,85,23,grad(ctx,900,260,1600,345,[[0,'#074083'],[1,'#0074bf']]));
+    label(ctx,'COMPETITION',1250,303,665,74,'#ffdc00',true,900);
   }
-  function paint(canvas,date,data,images,bg){
-    // Always the same design. If a nonstandard day has >4 matches, extend
-    // the same card grid vertically rather than dropping any fixtures.
-    const rows=Math.max(2,Math.ceil(data.length/2)),extra=(rows-2)*520;
-    canvas.width=W;canvas.height=H+extra;const ctx=canvas.getContext('2d');
-    ctx.fillStyle=grad(ctx,0,0,W,H+extra,[[0,'#051326'],[.38,'#08305e'],[.75,'#04162e'],[1,'#031020']]);ctx.fillRect(0,0,W,H+extra);
-    glow(ctx,210,240,620,'rgba(0,107,230,.35)');glow(ctx,1390,240,620,'rgba(0,107,230,.35)');
-    lights(ctx,36,45,1);lights(ctx,W-36,45,-1);
-    paddle(ctx,148,286,-.65);paddle(ctx,W-148,286,.65);
-    poly(ctx,[[350,214],[780,42],[710,104],[370,244]],'#f4c10e');
-    ball(ctx,715,89,67);
-    label(ctx,'TLP',490,211,510,174,'#f5fbff',true,900,true);
-    ctx.fillStyle='#d6eeff';ctx.fillRect(784,136,5,203);
-    label(ctx,'TEACHERS',1095,171,540,67,'#fff',true,900,true);
-    label(ctx,'PICKLEBALL',1095,245,540,67,'#fff',true,900,true);
-    label(ctx,'COMPETITION',1095,318,550,62,'#ffd32c',true,900,true);
-    ctx.save();ctx.translate(W/2,490);ctx.rotate(-.035);
-    const stripe=grad(ctx,-W/2,-95,W/2,95,[[0,'#e6a400'],[.48,'#ffe151'],[1,'#ffc400']]);
-    poly(ctx,[[-830,-74],[-670,-100],[810,-104],[730,76],[-820,104]],stripe);
-    label(ctx,'MATCH DAY POSTER',0,1,1460,119,'#031b35',true);
-    ctx.restore();
-    ctx.save();ctx.shadowColor='#168eff';ctx.shadowBlur=20;rect(ctx,112,619,W-224,96,32,'#051f40','#35bfff',4);ctx.restore();
-    label(ctx,dateText(date),W/2,668,W-290,57,'#fff',true,900,true);
-    const start=766,gap=24,margin=30,cw=(W-2*margin-gap)/2,ch=496;
-    data.forEach((m,i)=>{
-      const row=Math.floor(i/2),single=i===data.length-1&&data.length%2===1;
-      const x=single?(W-cw)/2:margin+i%2*(cw+gap);
-      card(ctx,m,images,bg,x,start+row*(ch+gap),cw,ch);
+  function drawFooter(ctx,art,w,y,h){
+    if(art){
+      const aw=art.naturalWidth,ah=art.naturalHeight;
+      const cut=Math.round(ah*(aw/ah<.65?.885:.725));
+      ctx.drawImage(art,0,cut,aw,ah-cut,0,y,w,h);
+    }else{
+      ctx.fillStyle=grad(ctx,0,y,w,y+h,[[0,'#d5f2ff'],[.4,'#128dd5'],[1,'#03346e']]);ctx.fillRect(0,y,w,h);
+      ctx.strokeStyle='#effcff';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(w/2,y);ctx.lineTo(w/2,y+h);ctx.moveTo(0,y+h*.55);ctx.lineTo(w,y+h*.55);ctx.stroke();
+      rect(ctx,120,y+15,w-240,82,2,'#064b7c','#b9f3ff',3);
+      for(let x=125;x<w-120;x+=26){ctx.beginPath();ctx.moveTo(x,y+15);ctx.lineTo(x,y+97);ctx.strokeStyle='#b9e9fa';ctx.lineWidth=1;ctx.stroke()}
+      paddle(ctx,w/2-155,y+h*.59,-.7);paddle(ctx,w/2+155,y+h*.59,.7);ball(ctx,w/2,y+h*.78,62);
+    }
+  }
+  function posterName(ctx,name,x,y,w,h,left){
+    const g=grad(ctx,x,y,x,y+h,left?[[0,'#fff477'],[.45,'#ffd52b'],[1,'#efaa00']]:[[0,'#1fc8ff'],[.43,'#078de1'],[1,'#0750ad']]);
+    ctx.save();ctx.shadowColor='rgba(0,0,0,.40)';ctx.shadowBlur=10;ctx.shadowOffsetY=4;
+    rect(ctx,x,y,w,h,h*.32,g,left?'#fff5b0':'#b8f1ff',3.5);ctx.restore();
+    const size=Math.min(48,h*.66),color=left?'#082448':'#fff';
+    label(ctx,name,x+w/2,y+h/2,w-24,size,color,true,900,!left);
+  }
+  function rowCard(ctx,match,images,bg,x,y,w,h){
+    ctx.save();path(ctx,x,y,w,h,38);ctx.clip();
+    ctx.fillStyle=grad(ctx,x,y,x+w,y+h,[[0,'#06162e'],[.45,'#12467a'],[1,'#071c3c']]);ctx.fillRect(x,y,w,h);
+    if(bg)ctx.drawImage(bg,x,y,w,h);
+    else{
+      glow(ctx,x+w*.5,y+h*.53,w*.25,'rgba(0,132,255,.58)');
+      poly(ctx,[[x,y+h*.56],[x+w*.38,y+h*.12],[x+w*.25,y+h*.72],[x,y+h*.92]],'#d6a600');
+      poly(ctx,[[x+w,y+h*.56],[x+w*.62,y+h*.12],[x+w*.75,y+h*.72],[x+w,y+h*.92]],'#007ecb');
+      ball(ctx,x+w*.5,y+h*.43,h*.15);label(ctx,'VS',x+w*.5,y+h*.61,w*.14,106,'#fff',true,900,true);
+    }
+    // Keep the centre VS clear of the four portraits.
+    const centers=[.137,.337,.663,.863],photoW=w*.166,photoH=330,py=y+105,ny=y+427,nameW=w*.194;
+    match.players.forEach((p,i)=>{
+      const left=i<2,cx=x+w*centers[i],px=cx-photoW/2;
+      const panel=grad(ctx,px,py,px+photoW,py+photoH,[[0,'#f2faff'],[1,'#bad8ee']]);
+      rect(ctx,px,py,photoW,photoH,30,panel,left?'#ffd539':'#65daff',4);
+      ctx.save();path(ctx,px+4,py+4,photoW-8,photoH-8,26);ctx.clip();
+      portrait(ctx,p,images.get(p.photo),px+4,py+4,photoW-8,photoH-8);
+      ctx.restore();
+      posterName(ctx,p.name,cx-nameW/2,ny,nameW,75,left);
     });
-    const fy=H+extra-369;
-    court(ctx,fy,260);
-    label(ctx,'Teachers Pickleball Competition',W/2,H+extra-125,W-160,55,'#fff',true,900,true);
-    label(ctx,'MATCH DAY SCHEDULE',W/2,H+extra-55,W-180,31,'#e8f2ff',false,700,true);
-    ctx.fillStyle='#f8c810';ctx.fillRect(55,H+extra-56,215,5);ctx.fillRect(W-270,H+extra-56,215,5);
+    const tagW=w*.29;
+    rect(ctx,x+(w-tagW)/2,y+13,tagW,70,22,grad(ctx,x,y,x,y+83,[[0,'#ffe574'],[1,'#ffb500']]),'#fff1ac',3);
+    label(ctx,'MATCH '+match.number,x+w/2,y+48,tagW-28,54,'#082448',true);
+    ctx.restore();
+    ctx.save();ctx.shadowColor='#16bfff';ctx.shadowBlur=10;rect(ctx,x,y,w,h,38,null,'#99e7ff',4);ctx.restore();
   }
   function paintLight(canvas,date,data,images,bg,art){
-    const w=1800,h=2400,gap=24,margin=44,ch=550;
-    const rows=Math.max(2,Math.ceil(data.length/2)),extra=(rows-2)*(ch+gap);
-    canvas.width=w;canvas.height=h+extra;
-    const ctx=canvas.getContext('2d');
-    ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
-    const aw=art.naturalWidth,ah=art.naturalHeight;
-    if(!extra)ctx.drawImage(art,0,0,w,h);
-    else{
-      const cut=Math.round(ah*.715),dy=Math.round(h*.715);
-      ctx.drawImage(art,0,0,aw,cut,0,0,w,dy);
-      ctx.fillStyle=grad(ctx,0,dy,w,dy+extra,[[0,'#e5f3ff'],[.5,'#f3f9ff'],[1,'#d9efff']]);ctx.fillRect(0,dy,w,extra);
-      ctx.drawImage(art,0,cut,aw,ah-cut,0,dy+extra,w,h-dy);
-    }
-    ctx.save();ctx.shadowColor='rgba(14,74,130,.22)';ctx.shadowBlur=16;ctx.shadowOffsetY=5;
-    rect(ctx,170,425,w-340,91,24,grad(ctx,170,425,w-170,516,[[0,'#0a335f'],[1,'#1266ad']]),'#f4c400',4);ctx.restore();
-    label(ctx,dateText(date),w/2,471,w-410,59,'#fff',true,900);
-    const cw=(w-2*margin-gap)/2;
-    data.forEach((m,i)=>{
-      const row=Math.floor(i/2),single=i===data.length-1&&data.length%2===1;
-      card(ctx,m,images,bg,single?(w-cw)/2:margin+i%2*(cw+gap),550+row*(ch+gap),cw,ch);
-    });
+    const w=posterWidth,{margin,top,height,gap,footer}=rowLayout;
+    const bottom=top+data.length*height+Math.max(0,data.length-1)*gap;
+    canvas.width=w;canvas.height=bottom+26+footer;
+    const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+    ctx.fillStyle=grad(ctx,0,0,w,canvas.height,[[0,'#edf8ff'],[.5,'#dcefff'],[1,'#e8f5ff']]);ctx.fillRect(0,0,w,canvas.height);
+    drawHeader(ctx,art,w);
+    ctx.save();ctx.shadowColor='rgba(14,74,130,.24)';ctx.shadowBlur=13;ctx.shadowOffsetY=4;
+    rect(ctx,65,443,w-130,100,26,grad(ctx,65,443,w-65,543,[[0,'#06356b'],[.5,'#0974bd'],[1,'#064086']]),'#ffd521',5);ctx.restore();
+    label(ctx,dateText(date),w/2,493,w-200,68,'#fff',true,900,true);
+    data.forEach((m,i)=>rowCard(ctx,m,images,bg,margin,top+i*(height+gap),w-2*margin,height));
+    drawFooter(ctx,art,w,bottom+26,footer);
   }
   async function loadSavedBackground(){
     const path=competition?.poster_background_path;
@@ -198,8 +212,8 @@
       status.textContent='Checking and saving the shared HD poster background…';
       blobUrl=URL.createObjectURL(file);
       const image=await loadPhoto(blobUrl);
-      if(!image||image.naturalWidth<1000||image.naturalHeight<1300||Math.abs(image.naturalWidth/image.naturalHeight-.75)>.015)
-        throw new Error('Use a 3:4 portrait image at least 1000 × 1300 pixels.');
+      if(!image||image.naturalWidth<850||image.naturalHeight<1200||image.naturalWidth/image.naturalHeight<.48||image.naturalWidth/image.naturalHeight>.80)
+        throw new Error('Use a tall portrait image at least 850 × 1200 pixels (3:4 or approximately 9:16).');
       const ext={'image/png':'png','image/jpeg':'jpg','image/webp':'webp'}[file.type];
       path=cid+'/'+Date.now()+'-'+Math.random().toString(36).slice(2,10)+'.'+ext;
       const bucket=sb.storage.from(posterBucket);
@@ -223,7 +237,7 @@
   function makeDialog(){
     if(dialog)return dialog;
     const d=document.createElement('dialog');d.className='match-poster-dialog';d.setAttribute('aria-labelledby','matchPosterTitle');
-    d.innerHTML='<div class="match-poster-top"><div><strong id="matchPosterTitle">Match Day Poster</strong><p id="matchPosterDate"></p></div><button type="button" class="btn secondary" data-poster-close aria-label="Close poster preview">Close ×</button></div><div class="match-poster-content"><p id="matchPosterStatus" role="status" aria-live="polite"></p><canvas id="matchPosterCanvas" aria-label="Match day poster preview" hidden></canvas></div><div class="match-poster-bottom"><small>High-resolution portrait PNG · Actual player photos · No skill ratings or team averages</small><div class="match-poster-actions"><label class="btn secondary match-poster-upload" title="Upload the shared 3:4 poster template"><span data-background-label>Set Poster Background</span><input type="file" data-poster-background accept="image/png,image/jpeg,image/webp" aria-label="Set poster background"></label> <button type="button" class="btn secondary" data-poster-retry>Refresh poster</button> <button type="button" class="btn" data-poster-download disabled>Download PNG ↓</button></div></div>';
+    d.innerHTML='<div class="match-poster-top"><div><strong id="matchPosterTitle">Match Day Poster</strong><p id="matchPosterDate"></p></div><button type="button" class="btn secondary" data-poster-close aria-label="Close poster preview">Close ×</button></div><div class="match-poster-content"><p id="matchPosterStatus" role="status" aria-live="polite"></p><canvas id="matchPosterCanvas" aria-label="Match day poster preview" hidden></canvas></div><div class="match-poster-bottom"><small>High-resolution portrait PNG · Actual player photos · No skill ratings or team averages</small><div class="match-poster-actions"><label class="btn secondary match-poster-upload" title="Upload a shared portrait poster background"><span data-background-label>Set Poster Background</span><input type="file" data-poster-background accept="image/png,image/jpeg,image/webp" aria-label="Set poster background"></label> <button type="button" class="btn secondary" data-poster-retry>Refresh poster</button> <button type="button" class="btn" data-poster-download disabled>Download PNG ↓</button></div></div>';
     document.body.appendChild(d);
     d.querySelector('[data-poster-close]').onclick=()=>d.close();
     d.querySelector('[data-poster-retry]').onclick=()=>window.openMatchDayPoster(dateSelected);
@@ -253,12 +267,12 @@
       if(!isAdmin()){d.close();return}
       const images=new Map(loaded);
       const missing=[...new Set(data.flatMap(m=>m.players).filter(p=>!p.photo||!images.get(p.photo)).map(p=>p.name))];
-      if(art)paintLight(canvas,date,data,images,bg,art);else paint(canvas,date,data,images,bg);
+      paintLight(canvas,date,data,images,bg,art);
       const blob=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('PNG export failed')),'image/png'));
       if(token!==generation)return;
       exportBlob=blob;canvas.hidden=false;download.disabled=false;
       const notes=[];if(missing.length)notes.push('Photo unavailable (initials shown): '+missing.join(', ')+'.');if(!bg)notes.push('Stadium artwork unavailable; using built-in graphics.');
-      if(!art)notes.push(competition?.poster_background_path?'Shared background could not be loaded; showing previous template.':'Previous template shown. Set Poster Background to activate the new light design.');
+      if(!art)notes.push(competition?.poster_background_path?'Saved artwork could not be loaded; using the built-in light template.':'Using the built-in light template. Set Poster Background to use your artwork.');
       status.textContent='Poster ready · '+canvas.width+' × '+canvas.height+' px'+(notes.length?' · '+notes.join(' '):'');
     }catch(e){if(token===generation)status.textContent='Could not generate poster: '+(e.message||e)+'. Please refresh the poster.'}
     finally{if(token===generation){busy=false;retry.disabled=false;upload.disabled=false}}
