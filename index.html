@@ -4,7 +4,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="20261113-public-completed-visible-v20">
+<meta name="app-build" content="20261117-match-weekday-heading-v21">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#0b2d5c" />
@@ -524,6 +524,14 @@ document.getElementById('nextMatches').innerHTML=next.length?next.map(dashboardM
 document.getElementById('top10').innerHTML=top.length?top.map((r,i)=>'<div class="dash-rank-row"><span class="dash-rank-no '+(i<3?'top':'')+'">'+r.official_rank+'</span><div class="dash-rank-player"><b>'+esc(r.display_name)+'</b><small>'+r.matches_played+' played • '+r.match_wins+' wins</small></div><div class="dash-rank-stat"><b>'+signed(r.score_difference)+'</b><small>Diff</small></div></div>').join(''):'<div class="empty">No ranking data yet.</div>';
 document.getElementById('participationWatch').innerHTML=watch.length?watch.map(s=>{const pct=targetPerPlayer?Math.min(100,Math.round(((s.matches_played||0)/targetPerPlayer)*100)):0;return '<div class="dash-watch-row"><div><b>'+esc(s.display_name)+'</b><small>'+(s.matches_played||0)+' played • '+(s.upcoming_matches||0)+' upcoming</small></div><div class="dash-watch-progress"><span style="width:'+pct+'%"></span></div><strong>'+Math.max(0,targetPerPlayer-(s.matches_played||0))+' left</strong></div>'}).join(''):'<div class="empty">No active participants.</div>';
 document.getElementById('matchOverview').innerHTML='<div class="dash-mini-stat"><span>2–0 Matches</span><strong>'+twoZero+'</strong><small>Straight-set wins</small></div><div class="dash-mini-stat"><span>2–1 Matches</span><strong>'+twoOne+'</strong><small>Three-game matches</small></div><div class="dash-mini-stat"><span>Queue</span><strong>'+upcoming.length+'</strong><small>Upcoming / live</small></div><div class="dash-mini-stat '+(balanced?'good':'attention')+'"><span>Fairness</span><strong>'+(balanced?'Excellent':spread===2?'Good':'Needs Attention')+'</strong><small>Spread '+spread+' match'+(spread===1?'':'es')+'</small></div>'}
+function matchDayLabel(date){
+  const dayDate=new Date(date+'T12:00:00Z');
+  const weekday=dayDate.toLocaleDateString('en-US',{timeZone:'UTC',weekday:'long'});
+  const fullDate=dayDate.toLocaleDateString('en-US',{
+    timeZone:'UTC',month:'long',day:'numeric',year:'numeric'
+  });
+  return weekday+' - '+fullDate;
+}
 function renderMatches(){
   const admin=isAdmin();
   const filterSelect=document.getElementById('matchFilter');
@@ -564,7 +572,7 @@ function renderMatches(){
     const lineup=lineups(m);
     const dailyNumber=typeof mcxDailyMatchNumber==='function'?mcxDailyMatchNumber(m):m.slot;
     const searchable=['match '+m.match_number,'match '+dailyNumber,dateFmt(m.scheduled_date),
-      m.scheduled_date,lineup.a1,lineup.a2,lineup.b1,lineup.b2].join(' ').toLowerCase();
+      matchDayLabel(m.scheduled_date),m.scheduled_date,lineup.a1,lineup.a2,lineup.b1,lineup.b2].join(' ').toLowerCase();
     return searchable.includes(query);
   }).sort((a,b)=>{
     const dateOrder=a.scheduled_date.localeCompare(b.scheduled_date);
@@ -580,9 +588,7 @@ function renderMatches(){
     byDate.get(m.scheduled_date).push(m);
   });
   host.innerHTML=Array.from(byDate,([date,items])=>{
-    const label=new Date(date+'T12:00:00Z').toLocaleDateString('en-US',{
-      timeZone:'UTC',month:'long',day:'numeric',year:'numeric'
-    });
+    const label=matchDayLabel(date);
     return '<section class="match-day-group" aria-label="'+esc(label)+' Matches">'
       +'<h3 class="match-day-heading"><span class="match-day-heading-icon" aria-hidden="true">▦</span>'
       +esc(label)+' Matches</h3>'
@@ -860,7 +866,7 @@ sb.auth.getSession().then(({data})=>{session=data.session;applyAuth();loadAll().
 <script src="/rankings-experience.js?v=20261112-ranking-exclusion-v1"></script>
 <script>
 (function(){
-  const CURRENT_BUILD='20261113-public-completed-visible-v20';
+  const CURRENT_BUILD='20261117-match-weekday-heading-v21';
   async function checkForNewBuild(){
     try{
       const r=await fetch('/index.html?buildcheck='+Date.now(),{cache:'no-store'});
