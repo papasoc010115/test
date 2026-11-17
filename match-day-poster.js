@@ -128,11 +128,24 @@
     rect(ctx,900,260,700,85,23,grad(ctx,900,260,1600,345,[[0,'#074083'],[1,'#0074bf']]));
     label(ctx,'COMPETITION',1250,303,665,74,'#ffdc00',true,900);
   }
+  function footerSource(art){
+    if(!art||!art.naturalWidth||!art.naturalHeight)return null;
+    const aw=art.naturalWidth,ah=art.naturalHeight;
+    const cut=Math.round(ah*(aw/ah<.65?.885:.725));
+    return {aw,cut,sh:ah-cut};
+  }
+  function footerHeight(art,w,fallback){
+    const source=footerSource(art);
+    return source?Math.ceil(w*source.sh/source.aw):fallback;
+  }
   function drawFooter(ctx,art,w,y,h){
-    if(art){
-      const aw=art.naturalWidth,ah=art.naturalHeight;
-      const cut=Math.round(ah*(aw/ah<.65?.885:.725));
-      ctx.drawImage(art,0,cut,aw,ah-cut,0,y,w,h);
+    const source=footerSource(art);
+    if(source){
+      // Uniform scale: original paddle, ball and court proportions.
+      const {aw,cut,sh}=source;
+      const scale=w/aw;
+      const dh=sh*scale;
+      ctx.drawImage(art,0,cut,aw,sh,0,y,w,dh);
     }else{
       ctx.fillStyle=grad(ctx,0,y,w,y+h,[[0,'#d5f2ff'],[.4,'#128dd5'],[1,'#03346e']]);ctx.fillRect(0,y,w,h);
       ctx.strokeStyle='#effcff';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(w/2,y);ctx.lineTo(w/2,y+h);ctx.moveTo(0,y+h*.55);ctx.lineTo(w,y+h*.55);ctx.stroke();
@@ -159,14 +172,12 @@
       ball(ctx,x+w*.5,y+h*.43,h*.15);label(ctx,'VS',x+w*.5,y+h*.61,w*.14,106,'#fff',true,900,true);
     }
     // Keep the centre VS clear of the four portraits.
-    const centers=[.137,.337,.663,.863],photoW=w*.166,photoH=330,py=y+105,ny=y+427,nameW=w*.194;
+    const centers=[.137,.337,.663,.863],photoW=w*.193,photoH=360,py=y+78,ny=y+427,nameW=w*.194;
     match.players.forEach((p,i)=>{
       const left=i<2,cx=x+w*centers[i],px=cx-photoW/2;
-      const panel=grad(ctx,px,py,px+photoW,py+photoH,[[0,'#f2faff'],[1,'#bad8ee']]);
-      rect(ctx,px,py,photoW,photoH,30,panel,left?'#ffd539':'#65daff',4);
-      ctx.save();path(ctx,px+4,py+4,photoW-8,photoH-8,26);ctx.clip();
-      portrait(ctx,p,images.get(p.photo),px+4,py+4,photoW-8,photoH-8);
-      ctx.restore();
+      // Draw the original alpha-transparent portrait directly on the
+      // stadium. No filled photo panel, border or rounded photo mask.
+      portrait(ctx,p,images.get(p.photo),px,py,photoW,photoH);
       posterName(ctx,p.name,cx-nameW/2,ny,nameW,75,left);
     });
     const tagW=w*.29;
@@ -178,7 +189,8 @@
   function paintLight(canvas,date,data,images,bg,art){
     const w=posterWidth,{margin,top,height,gap,footer}=rowLayout;
     const bottom=top+data.length*height+Math.max(0,data.length-1)*gap;
-    canvas.width=w;canvas.height=bottom+26+footer;
+    const footerH=footerHeight(art,w,footer);
+    canvas.width=w;canvas.height=bottom+26+footerH;
     const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
     ctx.fillStyle=grad(ctx,0,0,w,canvas.height,[[0,'#edf8ff'],[.5,'#dcefff'],[1,'#e8f5ff']]);ctx.fillRect(0,0,w,canvas.height);
     drawHeader(ctx,art,w);
@@ -186,7 +198,7 @@
     rect(ctx,65,443,w-130,100,26,grad(ctx,65,443,w-65,543,[[0,'#06356b'],[.5,'#0974bd'],[1,'#064086']]),'#ffd521',5);ctx.restore();
     label(ctx,dateText(date),w/2,493,w-200,68,'#fff',true,900,true);
     data.forEach((m,i)=>rowCard(ctx,m,images,bg,margin,top+i*(height+gap),w-2*margin,height));
-    drawFooter(ctx,art,w,bottom+26,footer);
+    drawFooter(ctx,art,w,bottom+26,footerH);
   }
   async function loadSavedBackground(){
     const path=competition?.poster_background_path;
