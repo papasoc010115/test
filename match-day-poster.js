@@ -3,7 +3,8 @@
 (function(){
   'use strict';
   const W=1600,H=2240, stadium='/assets/match-stadium-hd.webp';
-  let dialog=null, generation=0, exportBlob=null, busy=false, dateSelected='';
+  let dialog=null, generation=0, exportBlob=null, busy=false, dateSelected='', uploadBusy=false;
+  const posterBucket='match-poster-backgrounds';
   const rosterForDay=date=>matches.filter(m=>m.scheduled_date===date&&m.status!=='CANCELLED')
     .slice().sort((a,b)=>Number(a.slot??999)-Number(b.slot??999)||Number(a.match_number??0)-Number(b.match_number??0))
     .map((m,i)=>{
@@ -150,13 +151,83 @@
     label(ctx,'MATCH DAY SCHEDULE',W/2,H+extra-55,W-180,31,'#e8f2ff',false,700,true);
     ctx.fillStyle='#f8c810';ctx.fillRect(55,H+extra-56,215,5);ctx.fillRect(W-270,H+extra-56,215,5);
   }
+  function paintLight(canvas,date,data,images,bg,art){
+    const w=1800,h=2400,gap=24,margin=44,ch=550;
+    const rows=Math.max(2,Math.ceil(data.length/2)),extra=(rows-2)*(ch+gap);
+    canvas.width=w;canvas.height=h+extra;
+    const ctx=canvas.getContext('2d');
+    ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+    const aw=art.naturalWidth,ah=art.naturalHeight;
+    if(!extra)ctx.drawImage(art,0,0,w,h);
+    else{
+      const cut=Math.round(ah*.715),dy=Math.round(h*.715);
+      ctx.drawImage(art,0,0,aw,cut,0,0,w,dy);
+      ctx.fillStyle=grad(ctx,0,dy,w,dy+extra,[[0,'#e5f3ff'],[.5,'#f3f9ff'],[1,'#d9efff']]);ctx.fillRect(0,dy,w,extra);
+      ctx.drawImage(art,0,cut,aw,ah-cut,0,dy+extra,w,h-dy);
+    }
+    ctx.save();ctx.shadowColor='rgba(14,74,130,.22)';ctx.shadowBlur=16;ctx.shadowOffsetY=5;
+    rect(ctx,170,425,w-340,91,24,grad(ctx,170,425,w-170,516,[[0,'#0a335f'],[1,'#1266ad']]),'#f4c400',4);ctx.restore();
+    label(ctx,dateText(date),w/2,471,w-410,59,'#fff',true,900);
+    const cw=(w-2*margin-gap)/2;
+    data.forEach((m,i)=>{
+      const row=Math.floor(i/2),single=i===data.length-1&&data.length%2===1;
+      card(ctx,m,images,bg,single?(w-cw)/2:margin+i%2*(cw+gap),550+row*(ch+gap),cw,ch);
+    });
+  }
+  async function loadSavedBackground(){
+    const path=competition?.poster_background_path;
+    if(!path||!path.startsWith(competition.id+'/'))return null;
+    try{
+      const {data,error}=await sb.storage.from(posterBucket).download(path);
+      if(error||!data)return null;
+      const url=URL.createObjectURL(data);
+      try{return await loadPhoto(url)}finally{URL.revokeObjectURL(url)}
+    }catch(e){return null}
+  }
+  async function savePosterBackground(input){
+    const file=input.files?.[0];input.value='';
+    if(!file||uploadBusy||busy||!requireAdmin()||!competition)return;
+    if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>8*1024*1024){
+      toast('Choose a PNG, JPEG or WebP image under 8 MB.',true);return;
+    }
+    const d=dialog,status=d.querySelector('#matchPosterStatus'),retry=d.querySelector('[data-poster-retry]');
+    const date=dateSelected,cid=competition.id,old=competition.poster_background_path,download=d.querySelector('[data-poster-download]');
+    uploadBusy=true;input.disabled=true;retry.disabled=true;download.disabled=true;
+    let path='',saved=false,blobUrl='';
+    try{
+      status.textContent='Checking and saving the shared HD poster background…';
+      blobUrl=URL.createObjectURL(file);
+      const image=await loadPhoto(blobUrl);
+      if(!image||image.naturalWidth<1000||image.naturalHeight<1300||Math.abs(image.naturalWidth/image.naturalHeight-.75)>.015)
+        throw new Error('Use a 3:4 portrait image at least 1000 × 1300 pixels.');
+      const ext={'image/png':'png','image/jpeg':'jpg','image/webp':'webp'}[file.type];
+      path=cid+'/'+Date.now()+'-'+Math.random().toString(36).slice(2,10)+'.'+ext;
+      const bucket=sb.storage.from(posterBucket);
+      const {error:upError}=await bucket.upload(path,file,{contentType:file.type,cacheControl:'31536000',upsert:false});
+      if(upError)throw upError;
+      const {data,error:dbError}=await sb.from('competitions').update({poster_background_path:path}).eq('id',cid).select('poster_background_path').single();
+      if(dbError||data?.poster_background_path!==path)throw dbError||new Error('Background setting was not confirmed.');
+      saved=true;
+      if(competition?.id===cid)competition.poster_background_path=path;
+      if(old&&old!==path&&old.startsWith(cid+'/')){try{await bucket.remove([old])}catch(e){}}
+      toast('Shared poster background saved.');
+    }catch(e){
+      if(path&&!saved){try{await sb.storage.from(posterBucket).remove([path])}catch(cleanupError){}}
+      status.textContent='Background was not saved: '+(e.message||e);toast(status.textContent,true);
+    }finally{
+      if(blobUrl)URL.revokeObjectURL(blobUrl);
+      uploadBusy=false;input.disabled=false;retry.disabled=false;download.disabled=!exportBlob||busy;
+    }
+    if(saved&&d.open&&date===dateSelected&&competition?.id===cid&&isAdmin())await window.openMatchDayPoster(date);
+  }
   function makeDialog(){
     if(dialog)return dialog;
     const d=document.createElement('dialog');d.className='match-poster-dialog';d.setAttribute('aria-labelledby','matchPosterTitle');
-    d.innerHTML='<div class="match-poster-top"><div><strong id="matchPosterTitle">Match Day Poster</strong><p id="matchPosterDate"></p></div><button type="button" class="btn secondary" data-poster-close aria-label="Close poster preview">Close ×</button></div><div class="match-poster-content"><p id="matchPosterStatus" role="status" aria-live="polite"></p><canvas id="matchPosterCanvas" aria-label="Match day poster preview" hidden></canvas></div><div class="match-poster-bottom"><small>High-resolution portrait PNG · Actual player photos · No skill ratings or team averages</small><div><button type="button" class="btn secondary" data-poster-retry>Refresh poster</button> <button type="button" class="btn" data-poster-download disabled>Download PNG ↓</button></div></div>';
+    d.innerHTML='<div class="match-poster-top"><div><strong id="matchPosterTitle">Match Day Poster</strong><p id="matchPosterDate"></p></div><button type="button" class="btn secondary" data-poster-close aria-label="Close poster preview">Close ×</button></div><div class="match-poster-content"><p id="matchPosterStatus" role="status" aria-live="polite"></p><canvas id="matchPosterCanvas" aria-label="Match day poster preview" hidden></canvas></div><div class="match-poster-bottom"><small>High-resolution portrait PNG · Actual player photos · No skill ratings or team averages</small><div class="match-poster-actions"><label class="btn secondary match-poster-upload" title="Upload the shared 3:4 poster template"><span data-background-label>Set Poster Background</span><input type="file" data-poster-background accept="image/png,image/jpeg,image/webp" aria-label="Set poster background"></label> <button type="button" class="btn secondary" data-poster-retry>Refresh poster</button> <button type="button" class="btn" data-poster-download disabled>Download PNG ↓</button></div></div>';
     document.body.appendChild(d);
     d.querySelector('[data-poster-close]').onclick=()=>d.close();
     d.querySelector('[data-poster-retry]').onclick=()=>window.openMatchDayPoster(dateSelected);
+    d.querySelector('[data-poster-background]').onchange=e=>savePosterBackground(e.target);
     d.querySelector('[data-poster-download]').onclick=()=>{
       if(!requireAdmin()||!exportBlob||busy)return;
       const url=URL.createObjectURL(exportBlob),a=document.createElement('a');a.href=url;a.download='TLP-Match-Day-'+dateSelected+'.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),15000);
@@ -165,28 +236,31 @@
     dialog=d;return d;
   }
   window.openMatchDayPoster=async date=>{
-    if(!requireAdmin()||!/^\d{4}-\d{2}-\d{2}$/.test(date))return;
+    if(uploadBusy||!requireAdmin()||!/^\d{4}-\d{2}-\d{2}$/.test(date))return;
     const data=rosterForDay(date);
     if(!data.length){toast('No matches scheduled for this date.',true);return}
     const d=makeDialog(),token=++generation;dateSelected=date;busy=true;exportBlob=null;
     const canvas=d.querySelector('canvas'),status=d.querySelector('#matchPosterStatus'),download=d.querySelector('[data-poster-download]'),retry=d.querySelector('[data-poster-retry]');
     d.querySelector('#matchPosterDate').textContent=dateText(date)+' · '+data.length+' matches';
-    download.disabled=true;retry.disabled=true;canvas.hidden=true;status.textContent='Loading actual player photos and rendering your poster…';
+    const upload=d.querySelector('[data-poster-background]');
+    d.querySelector('[data-background-label]').textContent=competition?.poster_background_path?'Change Poster Background':'Set Poster Background';
+    download.disabled=true;retry.disabled=true;upload.disabled=true;canvas.hidden=true;status.textContent='Loading actual player photos and rendering your poster…';
     if(!d.open)d.showModal();
     try{
       const urls=[...new Set(data.flatMap(m=>m.players.map(p=>p.photo)).filter(Boolean))];
-      const [bg,loaded]=await Promise.all([loadPhoto(stadium),Promise.all(urls.map(async url=>[url,await loadPhoto(url)]))]);
+      const [bg,loaded,art]=await Promise.all([loadPhoto(stadium),Promise.all(urls.map(async url=>[url,await loadPhoto(url)])),loadSavedBackground()]);
       if(token!==generation)return;
       if(!isAdmin()){d.close();return}
       const images=new Map(loaded);
       const missing=[...new Set(data.flatMap(m=>m.players).filter(p=>!p.photo||!images.get(p.photo)).map(p=>p.name))];
-      paint(canvas,date,data,images,bg);
+      if(art)paintLight(canvas,date,data,images,bg,art);else paint(canvas,date,data,images,bg);
       const blob=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('PNG export failed')),'image/png'));
       if(token!==generation)return;
       exportBlob=blob;canvas.hidden=false;download.disabled=false;
       const notes=[];if(missing.length)notes.push('Photo unavailable (initials shown): '+missing.join(', ')+'.');if(!bg)notes.push('Stadium artwork unavailable; using built-in graphics.');
-      status.textContent=notes.length?notes.join(' ')+' Refresh to retry.':'Poster ready · '+canvas.width+' × '+canvas.height+' px';
+      if(!art)notes.push(competition?.poster_background_path?'Shared background could not be loaded; showing previous template.':'Previous template shown. Set Poster Background to activate the new light design.');
+      status.textContent='Poster ready · '+canvas.width+' × '+canvas.height+' px'+(notes.length?' · '+notes.join(' '):'');
     }catch(e){if(token===generation)status.textContent='Could not generate poster: '+(e.message||e)+'. Please refresh the poster.'}
-    finally{if(token===generation){busy=false;retry.disabled=false}}
+    finally{if(token===generation){busy=false;retry.disabled=false;upload.disabled=false}}
   };
 })();
