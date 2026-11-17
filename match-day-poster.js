@@ -93,9 +93,9 @@
     ctx.restore();
   }
   // One full-width fixture per row. The uploaded artwork is used only
-  // for its decorative header/footer, never for baked dates or fixtures.
+  // for its decorative header and in-card artwork, never for baked dates or fixtures.
   const posterWidth=1800;
-  const rowLayout={margin:40,top:572,height:540,gap:30,footer:335};
+  const rowLayout={margin:40,top:572,height:540,gap:30,bottomMargin:40};
   function drawHeader(ctx,art,w){
     const hh=422;
     ctx.fillStyle=grad(ctx,0,0,w,hh,[[0,'#d4edff'],[.44,'#fff'],[1,'#e0f3ff']]);ctx.fillRect(0,0,w,hh);
@@ -134,25 +134,31 @@
     const cut=Math.round(ah*(aw/ah<.65?.885:.725));
     return {aw,cut,sh:ah-cut};
   }
-  function footerHeight(art,w,fallback){
-    const source=footerSource(art);
-    return source?Math.ceil(w*source.sh/source.aw):fallback;
-  }
-  function drawFooter(ctx,art,w,y,h){
-    const source=footerSource(art);
-    if(source){
-      // Uniform scale: original paddle, ball and court proportions.
-      const {aw,cut,sh}=source;
-      const scale=w/aw;
-      const dh=sh*scale;
-      ctx.drawImage(art,0,cut,aw,sh,0,y,w,dh);
+  // Reuse the saved court/paddles/ball artwork as a softly blended layer
+  // inside each match card. No standalone footer or stretched artwork.
+  function createMatchArtwork(art,w,h){
+    const layer=document.createElement('canvas');
+    layer.width=w;layer.height=h;
+    const c=layer.getContext('2d');
+    c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';
+    const src=footerSource(art);
+    if(src){
+      const dw=w*.68,dh=dw*src.sh/src.aw;
+      c.drawImage(art,0,src.cut,src.aw,src.sh,(w-dw)/2,h-dh,dw,dh);
     }else{
-      ctx.fillStyle=grad(ctx,0,y,w,y+h,[[0,'#d5f2ff'],[.4,'#128dd5'],[1,'#03346e']]);ctx.fillRect(0,y,w,h);
-      ctx.strokeStyle='#effcff';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(w/2,y);ctx.lineTo(w/2,y+h);ctx.moveTo(0,y+h*.55);ctx.lineTo(w,y+h*.55);ctx.stroke();
-      rect(ctx,120,y+15,w-240,82,2,'#064b7c','#b9f3ff',3);
-      for(let x=125;x<w-120;x+=26){ctx.beginPath();ctx.moveTo(x,y+15);ctx.lineTo(x,y+97);ctx.strokeStyle='#b9e9fa';ctx.lineWidth=1;ctx.stroke()}
-      paddle(ctx,w/2-155,y+h*.59,-.7);paddle(ctx,w/2+155,y+h*.59,.7);ball(ctx,w/2,y+h*.78,62);
+      c.save();c.translate(w/2,h-83);c.scale(.68,.68);
+      paddle(c,-123,-12,-.72);paddle(c,123,-12,.72);ball(c,0,74,57);
+      c.restore();
     }
+    // Fade in below the existing VS graphic and feather the sides.
+    // The original stadium and player portraits remain dominant.
+    c.globalCompositeOperation='destination-in';
+    c.fillStyle=grad(c,0,0,0,h,[[0,'rgba(0,0,0,0)'],[.54,'rgba(0,0,0,0)'],[.70,'rgba(0,0,0,.17)'],[.88,'rgba(0,0,0,.58)'],[1,'rgba(0,0,0,.56)']]);
+    c.fillRect(0,0,w,h);
+    c.fillStyle=grad(c,0,0,w,0,[[0,'rgba(0,0,0,0)'],[.14,'rgba(0,0,0,0)'],[.30,'#000'],[.70,'#000'],[.86,'rgba(0,0,0,0)'],[1,'rgba(0,0,0,0)']]);
+    c.fillRect(0,0,w,h);
+    c.globalCompositeOperation='source-over';
+    return layer;
   }
   function posterName(ctx,name,x,y,w,h,left){
     const g=grad(ctx,x,y,x,y+h,left?[[0,'#fff477'],[.45,'#ffd52b'],[1,'#efaa00']]:[[0,'#1fc8ff'],[.43,'#078de1'],[1,'#0750ad']]);
@@ -161,7 +167,7 @@
     const size=Math.min(48,h*.66),color=left?'#082448':'#fff';
     label(ctx,name,x+w/2,y+h/2,w-24,size,color,true,900,!left);
   }
-  function rowCard(ctx,match,images,bg,x,y,w,h){
+  function rowCard(ctx,match,images,bg,artwork,x,y,w,h){
     ctx.save();path(ctx,x,y,w,h,38);ctx.clip();
     ctx.fillStyle=grad(ctx,x,y,x+w,y+h,[[0,'#06162e'],[.45,'#12467a'],[1,'#071c3c']]);ctx.fillRect(x,y,w,h);
     if(bg)ctx.drawImage(bg,x,y,w,h);
@@ -171,6 +177,7 @@
       poly(ctx,[[x+w,y+h*.56],[x+w*.62,y+h*.12],[x+w*.75,y+h*.72],[x+w,y+h*.92]],'#007ecb');
       ball(ctx,x+w*.5,y+h*.43,h*.15);label(ctx,'VS',x+w*.5,y+h*.61,w*.14,106,'#fff',true,900,true);
     }
+    if(artwork)ctx.drawImage(artwork,x,y,w,h);
     // Keep the centre VS clear of the four portraits.
     const centers=[.137,.337,.663,.863],photoW=w*.193,photoH=360,py=y+78,ny=y+427,nameW=w*.194;
     match.players.forEach((p,i)=>{
@@ -187,18 +194,17 @@
     ctx.save();ctx.shadowColor='#16bfff';ctx.shadowBlur=10;rect(ctx,x,y,w,h,38,null,'#99e7ff',4);ctx.restore();
   }
   function paintLight(canvas,date,data,images,bg,art){
-    const w=posterWidth,{margin,top,height,gap,footer}=rowLayout;
+    const w=posterWidth,{margin,top,height,gap,bottomMargin}=rowLayout;
     const bottom=top+data.length*height+Math.max(0,data.length-1)*gap;
-    const footerH=footerHeight(art,w,footer);
-    canvas.width=w;canvas.height=bottom+26+footerH;
+    canvas.width=w;canvas.height=bottom+bottomMargin;
     const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
     ctx.fillStyle=grad(ctx,0,0,w,canvas.height,[[0,'#edf8ff'],[.5,'#dcefff'],[1,'#e8f5ff']]);ctx.fillRect(0,0,w,canvas.height);
     drawHeader(ctx,art,w);
     ctx.save();ctx.shadowColor='rgba(14,74,130,.24)';ctx.shadowBlur=13;ctx.shadowOffsetY=4;
     rect(ctx,65,443,w-130,100,26,grad(ctx,65,443,w-65,543,[[0,'#06356b'],[.5,'#0974bd'],[1,'#064086']]),'#ffd521',5);ctx.restore();
     label(ctx,dateText(date),w/2,493,w-200,68,'#fff',true,900,true);
-    data.forEach((m,i)=>rowCard(ctx,m,images,bg,margin,top+i*(height+gap),w-2*margin,height));
-    drawFooter(ctx,art,w,bottom+26,footerH);
+    const artwork=createMatchArtwork(art,w-2*margin,height);
+    data.forEach((m,i)=>rowCard(ctx,m,images,bg,artwork,margin,top+i*(height+gap),w-2*margin,height));
   }
   async function loadSavedBackground(){
     const path=competition?.poster_background_path;
