@@ -4,7 +4,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="20261117-match-weekday-heading-v21">
+<meta name="app-build" content="20261117-match-day-poster-v22">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#0b2d5c" />
@@ -259,6 +259,42 @@
   .public-matches-empty{margin:18px 0;padding:35px 16px;border-radius:15px}
   .public-matches-empty-icon{width:55px;height:55px;font-size:26px}
   .public-matches-toggle{width:100%;justify-content:center}
+}
+
+
+/* Per-date match poster export, independent of the schedule lock. */
+.match-day-heading-text{flex:1;min-width:0}
+.match-date-groups .match-day-heading .match-poster-btn{
+  flex:none;display:inline-flex;align-items:center;gap:7px;margin-left:auto;
+  white-space:nowrap;font-size:12px;line-height:1.2;font-weight:850;
+  padding:10px 14px;background:linear-gradient(135deg,#0b3969,#126eb3);color:#fff;
+  border:1px solid #1765a1;border-radius:9px;box-shadow:0 2px 7px #0b396924;
+}
+.public-mode .match-poster-btn{display:none!important}
+.match-poster-dialog{
+  box-sizing:border-box;width:min(760px,96vw);max-width:96vw;max-height:94vh;
+  max-height:94dvh;margin:auto;padding:0;border:1px solid #c3d8ea;
+  background:#f4f7fc;color:#153b63;border-radius:18px;box-shadow:0 18px 70px #0006;
+}
+.match-poster-dialog[open]{display:flex;flex-direction:column}
+.match-poster-dialog::backdrop{background:#07172bd9}
+.match-poster-top,.match-poster-bottom{
+  flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 18px;background:#fff;
+}
+.match-poster-top{border-bottom:1px solid #dbe7f3}
+.match-poster-top strong{font-size:20px;color:#0d3866}
+.match-poster-top p{margin:4px 0 0;font-size:12px;color:#536f8e}
+.match-poster-bottom{border-top:1px solid #dbe7f3}
+.match-poster-bottom small{font-size:11px;color:#58728e;flex:1;min-width:155px}
+.match-poster-content{padding:12px 16px 18px;overflow:auto;min-height:0;flex:1;text-align:center}
+#matchPosterStatus{font-size:12px;margin:4px auto 12px;color:#536f8e;line-height:1.5}
+#matchPosterCanvas{display:block;width:min(100%,540px);height:auto;margin:auto;border:1px solid #164b75;border-radius:8px;box-shadow:0 5px 16px #082a4b35}
+#matchPosterCanvas[hidden]{display:none}
+@media(max-width:600px){
+  .match-date-groups .match-day-heading{flex-wrap:wrap}
+  .match-date-groups .match-day-heading .match-poster-btn{font-size:11px;padding:8px 10px}
+  .match-poster-top,.match-poster-bottom{padding:10px 12px}
+  .match-poster-content{padding:10px}
 }
 
 </style>
@@ -589,9 +625,11 @@ function renderMatches(){
   });
   host.innerHTML=Array.from(byDate,([date,items])=>{
     const label=matchDayLabel(date);
+    const canPoster=admin&&/^\d{4}-\d{2}-\d{2}$/.test(date)&&matches.some(m=>m.scheduled_date===date&&m.status!=='CANCELLED');
+    const posterButton=canPoster?'<button type="button" class="btn match-poster-btn admin-only" data-poster-date="'+esc(date)+'" onclick="openMatchDayPoster(this.dataset.posterDate)" title="Create a downloadable poster of all non-cancelled matches on this day"><span aria-hidden="true">▧</span> Generate Poster</button>':'';
     return '<section class="match-day-group" aria-label="'+esc(label)+' Matches">'
       +'<h3 class="match-day-heading"><span class="match-day-heading-icon" aria-hidden="true">▦</span>'
-      +esc(label)+' Matches</h3>'
+      +'<span class="match-day-heading-text">'+esc(label)+' Matches</span>'+posterButton+'</h3>'
       +'<div class="matches-grid">'+items.map(matchCard).join('')+'</div></section>';
   }).join('');
 }
@@ -863,10 +901,11 @@ sb.auth.getSession().then(({data})=>{session=data.session;applyAuth();loadAll().
 </script>
 <script src="/participant-profile.js?v=20261113-slot-range-v3"></script>
 <script src="/matches-cinematic.js?v=20261107-winner-v13"></script>
+<script src="/match-day-poster.js?v=20261117-v1"></script>
 <script src="/rankings-experience.js?v=20261112-ranking-exclusion-v1"></script>
 <script>
 (function(){
-  const CURRENT_BUILD='20261117-match-weekday-heading-v21';
+  const CURRENT_BUILD='20261117-match-day-poster-v22';
   async function checkForNewBuild(){
     try{
       const r=await fetch('/index.html?buildcheck='+Date.now(),{cache:'no-store'});
