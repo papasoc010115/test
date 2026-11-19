@@ -4,7 +4,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="20261119-middle-slot-matches-v29">
+<meta name="app-build" content="20261119-select-match-date-v30">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#0b2d5c" />
@@ -307,7 +307,12 @@
 
 .week-generation-choice{display:inline-flex;align-items:center;gap:8px;border:1px solid #c7d9ee;border-radius:10px;background:#edf5ff;padding:5px 8px;white-space:nowrap;color:#163d68;font-weight:800;font-size:11px}
 .week-generation-choice .input{margin:0;min-width:145px;width:auto;min-height:32px;padding:5px 26px 5px 9px;font-size:12px;font-weight:750;background-color:#fff;color:#123957}
-.week-generation-choice:has(select:disabled){opacity:.65}
+.week-generation-choice:has(:disabled){opacity:.65}
+.week-generation-choice input[type="date"].input{min-width:162px;width:162px;max-width:100%;padding:5px 8px;color-scheme:light}
+.week-generation-hint{display:block;padding:9px 12px;margin:0 0 10px;border:1px solid #d9e7f7;border-radius:10px;background:#f7fbff;color:#24527c;font-size:12px;line-height:1.5}
+.week-generation-hint.is-warning{background:#fff9eb;border-color:#f4d49c;color:#80521a}
+.week-generation-hint.is-error{background:#fff1f0;border-color:#f6b3b0;color:#9f2921}
+.week-generation-hint b{font-weight:800}
 .public-mode .week-generation-choice{display:none!important}
 @media(max-width:650px){.week-generation-choice{width:100%;justify-content:space-between;box-sizing:border-box}.week-generation-choice .input{flex:1;max-width:210px}}
 </style>
@@ -362,7 +367,7 @@
     </div>
   </div>
 </section>
-<section id="matches" class="page"><div class="pagehead"><div><h2>Matches</h2><p class="match-page-help">Enter scores, replace players, and manage the upcoming queue.</p></div><div class="match-page-actions"><button id="publicMatchesBtn" type="button" class="btn admin-only public-matches-toggle" onclick="togglePublicMatches()" aria-pressed="true" title="Control whether spectators can see generated matches">🌐 Display to Public: Yes</button> <button id="matchLockBtn" class="btn yellow admin-only" onclick="toggleMatchLock()">🔒 Lock Matches</button> <button id="addMatchBtn" class="btn secondary admin-only" onclick="openManualMatch()">+ Add Match</button> <label class="week-generation-choice admin-only" for="weekGenerationDays"><span>Competition days</span><select id="weekGenerationDays" class="input" onchange="renderWeekGenerationControls()"><option value="both" selected>Thursday &amp; Friday</option><option value="thursday">Thursday only</option><option value="friday">Friday only</option></select></label> <button id="reshuffleBtn" class="btn secondary admin-only" onclick="reshuffleUpcoming()">Reshuffle Upcoming 8</button> <button id="generateBtn" class="btn admin-only" onclick="generateNext8()">Generate / Refresh Next 8</button> <button id="resetScoresBtn" class="btn red admin-only" onclick="resetAllScores()">Reset All Scores</button></div></div><div id="matchLockBanner"></div><div id="liveArena" class="live-arena"></div><div class="toolbar"><select id="matchFilter" class="input" onchange="renderMatches()"><option value="UPCOMING">Upcoming</option><option value="COMPLETED">Completed</option><option value="CANCELLED">Cancelled</option><option value="ALL">All matches</option></select><input id="matchSearch" class="input" placeholder="Search player / match" oninput="renderMatches()"></div><div id="matchesList" class="match-date-groups"></div></section>
+<section id="matches" class="page"><div class="pagehead"><div><h2>Matches</h2><p class="match-page-help">Enter scores, replace players, and manage the upcoming queue.</p></div><div class="match-page-actions"><button id="publicMatchesBtn" type="button" class="btn admin-only public-matches-toggle" onclick="togglePublicMatches()" aria-pressed="true" title="Control whether spectators can see generated matches">🌐 Display to Public: Yes</button> <button id="matchLockBtn" class="btn yellow admin-only" onclick="toggleMatchLock()">🔒 Lock Matches</button> <button id="addMatchBtn" class="btn secondary admin-only" onclick="openManualMatch()">+ Add Match</button> <label class="week-generation-choice admin-only" for="weekGenerationDays"><span>Competition days</span><select id="weekGenerationDays" class="input" onchange="onWeekGenerationModeChange()"><option value="both" selected>Thursday &amp; Friday</option><option value="thursday">Thursday only</option><option value="friday">Friday only</option></select></label> <label class="week-generation-choice admin-only" for="weekGenerationDate"><span>Match date</span><input type="date" id="weekGenerationDate" class="input" aria-label="Select the competition date to generate" onchange="renderWeekGenerationControls()" required></label> <button id="reshuffleBtn" class="btn secondary admin-only" onclick="reshuffleUpcoming()">Reshuffle Upcoming 8</button> <button id="generateBtn" class="btn admin-only" onclick="generateNext8()">Generate / Refresh Next 8</button> <button id="resetScoresBtn" class="btn red admin-only" onclick="resetAllScores()">Reset All Scores</button></div></div><div id="weekGenerationHint" class="week-generation-hint admin-only" role="status" aria-live="polite"></div><div id="matchLockBanner"></div><div id="liveArena" class="live-arena"></div><div class="toolbar"><select id="matchFilter" class="input" onchange="renderMatches()"><option value="UPCOMING">Upcoming</option><option value="COMPLETED">Completed</option><option value="CANCELLED">Cancelled</option><option value="ALL">All matches</option></select><input id="matchSearch" class="input" placeholder="Search player / match" oninput="renderMatches()"></div><div id="matchesList" class="match-date-groups"></div></section>
 <section id="participants" class="page"><div class="pagehead"><div><h2>Participants</h2><p>Open a dedicated profile to view a player’s complete match history, performance analytics, photo and match-generation settings.</p></div><button class="btn admin-only" onclick="openParticipant()">+ Add Participant</button></div><div class="toolbar"><input id="participantSearch" class="input" placeholder="Search participant" oninput="renderParticipants()"><select id="participantStatus" class="input" onchange="renderParticipants()"><option value="ALL">All</option><option value="ACTIVE">Active only</option><option value="INACTIVE">Inactive only</option></select></div><div class="card"><div class="tablewrap"><table><thead><tr>
 <th><button class="sort-th" onclick="setParticipantSort('player')">Player <span data-sort-indicator="player"></span></button></th>
 <th><button class="sort-th" onclick="setParticipantSort('rank')">Rank <span data-sort-indicator="rank"></span></button></th>
@@ -512,15 +517,82 @@ async function togglePublicMatches(){
   }
 }
 let weekGenerationBusy=false;
+function competitionManilaDate(){
+  const parts=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Manila',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+  const values=Object.fromEntries(parts.filter(x=>['year','month','day'].includes(x.type)).map(x=>[x.type,x.value]));
+  return values.year+'-'+values.month+'-'+values.day;
+}
+function addCompetitionDays(key,days){
+  const parsed=new Date(key+'T12:00:00Z');
+  if(!Number.isFinite(parsed.getTime()))return '';
+  parsed.setUTCDate(parsed.getUTCDate()+days);
+  return parsed.toISOString().slice(0,10);
+}
+function nextCompetitionThursday(){
+  const today=competitionManilaDate();
+  const day=new Date(today+'T12:00:00Z').getUTCDay();
+  let advance=(4-day+7)%7;
+  if(advance===0)advance=7;
+  return addCompetitionDays(today,advance);
+}
+function validCompetitionSelection(mode,selected){
+  if(!['thursday','friday','both'].includes(mode))return {error:'Choose Thursday, Friday or both days.'};
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(selected||''))return {error:'Select a competition date first.'};
+  const d=new Date(selected+'T12:00:00Z');
+  if(!Number.isFinite(d.getTime())||d.toISOString().slice(0,10)!==selected)return {error:'Invalid competition date.'};
+  const dow=d.getUTCDay(),required=mode==='friday'?5:4;
+  if(dow!==required)return {error:mode==='friday'?'Select a Friday for Friday-only generation.':'Select a Thursday to generate Thursday or both days.'};
+  if(selected<=competitionManilaDate())return {error:'Choose a future competition date. Today and past dates are protected.'};
+  if(competition?.schedule_closed_through&&selected<=competition.schedule_closed_through)return {error:'Selected date is already closed. Choose a later date.'};
+  const dates=mode==='both'?[selected,addCompetitionDays(selected,1)]:[selected];
+  const selectedMatches=matches.filter(m=>dates.includes(m.scheduled_date));
+  const blocked=selectedMatches.filter(m=>!['DRAFT','READY_TO_PLAY','PLAYER_REPLACEMENT_REQUIRED'].includes(m.status));
+  if(blocked.length)return {error:'Selected date contains '+blocked.length+' completed, cancelled, live or protected match(es). Choose another date.',dates};
+  return {dates,existing:selectedMatches.length,error:null};
+}
+function onWeekGenerationModeChange(){
+  const mode=document.getElementById('weekGenerationDays')?.value||'both';
+  const field=document.getElementById('weekGenerationDate');
+  if(!field)return;
+  const selected=field.value||nextCompetitionThursday();
+  const day=new Date(selected+'T12:00:00Z');
+  const current=day.getUTCDay(),target=mode==='friday'?5:4;
+  if(current!==target){
+    // Switching between Thursday/Friday keeps the same week when possible.
+    let delta=current===4&&target===5?1:current===5&&target===4?-1:(target-current+7)%7;
+    let next=addCompetitionDays(selected,delta);
+    if(next<=competitionManilaDate())next=addCompetitionDays(next,7);
+    field.value=next;
+  }
+  renderWeekGenerationControls();
+}
 function renderWeekGenerationControls(){
   const select=document.getElementById('weekGenerationDays');
-  if(!select)return;
+  const date=document.getElementById('weekGenerationDate');
+  if(!select||!date)return;
+  if(!date.value)date.value=select.value==='friday'?addCompetitionDays(nextCompetitionThursday(),1):nextCompetitionThursday();
+  date.min=addCompetitionDays(competitionManilaDate(),1);
+  const current=validCompetitionSelection(select.value,date.value);
   const count=select.value==='both'?8:4;
-  select.disabled=matchesLocked()||weekGenerationBusy;
-  select.title=matchesLocked()?'Unlock Matches to choose competition days.':'Choose the days for the next eligible competition week.';
+  const locked=matchesLocked(),inactive=locked||weekGenerationBusy;
+  select.disabled=inactive;
+  date.disabled=inactive;
+  select.title=locked?'Unlock Matches to choose competition days.':'Select how many days to generate.';
+  date.title=locked?'Unlock Matches to change the date.':'Choose the exact date. Only selected dates are rebuilt.';
   const generate=document.getElementById('generateBtn'),reshuffle=document.getElementById('reshuffleBtn');
-  if(generate){generate.textContent=weekGenerationBusy?'Generating…':'Generate / Refresh Next '+count;generate.disabled=matchesLocked()||weekGenerationBusy}
-  if(reshuffle){reshuffle.textContent='Reshuffle Upcoming '+count;reshuffle.disabled=matchesLocked()||weekGenerationBusy}
+  if(generate){generate.textContent=weekGenerationBusy?'Generating…':'Generate / Refresh '+count+' Matches';generate.disabled=inactive||!!current.error}
+  if(reshuffle){reshuffle.textContent='Reshuffle '+count+' Matches';reshuffle.disabled=inactive||!!current.error}
+  const hint=document.getElementById('weekGenerationHint');
+  if(hint){
+    hint.className='week-generation-hint admin-only'+(current.error?' is-error':current.existing?' is-warning':'');
+    if(current.error)hint.textContent=current.error;
+    else{
+      const scheduled=current.dates.map(d=>matchDayLabel(d)+' (4 matches)').join(' + ');
+      hint.textContent='Selected schedule: '+scheduled+'. '
+        +(current.existing?'This will replace '+current.existing+' unplayed match(es) on the selected date(s). ':'')
+        +'Other dates stay unchanged, including November 20 unless you select it.';
+    }
+  }
 }
 function renderMatchLockState(){
   renderPublicMatchesControl();const locked=matchesLocked(),btn=document.getElementById('matchLockBtn'),banner=document.getElementById('matchLockBanner');if(btn){btn.textContent=locked?'🔓 Unlock Matches':'🔒 Lock Matches';btn.className='btn '+(locked?'red':'yellow')+' admin-only'}const ids=['addMatchBtn','reshuffleBtn','generateBtn','resetScoresBtn'];ids.forEach(id=>{const el=document.getElementById(id);if(el){el.disabled=locked||weekGenerationBusy;el.title=locked?'Unlock Matches to use this control.':''}});renderWeekGenerationControls();if(btn)btn.disabled=weekGenerationBusy;if(banner){banner.className=locked?'match-lock-banner locked':'match-lock-banner unlocked';banner.innerHTML=locked?'<b>🔒 MATCHES LOCKED</b><span>Schedule, players, dates, slot order, generation, cancellation, deletion and replacements are frozen. Live scoring and final score entry still work.</span>':'<b>🔓 Matches Unlocked</b><span>Schedule and lineups are editable.</span>'}}
@@ -944,20 +1016,27 @@ async function saveEditedMatch(){if(!requireMatchesUnlocked())return;if(!activeE
 async function runWeekGeneration(action){
   if(weekGenerationBusy||!requireMatchesUnlocked()||!competition)return;
   const mode=document.getElementById('weekGenerationDays')?.value||'both';
-  if(!['thursday','friday','both'].includes(mode))return toast('Choose the competition days first.',true);
+  const selected=document.getElementById('weekGenerationDate')?.value||'';
+  const choice=validCompetitionSelection(mode,selected);
+  if(choice.error){toast(choice.error,true);return}
   const count=mode==='both'?8:4;
-  const days=mode==='both'?'Thursday and Friday':mode==='thursday'?'Thursday only':'Friday only';
-  const extra=mode==='both'?'Four matches on each day.':'Four matches on the chosen day. Unplayed fixtures on the other day of this week will be removed. Lowest completed matches receive priority among fairly balanced lineups.';
-  if(!confirm(action+' '+count+' matches for the next eligible competition week?\n\n'+days+' — '+extra+'\n\nThis replaces editable fixtures for that week only. Past, completed, cancelled and live results, plus other weeks, are protected. Continue?'))return;
+  const dates=choice.dates.map(d=>matchDayLabel(d)).join(' and ');
+  const detail=choice.existing?'This will REPLACE '+choice.existing+' unplayed match(es) on the selected date(s).':'There are no scheduled fixtures on the selected date(s).';
+  if(!confirm(action+' '+count+' matches for '+dates+'?\n\n'+detail
+    +'\n\nOnly these exact dates will be regenerated. All other dates, including any November 20 schedule, remain unchanged.'
+    +'\nCompleted, cancelled, and live matches are protected. Continue?'))return;
   weekGenerationBusy=true;renderMatchLockState();
   try{
-    const {data,error}=await sb.rpc('generate_competition_week',{p_competition_id:competition.id,p_days:mode});
+    const {data,error}=await sb.rpc('generate_competition_week_on_date',{
+      p_competition_id:competition.id,
+      p_days:mode,
+      p_selected_date:selected
+    });
     if(error)throw error;
-    if(!data?.complete||Number(data.generated)!==count)throw new Error('The complete schedule could not be confirmed.');
-    const dates=Array.isArray(data.dates)?data.dates.map(d=>matchDayLabel(d)).join(' and '):days;
-    toast(count+' matches generated for '+dates+'. '+(mode==='both'?'Existing matchmaking priorities applied.':'Lowest-played priority and fair matchmaking applied.'));
+    if(!data?.complete||Number(data.generated)!==count)throw new Error('The complete selected-date schedule could not be confirmed.');
+    toast(count+' matches generated for '+dates+'. '+(mode==='both'?'Fair matchmaking rules applied.':'Lowest-played priority and fair matchmaking applied.'));
     await loadAll();
-  }catch(e){toast('Schedule generation failed: '+(e?.message||e),true)}
+  }catch(e){toast('Selected-date generation failed: '+(e?.message||e),true)}
   finally{weekGenerationBusy=false;renderMatchLockState()}
 }
 async function reshuffleUpcoming(){return runWeekGeneration('Reshuffle')}
@@ -973,7 +1052,7 @@ sb.auth.getSession().then(({data})=>{session=data.session;applyAuth();loadAll().
 <script src="/rankings-experience.js?v=20261112-ranking-exclusion-v1"></script>
 <script>
 (function(){
-  const CURRENT_BUILD='20261119-middle-slot-matches-v29';
+  const CURRENT_BUILD='20261119-select-match-date-v30';
   async function checkForNewBuild(){
     try{
       const r=await fetch('/index.html?buildcheck='+Date.now(),{cache:'no-store'});
