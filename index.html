@@ -4,7 +4,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="20261117-week-day-generator-v27">
+<meta name="app-build" content="20261119-replacement-lowest-played-v28">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#0b2d5c" />
@@ -848,9 +848,11 @@ function previewReplacement(){
   const opponentAvg=replaceCtx.opponentAvg;
   const gap=Math.abs(projected-opponentAvg);
   const prior=previousOpponentEncounters(id,replaceCtx.opponentIds,replaceCtx.matchId);
+  const played=Math.max(0,Number(person.matches_played)||0);
   preview.style.display='';
   preview.className='replacement-preview'+(gap>0.5?' warning':'');
   preview.innerHTML='<strong>'+esc(person.display_name)+' — Skill '+Number(person.skill_level).toFixed(1)+'</strong>'
+    +'<div><b>'+played+' completed match'+(played===1?'':'es')+' played</b> · Priority favors fewer completed matches among fairly balanced replacements.</div>'
     +'<div>Projected teams: <b>'+projected.toFixed(2)+'</b> vs <b>'+opponentAvg.toFixed(2)+'</b> · Skill gap: <b>'+gap.toFixed(2)+'</b></div>'
     +'<div>Previous encounters with either current opponent: <b>'+prior+'</b> ('+(prior?'rotation considered':'fresh opponents')+')</div>'
     +'<div>Teammate history: <b>no previous partnership</b> · Schedule and weekly limits: <b>eligible</b></div>'
@@ -895,17 +897,18 @@ async function chooseReplace(matchId,team,pos,oldId,button){
     document.getElementById('replacementHint').textContent='No player meets teammate, lineup, scheduling and rest-gap requirements. Try a different position or use Edit Match.';
     return;
   }
-  el.innerHTML='<option value="">Choose replacement (best match first)…</option>'+suggestions.map(candidate=>{
+  el.innerHTML='<option value="">Choose replacement (fair balance, lowest played first)…</option>'+suggestions.map(candidate=>{
     const projected=(Number(candidate.skill_level)+request.teammateSkill)/2;
     const gap=Math.abs(projected-request.opponentAvg);
     const prior=previousOpponentEncounters(candidate.participant_id,request.opponentIds,matchId);
-    return '<option value="'+candidate.participant_id+'">'+esc(candidate.display_name)+' · L'+Number(candidate.skill_level).toFixed(1)
-      +' · team '+projected.toFixed(2)+' vs '+request.opponentAvg.toFixed(2)
-      +' · gap '+gap.toFixed(2)+' · past opponents '+prior+'</option>';
+    const played=Math.max(0,Number(candidate.matches_played)||0);
+    const balance=gap<=0.30?'Balanced':gap<=0.50?'Acceptable':'Balance warning';
+    return '<option value="'+candidate.participant_id+'">'+esc(candidate.display_name)+' · '+played+' played · Skill '+Number(candidate.skill_level).toFixed(1)
+      +' · gap '+gap.toFixed(2)+' ('+balance+') · past opponents '+prior+'</option>';
   }).join('');
   el.disabled=false;
   initChoice('replacementPlayer','Search eligible player');
-  document.getElementById('replacementHint').textContent=suggestions.length+' eligible replacement'+(suggestions.length===1?'':'s')+' ranked by projected team balance and past opponent encounters. Different skill levels are allowed.';
+  document.getElementById('replacementHint').textContent=suggestions.length+' eligible replacement'+(suggestions.length===1?'':'s')+'. Fair team balance first (gap ≤0.30 preferred), then lowest matches played; past opponents and exact skill gap break ties. Higher-gap options appear last with a warning.';
   previewReplacement();
 }
 async function saveReplacement(){if(!requireMatchesUnlocked())return;if(!replaceCtx)return toast('Choose a player position first.',true);const id=document.getElementById('replacementPlayer').value;if(!id)return toast('Choose one of the suggested replacement players.',true);document.getElementById('replaceSaveBtn').disabled=true;const{data,error}=await sb.rpc('replace_match_player',{p_match_id:replaceCtx.matchId,p_team:replaceCtx.team,p_position:replaceCtx.pos,p_new_player_id:id});if(error){document.getElementById('replaceSaveBtn').disabled=false;return toast(error.message,true)}if(data&&!data.ok){document.getElementById('replaceSaveBtn').disabled=false;return toast(data.message||data.code,true)}closeModal('replaceModal');toast('Player replaced with an eligible suggested player.');await loadAll()}
@@ -948,7 +951,7 @@ sb.auth.getSession().then(({data})=>{session=data.session;applyAuth();loadAll().
 <script src="/rankings-experience.js?v=20261112-ranking-exclusion-v1"></script>
 <script>
 (function(){
-  const CURRENT_BUILD='20261117-week-day-generator-v27';
+  const CURRENT_BUILD='20261119-replacement-lowest-played-v28';
   async function checkForNewBuild(){
     try{
       const r=await fetch('/index.html?buildcheck='+Date.now(),{cache:'no-store'});
