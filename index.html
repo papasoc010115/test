@@ -4,7 +4,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="app-build" content="20261119-replacement-lowest-played-v28">
+<meta name="app-build" content="20261119-middle-slot-matches-v29">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#0b2d5c" />
@@ -370,6 +370,7 @@
 <th><button class="sort-th" onclick="setParticipantSort('lastGame')">3rd &amp; 4th Match? <span data-sort-indicator="lastGame"></span></button></th>
 <th><button class="sort-th" onclick="setParticipantSort('nextMatch')">Next Match? <span data-sort-indicator="nextMatch"></span></button></th>
 <th><button class="sort-th" onclick="setParticipantSort('firstGame')" title="Yes: prioritize first appearance in Match 1 or Match 2">1st &amp; 2nd Match? <span data-sort-indicator="firstGame"></span></button></th>
+<th><button class="sort-th" onclick="setParticipantSort('middleGame')" title="Yes: prioritize this player for Match 2 or 3, subject to match eligibility and fair teams. No: normal matchmaking.">2nd &amp; 3rd Match? <span data-sort-indicator="middleGame"></span></button></th>
 <th><button class="sort-th" onclick="setParticipantSort('played')">Played <span data-sort-indicator="played"></span></button></th>
 <th><button class="sort-th" onclick="setParticipantSort('wins')">Wins <span data-sort-indicator="wins"></span></button></th>
 <th><button class="sort-th" onclick="setParticipantSort('upcoming')">Upcoming <span data-sort-indicator="upcoming"></span></button></th>
@@ -742,6 +743,27 @@ async function updateFirstGame(id,select){
     :' now has no early-match preference.')
     +' Use Generate / Refresh after unlocking matches to apply this preference.');
 }
+async function updateSecondThirdMatch(id,select){
+  if(!requireAdmin())return;
+  const value=select.value==='true',p=playerById(id);
+  if(!p)return;
+  select.disabled=true;
+  const {error}=await sb.from('participants')
+    .update({second_third_match:value})
+    .eq('id',id).eq('competition_id',competition.id);
+  select.disabled=false;
+  if(error){
+    toast('2nd & 3rd Match preference was not saved: '+error.message,true);
+    await loadAll();return;
+  }
+  p.second_third_match=value;
+  select.classList.toggle('lastgame-yes',value);
+  select.classList.toggle('lastgame-no',!value);
+  toast((p.display_name||'Player')+(value
+    ?' is now prioritized for Match 2 or Match 3 when eligible.'
+    :' now has no middle-match preference.')
+    +' Existing matches are unchanged; apply it using Generate / Refresh or Reshuffle.');
+}
 async function updateNextMatch(id,select){if(!requireAdmin())return;const value=select.value==='true',p=playerById(id);select.disabled=true;const{error}=await sb.from('participants').update({can_play_next_match:value}).eq('id',id);if(error){select.disabled=false;toast('Next-match availability was not saved: '+error.message,true);await loadAll();return}if(p)p.can_play_next_match=value;select.classList.toggle('lastgame-yes',value);select.classList.toggle('lastgame-no',!value);if(matchesLocked()){select.disabled=false;toast((p?.display_name||'Player')+' availability saved. Matches are locked, so the current schedule was not changed. It will apply after Unlock + Refresh.');return}toast((p?.display_name||'Player')+(value?' is available for the next match.':' is unavailable for the next match. Rebuilding upcoming matches…'));const{data,error:schedulerError}=await sb.rpc('reshuffle_upcoming_matches',{p_competition_id:competition.id});if(schedulerError){toast('Availability saved, but upcoming matches could not be rebuilt: '+schedulerError.message,true);await loadAll();return}await loadAll();toast('Upcoming queue updated. Only players with Next Match = Yes are scheduled. '+(data?.generated??0)+' match(es) generated.')}
 async function updateOnePlayPerWeek(id,select){if(!requireAdmin())return;const value=select.value==='true',p=playerById(id);if(value&&(p?.double_games_thursday||p?.double_games_friday)){select.value='false';toast('Disable both 2 Games Thursday/Friday options before enabling 1 Play / Week.',true);return}select.disabled=true;const{error}=await sb.from('participants').update({one_play_per_week:value}).eq('id',id);select.disabled=false;if(error){toast('Weekly play limit was not saved: '+error.message,true);await loadAll();return}if(p)p.one_play_per_week=value;select.classList.toggle('lastgame-yes',value);select.classList.toggle('lastgame-no',!value);if(matchesLocked()){toast((p?.display_name||'Player')+' weekly limit saved. Matches are locked, so the current schedule stays unchanged. It will apply after Unlock + Reshuffle/Refresh.');return}toast((p?.display_name||'Player')+(value?' is now limited to 1 match per Monday–Sunday week.':' can now be scheduled more than once per week.')+' Use Reshuffle Upcoming 8 or Generate / Refresh Next 8 to rebuild the queue with this rule.')}
 async function updateDoubleDay(id,day,select){
@@ -945,13 +967,13 @@ async function resetAllScores(){if(!requireMatchesUnlocked())return;const first=
 async function generateNext8(){return runWeekGeneration('Generate / Refresh')}
 sb.auth.getSession().then(({data})=>{session=data.session;applyAuth();loadAll().then(()=>{setTimeout(initStaticChoices,0);setupRealtime();if(isAdmin()&&location.hash.startsWith('#player-profile/'))go(location.hash.slice(1));else if(location.hash==='#rankings')go('rankings');else if(isAdmin()&&location.hash&&document.getElementById(location.hash.slice(1)))go(location.hash.slice(1));else go('matches')})});sb.auth.onAuthStateChange((_e,s)=>{session=s;applyAuth();if(!isAdmin())go(location.hash==='#rankings'?'rankings':'matches')});
 </script>
-<script src="/participant-profile.js?v=20261113-slot-range-v3"></script>
+<script src="/participant-profile.js?v=20261119-middle-slot-v4"></script>
 <script src="/matches-cinematic.js?v=20261107-winner-v13"></script>
 <script src="/match-day-poster.js?v=20261117-compact-v5"></script>
 <script src="/rankings-experience.js?v=20261112-ranking-exclusion-v1"></script>
 <script>
 (function(){
-  const CURRENT_BUILD='20261119-replacement-lowest-played-v28';
+  const CURRENT_BUILD='20261119-middle-slot-matches-v29';
   async function checkForNewBuild(){
     try{
       const r=await fetch('/index.html?buildcheck='+Date.now(),{cache:'no-store'});
