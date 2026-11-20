@@ -259,6 +259,9 @@ function profileSettings(ctx){
    +'</article>'
    +'<article class="pp-card"><h3>Participation and profile</h3><p class="pp-card-sub">Control availability and target matches</p>'
    +toggle('Next Match Available','can_play_next_match','Allow this player in the next generated schedule.')
+   +toggle('Cannot Play Thursday','cannot_play_thursday','Yes: exclude this player from ALL Thursday matches, including automatic generation, manual matches, edits and replacement suggestions. Default: No.')
+   +toggle('Cannot Play Friday','cannot_play_friday','Yes: exclude this player from ALL Friday matches, including automatic generation, manual matches, edits and replacement suggestions. Default: No.')
+   +'<div class="pp-notice">Weekday restrictions are strict. Choosing Yes automatically disables any conflicting two-game setting for that weekday. Existing completed results are preserved. Unplayed fixtures are not automatically regenerated; use Generate / Refresh or Reshuffle after updating settings.</div>'
    +toggle('3rd & 4th Match Eligible','can_play_last_game','Yes: may be selected for Match 3 or Match 4. No: exclude from both later matches. Match 1 and Match 2 remain available.')
    +toggle('Exclude from Rankings','exclude_from_rankings','Yes: hide this player from public and admin rankings, including the Top 3. Their match results, profile and matchmaking eligibility remain unchanged. Default: No.')
    +'<div class="pp-config"><div><strong>Match target</strong><small>Override the competition default of '+ppNum(competition?.target_matches_per_player||15)+' matches</small></div><input id="ppTargetMatches" type="number" min="1" max="100" value="'+ppNum(ctx.target)+'" onchange="saveProfileTarget(this)" aria-label="Target matches" style="width:90px"></div>'
@@ -350,7 +353,9 @@ function profileFeatureRail(ctx){
     ['1st & 2nd preferred',c.first_game?'Yes':'No'],
     ['3rd & 4th eligible',c.can_play_last_game!==false?'Yes':'No'],
     ['Thursday double',c.double_games_thursday?'Yes':'No'],
-    ['Friday double',c.double_games_friday?'Yes':'No']
+    ['Friday double',c.double_games_friday?'Yes':'No'],
+    ['Cannot play Thursday',c.cannot_play_thursday?'Yes':'No'],
+    ['Cannot play Friday',c.cannot_play_friday?'Yes':'No']
   ];
   return '<aside class="pp-editorial-rail"><div class="pp-next-fixture"><div class="pp-rail-kicker">UP NEXT</div><h3>Next Match</h3>'
     +schedule+'<button type="button" class="pp-fixture-action" onclick="go(\'matches\')">View match schedule →</button></div>'
@@ -418,20 +423,26 @@ function renderParticipantList(){
 }
 async function updateProfileSetting(field,value,select){
   if(!requireAdmin()||!currentProfilePlayerId)return;
-  const allowed=['first_game','second_third_match','one_play_per_week','double_games_thursday','double_games_friday','can_play_last_game','can_play_next_match','exclude_from_rankings'];
+  const allowed=['first_game','second_third_match','one_play_per_week','double_games_thursday','double_games_friday','cannot_play_thursday','cannot_play_friday','can_play_last_game','can_play_next_match','exclude_from_rankings'];
   if(!allowed.includes(field))return;
   const on=value==='true',patch={[field]:on};
   const p=playerById(currentProfilePlayerId);if(!p)return;
   if(on&&field==='one_play_per_week'){patch.double_games_thursday=false;patch.double_games_friday=false;}
-  if(on&&field==='double_games_thursday'){patch.double_games_friday=false;patch.one_play_per_week=false;}
-  if(on&&field==='double_games_friday'){patch.double_games_thursday=false;patch.one_play_per_week=false;}
+  if(on&&field==='double_games_thursday'){patch.double_games_friday=false;patch.one_play_per_week=false;patch.cannot_play_thursday=false;}
+  if(on&&field==='double_games_friday'){patch.double_games_thursday=false;patch.one_play_per_week=false;patch.cannot_play_friday=false;}
+  if(on&&field==='cannot_play_thursday')patch.double_games_thursday=false;
+  if(on&&field==='cannot_play_friday')patch.double_games_friday=false;
   select.disabled=true;
   const {error}=await sb.from('participants').update(patch).eq('id',p.id).eq('competition_id',competition.id);
   select.disabled=false;
   if(error){toast('Unable to save settings: '+error.message,true);await loadAll();return;}
   Object.assign(p,patch);
   await loadAll();
-  toast(field==='exclude_from_rankings'?'Ranking visibility updated. Matchmaking and recorded results are unchanged.':'Profile preferences saved. Use Generate / Refresh when you want to apply them to upcoming matches.');
+  toast(field==='exclude_from_rankings'
+    ?'Ranking visibility updated. Matchmaking and recorded results are unchanged.'
+    :((field==='cannot_play_thursday'||field==='cannot_play_friday')
+      ?'Weekday availability saved. This player will be excluded from future matches on the selected weekday. Existing fixtures are not automatically changed.'
+      :'Profile preferences saved. Use Generate / Refresh when you want to apply them to upcoming matches.'));
 }
 async function saveProfileTarget(input){
   if(!requireAdmin())return;
