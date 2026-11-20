@@ -245,7 +245,7 @@ function profileSettings(ctx){
   if(!isAdmin())return '<div class="pp-empty">Admin access required.</div>';
   const p=ctx.p;
   const toggle=(name,key,desc)=>'<div class="pp-config"><div><strong>'+esc(name)+'</strong><small>'+esc(desc)+'</small></div>'
-    +'<select aria-label="'+esc(name)+'" onchange="updateProfileSetting(\''+key+'\',this.value,this)" '+(profileUploadBusy?'disabled':'')+'>'
+    +'<select class="pp-boolean-select '+(p[key]===true?'pp-choice-yes':'pp-choice-no')+'" aria-label="'+esc(name)+'" onchange="this.classList.toggle(\'pp-choice-yes\',this.value===\'true\');this.classList.toggle(\'pp-choice-no\',this.value===\'false\');updateProfileSetting(\''+key+'\',this.value,this)" '+(profileUploadBusy?'disabled':'')+'>'
     +'<option value="false" '+(p[key]!==true?'selected':'')+'>No</option>'
     +'<option value="true" '+(p[key]===true?'selected':'')+'>Yes</option></select></div>';
   return '<div class="pp-grid">'
@@ -384,9 +384,101 @@ function renderParticipantProfile(){
   host.innerHTML='<div class="pp-premium-shell">'+top+details+nav+'<div class="pp-panel" role="tabpanel">'+renderers[profileActiveTab](ctx)+'</div></div>';
 }
 
+
+/* Participant scheduling overview uses the same live participant records as the profile settings.
+   It is a client-side overview only; the database generator remains authoritative. */
+const participantScheduleFilters=[
+  ['all','All scheduling settings'],
+  ['next-ready','Next Match: Yes'],
+  ['next-blocked','Next Match: No'],
+  ['thursday-blocked','Cannot Play Thursday: Yes'],
+  ['friday-blocked','Cannot Play Friday: Yes'],
+  ['both-blocked','Unavailable both days'],
+  ['weekly-one','1 Play / Week: Yes'],
+  ['thursday-double','2 Games Thursday: Yes'],
+  ['friday-double','2 Games Friday: Yes'],
+  ['early-preferred','1st & 2nd Match: Yes'],
+  ['middle-preferred','2nd & 3rd Match: Yes'],
+  ['late-ineligible','3rd & 4th Match: No'],
+  ['rank-excluded','Exclude from Rankings: Yes']
+];
+function participantMatchesScheduleFilter(p,key){
+  switch(key){
+    case 'next-ready':return p.can_play_next_match!==false;
+    case 'next-blocked':return p.can_play_next_match===false;
+    case 'thursday-blocked':return p.cannot_play_thursday===true||p.double_games_friday===true;
+    case 'friday-blocked':return p.cannot_play_friday===true||p.double_games_thursday===true;
+    case 'both-blocked':return (p.cannot_play_thursday===true||p.double_games_friday===true)
+      &&(p.cannot_play_friday===true||p.double_games_thursday===true);
+    case 'weekly-one':return p.one_play_per_week===true;
+    case 'thursday-double':return p.double_games_thursday===true;
+    case 'friday-double':return p.double_games_friday===true;
+    case 'early-preferred':return p.first_game===true;
+    case 'middle-preferred':return p.second_third_match===true;
+    case 'late-ineligible':return p.can_play_last_game===false;
+    case 'rank-excluded':return p.exclude_from_rankings===true;
+    default:return true;
+  }
+}
+function participantDayIsAvailable(p,day){
+  if(!p.active||p.can_play_next_match===false)return false;
+  if(day==='thursday')return p.cannot_play_thursday!==true&&p.double_games_friday!==true;
+  return p.cannot_play_friday!==true&&p.double_games_thursday!==true;
+}
+function participantStatusChips(p){
+  const day=(label,ok)=>'<span class="participant-day-chip '+(ok?'can-play':'cannot-play')+'" title="'+label+': '+(ok?'available for scheduling':'not available for scheduling')+'" aria-label="'+label+': '+(ok?'available':'unavailable')+'">'+label+' '+(ok?'✓':'×')+'</span>';
+  const tags=[];
+  if(p.one_play_per_week)tags.push(['1 per week','neutral']);
+  if(p.double_games_thursday)tags.push(['2× Thu','info']);
+  if(p.double_games_friday)tags.push(['2× Fri','info']);
+  if(p.exclude_from_rankings)tags.push(['Rank excluded','warning']);
+  if(!p.active)tags.push(['Inactive','warning']);
+  if(p.can_play_next_match===false&&p.active)tags.push(['Next: No','warning']);
+  return '<div class="participant-day-summary">'+day('Thu',participantDayIsAvailable(p,'thursday'))+day('Fri',participantDayIsAvailable(p,'friday'))+'</div>'
+    +(tags.length?'<div class="participant-setting-flags">'+tags.map(([label,tone])=>'<span class="participant-setting-flag '+tone+'">'+label+'</span>').join('')+'</div>':'');
+}
+function setParticipantScheduleFilter(key){
+  const select=document.getElementById('participantSettingsFilter');
+  if(!select)return;
+  const valid=participantScheduleFilters.some(([value])=>value===key)?key:'all';
+  select.value=valid;
+  const status=document.getElementById('participantStatus'),search=document.getElementById('participantSearch');
+  if(status)status.value='ACTIVE';
+  if(search)search.value='';
+  renderParticipants();
+}
+function renderParticipantSchedulingOverview(){
+  const root=document.getElementById('participantSettingsSummary');
+  if(!root)return;
+  const active=participants.filter(p=>p.active);
+  const total=participants.length;
+  const cards=[
+    ['active','Active players',active.length,'of '+total+' registered','navy','ACTIVE'],
+    ['next-ready','Next match ready',active.filter(p=>p.can_play_next_match!==false).length,'Next Match = Yes','green','READY'],
+    ['thursday-blocked','Cannot play Thu',active.filter(p=>!participantDayIsAvailable(p,'thursday')&&p.can_play_next_match!==false).length,'Weekday restrictions','red','THU'],
+    ['friday-blocked','Cannot play Fri',active.filter(p=>!participantDayIsAvailable(p,'friday')&&p.can_play_next_match!==false).length,'Weekday restrictions','red','FRI'],
+    ['weekly-one','1 play / week',active.filter(p=>p.one_play_per_week===true).length,'Weekly match limit','blue','1×'],
+    ['thursday-double','2 games Thursday',active.filter(p=>p.double_games_thursday===true).length,'Two-match allowance','blue','2×'],
+    ['friday-double','2 games Friday',active.filter(p=>p.double_games_friday===true).length,'Two-match allowance','blue','2×'],
+    ['rank-excluded','Ranking excluded',active.filter(p=>p.exclude_from_rankings===true).length,'Not shown in standings','yellow','RANK']
+  ];
+  const currentFilter=document.getElementById('participantSettingsFilter')?.value||'all';
+  const status=document.getElementById('participantStatus')?.value||'ALL';
+  root.innerHTML='<div class="participant-summary-heading"><div><h3>Player scheduling overview</h3><p>Live settings across active players · Select a card to filter the list</p></div><span class="participant-summary-key"><span class="participant-key-dot"></span>Updated with player settings</span></div>'
+  +'<div class="participant-summary-grid">'+cards.map(([key,label,value,detail,tone,initial])=>{
+    const isSelected=status==='ACTIVE'&&(key==='active'?currentFilter==='all':currentFilter===key);
+    return '<button type="button" class="participant-summary-card tone-'+tone+(isSelected?' selected':'')+'" aria-pressed="'+isSelected+'" aria-label="Filter '+esc(label)+': '+value+' players" onclick="setParticipantScheduleFilter(\''+key+'\')">'
+    +'<span class="participant-summary-card-top"><span>'+esc(label)+'</span><span class="participant-summary-symbol">'+esc(initial)+'</span></span>'
+    +'<strong>'+value+'</strong><small>'+esc(detail)+'</small></button>';
+  }).join('')+'</div>';
+}
 function renderParticipantList(){
+  renderParticipantSchedulingOverview();
+  const scrollWrap=document.querySelector('#participants .tablewrap');
+  const previousTop=scrollWrap?.scrollTop||0,previousLeft=scrollWrap?.scrollLeft||0;
+  const scheduleFilter=document.getElementById('participantSettingsFilter')?.value||'all';
   const q=(document.getElementById('participantSearch')?.value||'').toLowerCase(),status=document.getElementById('participantStatus')?.value||'ALL';
-  const entries=participants.filter(p=>(p.display_name+' '+p.player_code).toLowerCase().includes(q)&&(status==='ALL'||(status==='ACTIVE'?p.active:!p.active))).map(p=>{
+  const entries=participants.filter(p=>(p.display_name+' '+p.player_code).toLowerCase().includes(q)&&(status==='ALL'||(status==='ACTIVE'?p.active:!p.active))&&participantMatchesScheduleFilter(p,scheduleFilter)).map(p=>{
     const st=statById(p.id)||{},target=p.target_matches||competition?.target_matches_per_player||15;
     return {p,st,rank:ppRank(p),rem:Math.max(0,target-(st.matches_played||0)),skill:Number(p.skill_level||3),canLast:p.can_play_last_game!==false,canNext:p.can_play_next_match!==false,firstGame:p.first_game===true,middleGame:p.second_third_match===true};
   });
@@ -409,7 +501,7 @@ function renderParticipantList(){
   entries.sort((a,b)=>{const av=get(a),bv=get(b);if(typeof av==='string')return av.localeCompare(bv)*dir;if(av===bv)return a.p.display_name.localeCompare(b.p.display_name);return(av-bv)*dir});
   document.getElementById('participantsBody').innerHTML=entries.map(x=>{
     const {p,st,rank,rem,skill,canLast,canNext,firstGame,middleGame}=x;
-    const playerCell='<div class="pp-player-cell">'+profileAvatarHTML(p,'pp-avatar-small')+'<div><button class="pp-click-name" onclick="openParticipantProfile(\''+p.id+'\')"><b>'+esc(p.display_name)+'</b></button><div class="small muted">'+esc(p.player_code)+'</div></div></div>';
+    const playerCell='<div class="pp-player-cell">'+profileAvatarHTML(p,'pp-avatar-small')+'<div class="participant-player-info"><button class="pp-click-name" onclick="openParticipantProfile(\''+p.id+'\')"><b>'+esc(p.display_name)+'</b></button><div class="small muted">'+esc(p.player_code)+'</div>'+participantStatusChips(p)+'</div></div>';
     const skillCell=isAdmin()?'<div class="skill-editor"><input class="skill-input" type="number" min="1" max="5" step=".1" value="'+skill.toFixed(1)+'" oninput="queueSkillSave(\''+p.id+'\',this)" onblur="flushSkillSave(\''+p.id+'\',this)" onkeydown="handleSkillKey(event,\''+p.id+'\',this)">'+skillBadge(skill)+'</div>':skillBadge(skill);
     const toggle=(val,fn)=>isAdmin()?'<select class="lastgame-select '+(val?'lastgame-yes':'lastgame-no')+'" onchange="'+fn+'(\''+p.id+'\',this)"><option value="true" '+(val?'selected':'')+'>Yes</option><option value="false" '+(!val?'selected':'')+'>No</option></select>':'<span class="tag '+(val?'ready':'warn')+'">'+(val?'YES':'NO')+'</span>';
     return '<tr><td>'+playerCell+'</td><td><b>'+(p.exclude_from_rankings===true?'Excluded':rank?'#'+rank.official_rank:'—')+'</b></td><td>'+skillCell+'</td>'
@@ -419,6 +511,9 @@ function renderParticipantList(){
       +'<td><button class="pp-linkbtn" onclick="openParticipantProfile(\''+p.id+'\')">View Profile</button> '
       +(isAdmin()?'<button class="btn secondary sm" onclick="openParticipant(\''+p.id+'\')">Edit Name</button> '+(p.active?'<button class="btn red sm" onclick="archiveParticipant(\''+p.id+'\')">Archive</button>':''):'')+'</td></tr>';
   }).join('');
+  if(scrollWrap){scrollWrap.scrollTop=previousTop;scrollWrap.scrollLeft=previousLeft;}
+  const count=document.getElementById('participantSummaryCount');
+  if(count)count.textContent='Showing '+entries.length+' of '+participants.length+' players';
   updateParticipantSortIndicators();
 }
 async function updateProfileSetting(field,value,select){
