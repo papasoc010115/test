@@ -360,7 +360,7 @@ function profileFeatureRail(ctx){
   return '<aside class="pp-editorial-rail"><div class="pp-next-fixture"><div class="pp-rail-kicker">UP NEXT</div><h3>Next Match</h3>'
     +schedule+'<button type="button" class="pp-fixture-action" onclick="go(\'matches\')">View match schedule →</button></div>'
     +'<div class="pp-rail-settings"><div class="pp-rail-kicker">PLAYER AVAILABILITY</div><h3>Match preferences</h3>'
-    +preferences.map(item=>'<div class="pp-rail-preference"><span>'+esc(item[0])+'</span><strong>'+esc(item[1])+'</strong></div>').join('')
+    +preferences.map(item=>'<div class="pp-rail-preference"><span>'+esc(item[0])+'</span><strong class="'+(item[1]==='Yes'?'positive-yes':item[1]==='No'?'negative-no':'')+'">'+esc(item[1])+'</strong></div>').join('')
     +'<button class="pp-rail-settings-btn" type="button" onclick="profileTab(\'settings\')">Manage settings →</button></div></aside>';
 }
 function renderParticipantProfile(){
@@ -421,7 +421,8 @@ function participantMatchesScheduleFilter(p,key){
   }
 }
 function participantDayIsAvailable(p,day){
-  if(!p.active||p.can_play_next_match===false)return false;
+  // Weekday-specific restriction only. Global availability is separately shown
+  // by Next Match = No or Inactive so THU/FRI indicators are not misleading.
   if(day==='thursday')return p.cannot_play_thursday!==true&&p.double_games_friday!==true;
   return p.cannot_play_friday!==true&&p.double_games_thursday!==true;
 }
@@ -455,8 +456,8 @@ function renderParticipantSchedulingOverview(){
   const cards=[
     ['active','Active players',active.length,'of '+total+' registered','navy','ACTIVE'],
     ['next-ready','Next match ready',active.filter(p=>p.can_play_next_match!==false).length,'Next Match = Yes','green','READY'],
-    ['thursday-blocked','Cannot play Thu',active.filter(p=>!participantDayIsAvailable(p,'thursday')&&p.can_play_next_match!==false).length,'Weekday restrictions','red','THU'],
-    ['friday-blocked','Cannot play Fri',active.filter(p=>!participantDayIsAvailable(p,'friday')&&p.can_play_next_match!==false).length,'Weekday restrictions','red','FRI'],
+    ['thursday-blocked','Cannot play Thu',active.filter(p=>!participantDayIsAvailable(p,'thursday')).length,'Weekday restrictions','red','THU'],
+    ['friday-blocked','Cannot play Fri',active.filter(p=>!participantDayIsAvailable(p,'friday')).length,'Weekday restrictions','red','FRI'],
     ['weekly-one','1 play / week',active.filter(p=>p.one_play_per_week===true).length,'Weekly match limit','blue','1×'],
     ['thursday-double','2 games Thursday',active.filter(p=>p.double_games_thursday===true).length,'Two-match allowance','blue','2×'],
     ['friday-double','2 games Friday',active.filter(p=>p.double_games_friday===true).length,'Two-match allowance','blue','2×'],
